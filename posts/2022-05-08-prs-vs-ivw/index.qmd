@@ -2,7 +2,10 @@
 title: "PRS vs IVW"
 author: "Gibran Hemani"
 date: "2022-05-08"
+categories: [statistics, Mendelian randomization]
 ---
+
+How does PRS compare to IVW fixed effects analysis
 
 ## Simulation study
 
@@ -50,5 +53,3 @@ ses_unweighted <- sapply(1:ncol(geno2), function(i)
 })
 plot(ses_unweighted)
 ```
-
-## 

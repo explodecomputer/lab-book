@@ -161,7 +161,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <h1 class="title">PRS vs IVW</h1>
-                      </div>
+                                <div class="quarto-categories">
+                <div class="quarto-category">statistics</div>
+                <div class="quarto-category">Mendelian randomization</div>
+              </div>
+                  </div>
   </div>
     
   
@@ -194,6 +198,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
+<p>How does PRS compare to IVW fixed effects analysis</p>
 <section id="simulation-study" class="level2">
 <h2 class="anchored" data-anchor-id="simulation-study">Simulation study</h2>
 <div class="cell">
@@ -222,18 +227,18 @@ lm(formula = x2 ~ prs_unweighted)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--2.8477 -0.6214  0.0136  0.6042  3.2181 
+-3.2356 -0.5547 -0.0330  0.6087  3.1932 
 
 Coefficients:
                 Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)    -0.429180   0.041691  -10.29   &lt;2e-16 ***
-prs_unweighted  0.026133   0.001833   14.26   &lt;2e-16 ***
+(Intercept)    -0.321168   0.035444  -9.061   &lt;2e-16 ***
+prs_unweighted  0.027292   0.001791  15.239   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.912 on 998 degrees of freedom
-Multiple R-squared:  0.1692,    Adjusted R-squared:  0.1683 
-F-statistic: 203.2 on 1 and 998 DF,  p-value: &lt; 2.2e-16</code></pre>
+Residual standard error: 0.9011 on 998 degrees of freedom
+Multiple R-squared:  0.1888,    Adjusted R-squared:  0.1879 
+F-statistic: 232.2 on 1 and 998 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 </section>
@@ -257,16 +262,16 @@ older version of 'meta' package: https://tinyurl.com/dt4y5drs</code></pre>
 <pre><code>
 Equal-Effects Model (k = 500)
 
-I^2 (total heterogeneity / total variability):   22.25%
-H^2 (total variability / sampling variability):  1.29
+I^2 (total heterogeneity / total variability):   17.58%
+H^2 (total variability / sampling variability):  1.21
 
 Test for Heterogeneity:
-Q(df = 499) = 641.7790, p-val &lt; .0001
+Q(df = 499) = 605.4622, p-val = 0.0007
 
 Model Results:
 
 estimate      se     zval    pval   ci.lb   ci.ub      
-  0.0260  0.0020  12.9879  &lt;.0001  0.0221  0.0299  *** 
+  0.0277  0.0020  13.8615  &lt;.0001  0.0238  0.0316  *** 
 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
@@ -286,12 +291,9 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-</section>
-</section>
-<section id="section" class="level2">
-<h2 class="anchored" data-anchor-id="section"></h2>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
