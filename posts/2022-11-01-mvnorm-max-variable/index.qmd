@@ -1,0 +1,102 @@
+---
+title: "Probability of a random variable being larger than all other random variables in a multivariate normal vector"
+author: "Gibran Hemani"
+date: "2022-11-01"
+categories: [statistics]
+---
+
+I have 1k SNPs in a region. I know the causal variant and the LD matrix. The effect size at each SNP will be related to the allele frequency and the LD at all other variants. The SE across the SNPs will be correlated in relation to the LD. I can generate the expected effect size and the variance covariance matrix of the effects. Once I have that, I can generate beta values from a multivariate normal distribution, and determine how often each of the SNPs is the top SNP.
+
+Is there a faster way to do this by getting the probability from a multivariate normal distribution?
+
+Related to this question: https://stats.stackexchange.com/a/4181
+
+```{r}
+library(MCMCpack)
+library(dplyr)
+library(simulateGP)
+library(MASS)
+library(mvtnorm)
+```
+
+Empirical simulation for probabilities, case of 3 variables
+
+```{r}
+n <- 3
+mu <- rnorm(n)
+S <- rwish(n, diag(n))
+emp <- mvrnorm(1000, mu, S)
+res <- apply(emp, 1, function(x) which.max(x)) %>% table() %>% prop.table()
+res
+```
+
+
+```{r}
+A <- matrix(c(1,-1,0, 1,0,-1), nrow = 2, byrow = TRUE)
+newMu <- as.vector(A %*% mu)
+newS <- A %*% S %*% t(A)
+pmvnorm(lower=c(0,0), mean = newMu, sigma = newS)
+
+A <- matrix(c(1,-1,0, 1,0,-1), nrow = 2, byrow = TRUE)
+A <- A[,c(2,1,3)]
+newMu <- as.vector(A %*% mu)
+newS <- A %*% S %*% t(A)
+pmvnorm(lower=c(0,0), mean = newMu, sigma = newS)
+
+A <- matrix(c(1,-1,0, 1,0,-1), nrow = 2, byrow = TRUE)
+A <- A[,c(2,3,1)]
+newMu <- as.vector(A %*% mu)
+newS <- A %*% S %*% t(A)
+pmvnorm(lower=c(0,0), mean = newMu, sigma = newS)
+```
+
+Increase to arbitrary variables
+
+
+Use wishart distribution to generate random vcov matrix
+
+```{r}
+n <- 100
+mu <- rnorm(n)
+S <- rwish(n, diag(n))
+```
+
+Empirically generate correlated variables and count how often each one is the largest
+
+```{r}
+samp <- mvrnorm(10000, mu, S)
+res <- apply(samp, 1, function(x) which.max(x)) %>% table() %>% prop.table()
+res
+```
+
+Use probability density function instead, evaluating for each variable the probability that it's larger than all the other variables
+
+```{r}
+# Create design matrix
+swap_1 <- function(n, i)
+{
+  ind <- 1:n
+  if(i == 1) return(ind)
+  ind[i] <- 1
+  ind[1:(i-1)] <- 2:i
+  return(ind)
+}
+#sapply(1:7, function(i) swap_1(7, i))
+A <- cbind(
+  rep(1, n-1),
+  diag(rep(-1, n-1))
+) %>% as.matrix()
+
+emp <- sapply(1:n, function(i)
+{
+  A <- A[,swap_1(n,i)]
+  newMu <- as.vector(A %*% mu)
+  newS <- A %*% S %*% t(A)
+  pmvnorm(lower=rep(0,n-1), mean = newMu, sigma = newS)
+})
+plot(emp ~ as.numeric(res))
+```
+
+
+Theoretical result works fine but is slower than empirical sampling.
+

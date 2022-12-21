@@ -1,0 +1,16 @@
+{
+  "hash": "157767f002033e4d731249fb8c6b28b6",
+  "result": {
+    "markdown": "---\ntitle: \"PRS vs IVW\"\nauthor: \"Gibran Hemani\"\ndate: \"2022-05-08\"\n---\n\n\n## Simulation study\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(simulateGP)\ngeno1 <- make_geno(10000, 500, 0.5)\nb <- choose_effects(500, 0.3)\nx1 <- make_phen(b, geno1)\ny1 <- make_phen(0.4, x1)\n\ngeno2 <- make_geno(1000, 500, 0.5)\nx2 <- make_phen(b, geno2)\ny2 <- make_phen(0.4, x2)\n\nbhat <- gwas(x1, geno1)\nb_unweighted <- sign(b)\n```\n:::\n\n\n### Standard unweighted PRS analysis\n\n\n::: {.cell}\n\n```{.r .cell-code}\nprs_unweighted <- geno2 %*% b_unweighted\nsummary(lm(x2 ~ prs_unweighted))\n```\n\n::: {.cell-output .cell-output-stdout}\n```\n\nCall:\nlm(formula = x2 ~ prs_unweighted)\n\nResiduals:\n    Min      1Q  Median      3Q     Max \n-2.8477 -0.6214  0.0136  0.6042  3.2181 \n\nCoefficients:\n                Estimate Std. Error t value Pr(>|t|)    \n(Intercept)    -0.429180   0.041691  -10.29   <2e-16 ***\nprs_unweighted  0.026133   0.001833   14.26   <2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 0.912 on 998 degrees of freedom\nMultiple R-squared:  0.1692,\tAdjusted R-squared:  0.1683 \nF-statistic: 203.2 on 1 and 998 DF,  p-value: < 2.2e-16\n```\n:::\n:::\n\n\n### Meta analysing per-SNP PRS scores\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(meta)\n```\n\n::: {.cell-output .cell-output-stderr}\n```\nLoading 'meta' package (version 6.0-0).\nType 'help(meta)' for a brief overview.\nReaders of 'Meta-Analysis with R (Use R!)' should install\nolder version of 'meta' package: https://tinyurl.com/dt4y5drs\n```\n:::\n\n```{.r .cell-code}\no <- sapply(1:ncol(geno2), function(i)\n{\n  prs_unweighted <- geno2[,i] * b_unweighted[i]\n  summary(lm(x2 ~ prs_unweighted))$coef[2,1:2]\n})\nmetafor::rma(yi=o[1,], sei=o[2,], method=\"EE\")\n```\n\n::: {.cell-output .cell-output-stdout}\n```\n\nEqual-Effects Model (k = 500)\n\nI^2 (total heterogeneity / total variability):   22.25%\nH^2 (total variability / sampling variability):  1.29\n\nTest for Heterogeneity:\nQ(df = 499) = 641.7790, p-val < .0001\n\nModel Results:\n\nestimate      se     zval    pval   ci.lb   ci.ub      \n  0.0260  0.0020  12.9879  <.0001  0.0221  0.0299  *** \n\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n```\n:::\n:::\n\n\n### Standard errors with number of SNPs\n\n\n::: {.cell}\n\n```{.r .cell-code}\nses_unweighted <- sapply(1:ncol(geno2), function(i)\n{\n  prs_unweighted <- geno2[,1:i, drop=FALSE] %*% b_unweighted[1:i]\n  summary(lm(x2 ~ prs_unweighted))$coef[2,2]\n})\nplot(ses_unweighted)\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-4-1.png){width=672}\n:::\n:::\n\n\n## \n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

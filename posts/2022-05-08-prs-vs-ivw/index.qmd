@@ -1,0 +1,54 @@
+---
+title: "PRS vs IVW"
+author: "Gibran Hemani"
+date: "2022-05-08"
+---
+
+## Simulation study
+
+```{r}
+library(simulateGP)
+geno1 <- make_geno(10000, 500, 0.5)
+b <- choose_effects(500, 0.3)
+x1 <- make_phen(b, geno1)
+y1 <- make_phen(0.4, x1)
+
+geno2 <- make_geno(1000, 500, 0.5)
+x2 <- make_phen(b, geno2)
+y2 <- make_phen(0.4, x2)
+
+bhat <- gwas(x1, geno1)
+b_unweighted <- sign(b)
+```
+
+### Standard unweighted PRS analysis
+
+```{r}
+prs_unweighted <- geno2 %*% b_unweighted
+summary(lm(x2 ~ prs_unweighted))
+```
+
+### Meta analysing per-SNP PRS scores
+
+```{r}
+library(meta)
+o <- sapply(1:ncol(geno2), function(i)
+{
+  prs_unweighted <- geno2[,i] * b_unweighted[i]
+  summary(lm(x2 ~ prs_unweighted))$coef[2,1:2]
+})
+metafor::rma(yi=o[1,], sei=o[2,], method="EE")
+```
+
+### Standard errors with number of SNPs
+
+```{r}
+ses_unweighted <- sapply(1:ncol(geno2), function(i)
+{
+  prs_unweighted <- geno2[,1:i, drop=FALSE] %*% b_unweighted[1:i]
+  summary(lm(x2 ~ prs_unweighted))$coef[2,2]
+})
+plot(ses_unweighted)
+```
+
+## 

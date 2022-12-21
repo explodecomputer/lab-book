@@ -1,0 +1,141 @@
+---
+title: "BMI instrument replication"
+author: "Gibran Hemani"
+date: "2022-12-18"
+---
+
+## Background
+
+Liza's analysis of BMI instruments clusters them by PheWAS and finds that cluster 4 relates to SES, and drives BMI-EDU biased effect. Are the instruments in cluster 4 solely due to dynastic confounding? If so they should fail to replicate in the sibling analysis.
+
+## Instruments
+
+```{r}
+library(ieugwasr)
+library(dplyr)
+library(ggplot2)
+bmi_inst <- list(
+  c("rs1097327","rs2186120","rs2166172","rs75641275","rs12037698","rs1446585","rs16846140","rs13062093","rs2051559","rs6861649","rs2281819","rs12662900","rs9388681","rs17132130","rs215634","rs79682948","rs2192649","rs13294945","rs7357754","rs4749937","rs1465900","rs1799992","rs55938344","rs7987928","rs7331420","rs9522279","rs55689274","rs4777541","rs7189149","rs11079849","rs113230003","rs150998792"),
+  c("rs3737992","rs1167311","rs12140153","rs34361149","rs12049202","rs2181375","rs17024393","rs61813324","rs815163","rs2678204","rs17014332","rs563738408","rs6751993","rs4671328","rs6545714","rs4482463","rs815715","rs6769617","rs1225004","rs355777","rs6776471","rs869400","rs4261944","rs1296328","rs6867471","rs2307111","rs28404639","rs7442885","rs55838622","rs13174863","rs146696797","rs9368828","rs34045288","rs72892910","rs2482398","rs2253310","rs765874","rs9688977","rs6950388","rs4722398","rs1470749","rs147678035","rs39330","rs1805123","rs6601527","rs791405","rs12679106","rs201519328","rs9297524","rs17770336","rs2440589","rs3931548","rs3861879","rs2356376","rs17399739","rs6265","rs491711","rs7942037","rs10898330","rs12364470","rs55726687","rs1458156","rs7138383","rs147730268","rs9507895","rs10507483","rs11148421","rs1949204","rs1441264","rs7990098","rs8015400","rs7141420","rs1286138","rs6575340","rs12881629","rs3803286","rs7183417","rs4776970","rs2870111","rs2046002","rs56803094","rs12926311","rs879620","rs7193783","rs4402589","rs11642015","rs117342986","rs11150461","rs4790841","rs56161855","rs11150745","rs9319615","rs57636386","rs111640872","rs3810291","rs6050446","rs67844506","rs6001870"),
+  c("rs12024554","rs35722922","rs593010","rs10803762","rs6772763","rs80082351","rs1471740","rs2606228","rs13107325","rs13176429","rs1919243","rs286818","rs3844598","rs7755574","rs3843540","rs17716502","rs1411432","rs2267958","rs2450447","rs11826177","rs7124681","rs317687","rs3897102","rs9506311","rs35193668","rs3759584","rs862320","rs7774","rs8078135","rs11653258","rs56212061","rs11084554","rs2153740","rs8134638","rs2837398"),
+  c("rs115866895","rs6687953","rs935166","rs13002946","rs72820274","rs12619626","rs13427822","rs72967047","rs9843653","rs1454687","rs34811474","rs17085463","rs1383723","rs35853157","rs1503526","rs1477290","rs9463511","rs9277992","rs236660","rs2045293","rs10954772","rs77883185","rs35529153","rs11782074","rs2398861","rs7030732","rs61845249","rs4595495","rs61903695","rs1048932","rs2292238","rs116394958","rs2933223","rs217672","rs2333012","rs11855853","rs62037365","rs34966008","rs1788808","rs784257","rs11666480"),
+  c("rs4648450","rs12031634","rs1778830","rs61826867","rs170553","rs10185199","rs6545144","rs3806572","rs2861685","rs7557796","rs72844755","rs115584509","rs35882248","rs34373881","rs4377469","rs75557510","rs2035936","rs66679256","rs73213484","rs6831020","rs11099020","rs750090","rs6536575","rs7701777","rs9291822","rs10059453","rs2118793","rs4921301","rs4467770","rs7453694","rs9342196","rs9489620","rs13210756","rs3807652","rs7810870","rs7461253","rs2616192","rs12681792","rs55781253","rs13289199","rs2254331","rs1327808","rs6597653","rs2439823","rs6591","rs75936055","rs34292685","rs7940866","rs329651","rs12422552","rs4761401","rs1901241","rs11613680","rs9579775","rs7995015","rs9527895","rs9522183","rs145946602","rs8027969","rs117632017","rs113182412","rs756717","rs11656076","rs2332306","rs7237783","rs1942826","rs45486197","rs76040172","rs28489620"),
+  c("rs61743745","rs10921760","rs2141004","rs754481","rs80330591","rs199750218","rs12479357","rs4485556","rs2569993","rs9847186","rs13076052","rs762705","rs550669262","rs10865612","rs6780459","rs73169730","rs10938397","rs35851183","rs190301182","rs1428120","rs245775","rs1775255","rs2749929","rs6973656","rs12537134","rs1425717","rs11012732","rs12260817","rs112921972","rs61871615","rs10749233","rs845084","rs67609008","rs2035806","rs12575252","rs555754158","rs2234458","rs704061","rs13353100","rs7498044","rs2342892","rs55931203","rs60764613","rs2155869","rs1389067","rs2247593","rs273505","rs10404726","rs112693590")
+)
+```
+
+Extract instruments from the population and sibling GWASs
+
+```{r}
+wfest <- ieugwasr::associations(unlist(bmi_inst), "ieu-b-4815")
+popest <- ieugwasr::associations(unlist(bmi_inst), "ieu-b-4816")
+giantest <- ieugwasr::associations(unlist(bmi_inst), "ieu-b-40")
+ukbest <- ieugwasr::associations(unlist(bmi_inst), "ukb-b-19953")
+```
+
+Replication rates function
+
+```{r}
+exp_rep <- function(b_disc, b_rep, se_disc, se_rep, alpha)
+{
+  p_sign <- pnorm(-abs(b_disc) / se_disc) * pnorm(-abs(b_disc) / se_rep) + ((1 - pnorm(-abs(b_disc) / se_disc)) * (1 - pnorm(-abs(b_disc) / se_rep)))
+  p_sig <- pnorm(-abs(b_disc) / se_rep + qnorm(alpha / 2)) + (1 - pnorm(-abs(b_disc) / se_rep - qnorm(alpha / 2)))
+  p_rep <- pnorm(abs(b_rep)/se_rep, lower.tail=FALSE)
+  res <- tibble::tibble(
+    nsnp=length(b_disc),
+    metric=c("Sign", "Sign", "P-value", "P-value"),
+    datum=c("Expected", "Observed", "Expected", "Observed"),
+    value=c(sum(p_sign, na.rm=TRUE), sum(sign(b_disc) == sign(b_rep)), sum(p_sig, na.rm=TRUE), sum(p_rep < alpha, na.rm=TRUE))
+  )
+  return(list(res=res, variants=dplyr::tibble(sig=p_sig, sign=p_sign)))
+}
+```
+
+Analysis
+
+```{r}
+ests <- bind_rows(giantest, wfest, popest, ukbest) %>%
+  mutate(cluster=NA)
+for(i in 1:length(bmi_inst))
+{
+  ests$cluster[ests$rsid %in% bmi_inst[[i]]] <- i
+}
+
+ests %>%
+  group_by(id, cluster) %>%
+  summarise(n=n(), psig = sum(p < 5e-3)/n) %>%
+  ggplot(., aes(x=as.factor(cluster), y=psig)) +
+  geom_bar(position="dodge", stat="identity", aes(fill=id))
+```
+
+Expected vs observed replication rates
+
+```{r}
+o <- lapply(1:length(bmi_inst), function(i)
+{
+  x <- bmi_inst[[i]]
+  dat <- inner_join(
+    subset(popest, rsid %in% x),
+    subset(wfest, rsid %in% x),
+    by="rsid"
+  )
+  exp_rep(dat$beta.x, dat$beta.y, dat$se.x, dat$se.y, 1e-3)[[1]] %>%
+    mutate(cluster=i)
+})
+o %>% bind_rows() %>%
+  ggplot(aes(x=as.factor(cluster), y=value/nsnp)) +
+  geom_point(aes(colour=datum)) +
+  facet_grid(. ~ metric) +
+  labs(x="Cluster", y="Fraction of sig. instruments", colour="")
+```
+
+## Summary
+
+All clusters appear to replicate as expected in the within-family GWAS, which is consistent with there being almost no shrinkage of the effect sizes.
+
+## Childhood vs adulthood relationship to SES
+
+```{r}
+library(TwoSampleMR)
+child <- make_dat("ukb-b-10011", "ebi-a-GCST90002409")
+mr(child) %>% select(nsnp, b, se, pval)
+
+```
+
+```{r}
+adult <- make_dat("ukb-b-10011", "ukb-b-19953")
+mr(adult) %>% select(nsnp, b, se, pval)
+```
+
+Replication of clustered instruments from adult to child
+
+```{r}
+ukbest <- ieugwasr::associations(unlist(bmi_inst), "ukb-b-19953")
+childest <- ieugwasr::associations(unlist(bmi_inst), "ebi-a-GCST90002409")
+```
+
+```{r}
+o1 <- lapply(1:length(bmi_inst), function(i)
+{
+  x <- bmi_inst[[i]]
+  dat <- inner_join(
+    subset(ukbest, rsid %in% x),
+    subset(childest, rsid %in% x),
+    by="rsid"
+  )
+  exp_rep(dat$beta.x, dat$beta.y, dat$se.x, dat$se.y, 1e-3)[[1]] %>%
+    mutate(cluster=i)
+})
+o1 %>% bind_rows() %>%
+  ggplot(aes(x=as.factor(cluster), y=value/nsnp)) +
+  geom_point(aes(colour=datum)) +
+  facet_grid(. ~ metric) +
+  labs(x="Cluster", y="Fraction of sig. instruments", colour="")
+
+```
+
+### Summary
+
+-   SES has an influence on BMI in adulthood but not childhood
+
+-   The replication rate amongst clusters appears to be relatively consistent, except cluster 2 replicates particularly well

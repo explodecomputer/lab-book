@@ -1,0 +1,124 @@
+---
+title: "Correlated SNPs"
+author: "Gibran Hemani"
+date: "2022-08-12"
+---
+
+## MR type 1 error rate
+
+One instrument for X and X has no influence on Y
+
+```{r}
+library(TwoSampleMR)
+library(simulateGP)
+library(dplyr)
+```
+
+
+```{r}
+set.seed(12345)
+map <- tibble(snp=1, af=0.5)
+params_x <- generate_gwas_params(map=map, h2=0.01, S=-0.4, Pi=1)
+params_y <- generate_gwas_params(map=map, h2=0.0, S=-0.4, Pi=1)
+nid <- 100000
+ss <- summary_set(
+    beta_gx=params_x$beta,
+    beta_gy=params_y$beta,
+    af=params_x$af,
+    n_gx=10000,
+    n_gy=10000,
+    n_overlap=0,
+    cor_xy=0.5
+)
+```
+
+Perform MR with single causal variant
+
+```{r}
+mr(ss) %>% glimpse()
+```
+
+Perform MR with causal variant + 100 correlated tag SNPs
+
+```{r}
+ss2 <- ss[rep(1,100),] %>% mutate(SNP=1:100)
+mr(ss2, method_list="mr_ivw") %>% glimpse()
+```
+
+Very small p-value - inflated type 1 error
+
+## GRS correlation performance
+
+Tag SNPs are perfectly correlated with causal variant
+
+```{r}
+sim <- function(nid=10000, nsnp=10)
+{
+  g <- matrix(0, nid, nsnp)
+  g[,1] <- rnorm(nid)
+  for(i in 2:nsnp)
+  {
+    g[,i] <- g[,1]
+  }
+  y <- g[,1] + rnorm(nid)
+  summary(lm(y ~ g[,1]))
+  grs <- rowSums(g)
+  return(c(cor(y, g[,1])^2, cor(y, grs)^2))
+}
+sapply(1:10, function(i) sim()) %>% rowMeans() %>% tibble(method=c("Causal variant only", "GRS"), rsq=.)
+```
+
+GRS and single causal variant work the same as Jack showed.
+
+
+Tag SNPs are imperfectly correlated with causal variant
+
+```{r}
+sim <- function(nid=10000, nsnp=10)
+{
+  g <- matrix(0, nid, nsnp)
+  g[,1] <- rnorm(nid)
+  for(i in 2:nsnp)
+  {
+    g[,i] <- g[,i] + rnorm(nid, sd=0.5)
+  }
+  y <- g[,1] + rnorm(nid)
+  summary(lm(y ~ g[,1]))
+  grs <- rowSums(g)
+  return(c(cor(y, g[,1])^2, cor(y, grs)^2))
+}
+sapply(1:10, function(i) sim()) %>% rowMeans() %>% tibble(method=c("Causal variant only", "GRS"), rsq=.)
+```
+
+Now the GRS doesn't work well because it includes the variance of the SNP + noise that isn't causally related to the trait.
+
+$$
+r^2 = \frac{cov(grs, y)^2}{var(grs) var(y)}
+$$
+
+i.e. cov(grs,y) isn't increasing, but (var(y)) is.
+
+
+## Checking
+
+```{r}
+n <- 10000
+nsnp <- 10
+g <- matrix(0, n, nsnp)
+g[,1] <- rnorm(n)
+for(i in 2:nsnp)
+{
+  g[,i] <- g[,i] + rnorm(n, sd=0.5)
+}
+y <- g[,1] + rnorm(n)
+grs <- rowSums(g)
+cov(y, grs)
+cov(y, g[,1])
+sd(grs)
+sd(g[,1])
+```
+
+
+```{r}
+sessionInfo()
+```

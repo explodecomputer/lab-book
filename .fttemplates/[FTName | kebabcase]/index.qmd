@@ -1,0 +1,14 @@
+---
+title: "[FTName]"
+author: Gibran Hemani
+date: "[$CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE]"
+categories: []
+---
+
+## Background
+
+---
+
+```{r}
+sessionInfo()
+```

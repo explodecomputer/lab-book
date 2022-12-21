@@ -1,0 +1,60 @@
+---
+title: "Citation counts"
+author: "Gibran Hemani"
+date: "2022-12-15"
+draft: true
+---
+
+Time to write a paper
+
+Average authors per paper
+
+```{r, eval=FALSE}
+library(dplyr)
+n <- 100000
+lambda <- 10
+authors <- tibble(
+  id = 1:n,
+  nperyear = rpois(n, lambda),
+  pcite = runif(n),
+  pauthor = pcite
+)
+
+papers <- tibble(
+  id - 
+)
+
+
+lapply(1:length(authors))
+do({
+    x <- .
+    lapply(1:x$nperyear, function(i)
+      {
+        tibble(id=paste(x$id, i),
+               authors = c(x$id, sample(authors$id, replace=FALSE, nauthors-1, prob=authors$pcite)),
+               )
+    })
+    tibble(
+      id = 1:x$nperyear,
+      
+    )
+  })
+
+nauthors <- 10
+ncitations <- 40
+generate_paper <- function(authors, nauthors, papers, nrefs)
+{
+  sample(authors$id, replace=FALSE, nauthors-1, prob=authors$pcite)
+}
+
+
+
+papers <- tibble(
+  id = 1
+)
+
+
+
+annual_citations <- function(time, authors)
+
+```

@@ -1,0 +1,223 @@
+---
+title: "Inflation of vQTLs"
+author: "Gibran Hemani"
+date: "2022-12-16"
+---
+
+## Background
+
+This paper describes how incomplete linkage disequilibrium can lead to inflated test statistics for interactions - https://www.nature.com/articles/s41586-021-03765-z. Because interaction terms contribute to variance heterogeneity across genotype classes, this could also inflate vQTL detection methods.
+
+Example model
+
+Suppose a system with three variants and one trait. The trait \$x\$ is influenced by a single additive causal variant \$y_1\$. But there is another variant in LD with this causal variant \$y_2\$. Finally, a third variant is independent of all other variables (think of that as a trans SNP). So
+
+$$
+x_i = y_{1,i} + e_i
+$$
+
+But we test for an interaction between y_2 and y_3.
+
+Run some simulations...
+
+```{r}
+library(dplyr)
+library(ggplot2)
+set.seed(12345)
+
+test_drm <- function(g, y)
+{
+  y.i <- tapply(y, g, median, na.rm=T)  
+  z.ij <- abs(y - y.i[g+1])
+  summary(lm(z.ij ~ g))$coef %>%
+    as_tibble() %>%
+    slice(2) %>%
+    mutate(method="drm")
+}
+
+correlated_binomial <- function (nid, p1, p2, rho, n = 2, round = TRUE, print = FALSE) 
+{
+    p <- p1
+    q <- p2
+    a <- function(rho, p, q) {
+        rho * sqrt(p * q * (1 - p) * (1 - q)) + (1 - p) * (1 - 
+            q)
+    }
+    a.0 <- a(rho, p, q)
+    prob <- c(`(0,0)` = a.0, `(1,0)` = 1 - q - a.0, `(0,1)` = 1 - 
+        p - a.0, `(1,1)` = a.0 + p + q - 1)
+    if (min(prob) < 0) {
+        print(prob)
+        stop("Error: a probability is negative.")
+    }
+    n.sim <- nid
+    u <- sample.int(4, n.sim * n, replace = TRUE, prob = prob)
+    y <- floor((u - 1)/2)
+    x <- 1 - u%%2
+    x <- colSums(matrix(x, nrow = n))
+    y <- colSums(matrix(y, nrow = n))
+    if (round) {
+        x <- round(x)
+        y <- round(y)
+    }
+    if (print) {
+        print(table(x, y))
+        print(stats::cor(x, y))
+    }
+    return(cbind(x, y))
+}
+
+gendatp <- function(n, p1, p2, p3, r1)
+{
+	dat <- correlated_binomial(n, p1, p2, r1) %>% as_tibble()
+	names(dat) <- c("y1", "y2")
+	dat$y3 <- rbinom(n, 1, p3)
+	return(dat)
+}
+
+run_simp <- function(param, i)
+{
+	set.seed(i*10)
+	dat <- gendatp(param$n[i], param$p1[i], param$p2[i], param$p3[i], param$r1[i])
+	x <- dat$y1 + rnorm(nrow(dat), sd=sd(dat$y1)/4)
+	mod1 <- lm(x ~ y2 + y3, dat)
+	mod2 <- lm(x ~ y2 + y3 + y2*y3, dat)
+	amod <- anova(mod1, mod2)
+	param$F[i] <- amod$P[2]
+	o1 <- test_drm(dat$y1, x)
+	o2 <- test_drm(dat$y2, x)
+	o3 <- test_drm(dat$y3, x)
+	param$drm1[i] <- o1$`Pr(>|t|)`
+	param$drm2[i] <- o2$`Pr(>|t|)`
+	param$drm3[i] <- o3$`Pr(>|t|)`
+	return(param[i,])
+}
+
+param <- expand.grid(
+	p1=0.1,
+	p2=0.1,
+	p3=0.5,
+	p4=0.1,
+	n=1000,
+	r1=seq(0, 1, by=0.2),
+	sim=1:500,
+	r2=NA,
+	F=NA,
+	drm1=NA,
+	drm2=NA,
+	drm3=NA
+)
+
+resp <- lapply(1:nrow(param), function(x) run_simp(param, x)) %>% bind_rows()
+str(resp)
+```
+
+## Type 1 error of vQTLs
+
+This is what happens to the genetic interaction between y_2 and y_3 - remember that neither of these have a causal effect, and there is no interaction term, however y_2 is correlated with the causal variant y_1
+
+```{r}
+ggplot(resp, aes(x=as.factor(r1), y=-log10(F))) +
+geom_boxplot() +
+geom_hline(yintercept=-log10(0.05/nrow(resp))) +
+scale_fill_brewer(type="seq") +
+labs(y="Interaction -log10 p for y2xy3", x="LD between tagging\nvariant and causal variant")
+```
+
+So you get some false positives even after bonferroni correction. However now look at what happens to the variance QTL estimate for y_2 (the SNP that has no interaction but is in incomplete LD with the additive SNP y_1). Here we'll use the DRM method to test for vQTL effects at y_2
+
+```{r}
+ggplot(resp, aes(x=r1, y=-log10(drm2))) +
+geom_boxplot(aes(fill=as.factor(r1))) +
+scale_fill_brewer(type="seq") +
+labs(y="DRM -log10 p", x="LD between tagging\nvariant and causal variant", fill="")
+```
+
+This is really extreme type 1 sensitivity to incomplete LD. There's no problem at the actual causal locus (y_1)
+
+```{r}
+ggplot(resp, aes(x=r1, y=-log10(drm1))) +
+geom_boxplot(aes(fill=as.factor(r1))) +
+scale_fill_brewer(type="seq") +
+labs(y="DRM -log10 p", x="LD between tagging\nvariant and causal variant", fill="")
+```
+
+Or at the unlinked locus y_3
+
+```{r}
+ggplot(resp, aes(x=r1, y=-log10(drm3))) +
+geom_boxplot(aes(fill=as.factor(r1))) +
+scale_fill_brewer(type="seq") +
+labs(y="DRM -log10 p", x="LD between tagging\nvariant and causal variant", fill="")
+```
+
+Implications - performing an exhaustive search is going to give quite problematic results if the main effects aren't controlled. So you'd really have to know what all the main effects are before performing the vQTL tests in order to control for them. Note that incomplete control of the main effects is inevitable and we should be anticipating elevated type 1 error rates for any SNPs that are in the region of any large main effects.
+
+## Power issues when controlling for main effects
+
+The other problem is actually controlling for main effects. Suppose that a probe has two distal SNPs that interact e.g.
+
+```{r}
+n <- 10000
+g1 <- rbinom(n, 2, 0.4)
+g2 <- rbinom(n, 2, 0.4)
+y <- g1 + g2 + g1 * g2 + rnorm(n, sd=1.5)
+test_drm(g1, y) %>% str
+```
+
+The DRM method finds a big vQTL effect here because of the GxG interaction - so it's detecting that g1 might be interacting with something.
+
+If we adjust for the main effects of g1 and g2 now look at DRM
+
+```{r}
+yres <- residuals(lm(y ~ g1 + g2))
+test_drm(g1, yres) %>% str
+```
+
+The test statistic for the interaction test has massively attenuated.
+
+Where does this leave us?
+
+-   If a SNP is a known additive causal variant then it is relatively safe from type 1 error
+
+-   If a SNP is not a known additive causal variant, then it is susceptible to type 1 error due to incomplete LD with actual additive causal variants
+
+-   If we adjust the probe for additive causal variants before testing the SNP, we risk drastically reducing the vQTL effect that arise due to GxG interactions
+
+-   Note that this applies to GxE for when adjusting for other covariates too - e.g. if we adjust probes for smoking, age, sex, cell type etc and we are trying to find interactions with those based on vQTLs then the power to identify those vQTL effects drastically reduces
+
+## Power of vQTL vs interaction
+
+Suppose we simulate a GxE interaction. We can try to detect it either using a vQTL method (e.g. DRM) or using a direct interaction test.
+
+```{r}
+sim_gxe <- function(n, p, bi)
+{
+  params <- environment() %>% as.list() %>% as_tibble()
+  g <- rbinom(n, 2, p)
+  e <- rnorm(n)
+  y <- g + bi * g*e + e + rnorm(n)
+  
+  bind_rows(
+    test_drm(g, y),
+    summary(lm(y ~ g*e))$coef %>%
+      as_tibble() %>%
+      slice(n=4) %>%
+      mutate(method="interaction")
+  ) %>%
+    bind_cols(., params)
+}
+
+param <- expand.grid(
+  n=1000,
+  bi=seq(0,1,by=0.01),
+  nsim=10,
+  p=0.5
+) %>% select(-nsim)
+res <- lapply(1:nrow(param), function(i) do.call(sim_gxe, param[i,])) %>% bind_rows()
+res %>%
+  ggplot(., aes(x=bi, y=-log10(`Pr(>|t|)`))) +
+  geom_point(aes(colour=method))
+```
+
+The direct interaction test seems much better powered to detect these associations.

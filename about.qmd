@@ -1,0 +1,16 @@
+---
+title: "About"
+image: profile.jpg
+about:
+  template: jolla
+  links:
+    - icon: twitter
+      text: Twitter
+      href: https://twitter.com/explodecomputer
+    - icon: github
+      text: Github
+      href: https://github.com/explodecomputer
+
+---
+
+Need a place to put my dynamic document notes

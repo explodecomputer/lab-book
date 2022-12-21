@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.0.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Gibran Hemani">
+<meta name="dcterms.date" content="2022-12-18">
+
+<title>Gibran Hemani’s lab book - BMI instrument replication</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Gibran Hemani’s lab book</span>
+  </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">About</a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">BMI instrument replication</h1>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Gibran Hemani </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">December 18, 2022</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<p>Liza’s analysis of BMI instruments clusters them by PheWAS and finds that cluster 4 relates to SES, and drives BMI-EDU biased effect. Are the instruments in cluster 4 solely due to dynastic confounding? If so they should fail to replicate in the sibling analysis.</p>
+</section>
+<section id="instruments" class="level2">
+<h2 class="anchored" data-anchor-id="instruments">Instruments</h2>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-1_289ef45db63a62f083def06367637c5c">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ieugwasr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>API: public: http://gwas-api.mrcieu.ac.uk/</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>bmi_inst <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"rs1097327"</span>,<span class="st">"rs2186120"</span>,<span class="st">"rs2166172"</span>,<span class="st">"rs75641275"</span>,<span class="st">"rs12037698"</span>,<span class="st">"rs1446585"</span>,<span class="st">"rs16846140"</span>,<span class="st">"rs13062093"</span>,<span class="st">"rs2051559"</span>,<span class="st">"rs6861649"</span>,<span class="st">"rs2281819"</span>,<span class="st">"rs12662900"</span>,<span class="st">"rs9388681"</span>,<span class="st">"rs17132130"</span>,<span class="st">"rs215634"</span>,<span class="st">"rs79682948"</span>,<span class="st">"rs2192649"</span>,<span class="st">"rs13294945"</span>,<span class="st">"rs7357754"</span>,<span class="st">"rs4749937"</span>,<span class="st">"rs1465900"</span>,<span class="st">"rs1799992"</span>,<span class="st">"rs55938344"</span>,<span class="st">"rs7987928"</span>,<span class="st">"rs7331420"</span>,<span class="st">"rs9522279"</span>,<span class="st">"rs55689274"</span>,<span class="st">"rs4777541"</span>,<span class="st">"rs7189149"</span>,<span class="st">"rs11079849"</span>,<span class="st">"rs113230003"</span>,<span class="st">"rs150998792"</span>),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"rs3737992"</span>,<span class="st">"rs1167311"</span>,<span class="st">"rs12140153"</span>,<span class="st">"rs34361149"</span>,<span class="st">"rs12049202"</span>,<span class="st">"rs2181375"</span>,<span class="st">"rs17024393"</span>,<span class="st">"rs61813324"</span>,<span class="st">"rs815163"</span>,<span class="st">"rs2678204"</span>,<span class="st">"rs17014332"</span>,<span class="st">"rs563738408"</span>,<span class="st">"rs6751993"</span>,<span class="st">"rs4671328"</span>,<span class="st">"rs6545714"</span>,<span class="st">"rs4482463"</span>,<span class="st">"rs815715"</span>,<span class="st">"rs6769617"</span>,<span class="st">"rs1225004"</span>,<span class="st">"rs355777"</span>,<span class="st">"rs6776471"</span>,<span class="st">"rs869400"</span>,<span class="st">"rs4261944"</span>,<span class="st">"rs1296328"</span>,<span class="st">"rs6867471"</span>,<span class="st">"rs2307111"</span>,<span class="st">"rs28404639"</span>,<span class="st">"rs7442885"</span>,<span class="st">"rs55838622"</span>,<span class="st">"rs13174863"</span>,<span class="st">"rs146696797"</span>,<span class="st">"rs9368828"</span>,<span class="st">"rs34045288"</span>,<span class="st">"rs72892910"</span>,<span class="st">"rs2482398"</span>,<span class="st">"rs2253310"</span>,<span class="st">"rs765874"</span>,<span class="st">"rs9688977"</span>,<span class="st">"rs6950388"</span>,<span class="st">"rs4722398"</span>,<span class="st">"rs1470749"</span>,<span class="st">"rs147678035"</span>,<span class="st">"rs39330"</span>,<span class="st">"rs1805123"</span>,<span class="st">"rs6601527"</span>,<span class="st">"rs791405"</span>,<span class="st">"rs12679106"</span>,<span class="st">"rs201519328"</span>,<span class="st">"rs9297524"</span>,<span class="st">"rs17770336"</span>,<span class="st">"rs2440589"</span>,<span class="st">"rs3931548"</span>,<span class="st">"rs3861879"</span>,<span class="st">"rs2356376"</span>,<span class="st">"rs17399739"</span>,<span class="st">"rs6265"</span>,<span class="st">"rs491711"</span>,<span class="st">"rs7942037"</span>,<span class="st">"rs10898330"</span>,<span class="st">"rs12364470"</span>,<span class="st">"rs55726687"</span>,<span class="st">"rs1458156"</span>,<span class="st">"rs7138383"</span>,<span class="st">"rs147730268"</span>,<span class="st">"rs9507895"</span>,<span class="st">"rs10507483"</span>,<span class="st">"rs11148421"</span>,<span class="st">"rs1949204"</span>,<span class="st">"rs1441264"</span>,<span class="st">"rs7990098"</span>,<span class="st">"rs8015400"</span>,<span class="st">"rs7141420"</span>,<span class="st">"rs1286138"</span>,<span class="st">"rs6575340"</span>,<span class="st">"rs12881629"</span>,<span class="st">"rs3803286"</span>,<span class="st">"rs7183417"</span>,<span class="st">"rs4776970"</span>,<span class="st">"rs2870111"</span>,<span class="st">"rs2046002"</span>,<span class="st">"rs56803094"</span>,<span class="st">"rs12926311"</span>,<span class="st">"rs879620"</span>,<span class="st">"rs7193783"</span>,<span class="st">"rs4402589"</span>,<span class="st">"rs11642015"</span>,<span class="st">"rs117342986"</span>,<span class="st">"rs11150461"</span>,<span class="st">"rs4790841"</span>,<span class="st">"rs56161855"</span>,<span class="st">"rs11150745"</span>,<span class="st">"rs9319615"</span>,<span class="st">"rs57636386"</span>,<span class="st">"rs111640872"</span>,<span class="st">"rs3810291"</span>,<span class="st">"rs6050446"</span>,<span class="st">"rs67844506"</span>,<span class="st">"rs6001870"</span>),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"rs12024554"</span>,<span class="st">"rs35722922"</span>,<span class="st">"rs593010"</span>,<span class="st">"rs10803762"</span>,<span class="st">"rs6772763"</span>,<span class="st">"rs80082351"</span>,<span class="st">"rs1471740"</span>,<span class="st">"rs2606228"</span>,<span class="st">"rs13107325"</span>,<span class="st">"rs13176429"</span>,<span class="st">"rs1919243"</span>,<span class="st">"rs286818"</span>,<span class="st">"rs3844598"</span>,<span class="st">"rs7755574"</span>,<span class="st">"rs3843540"</span>,<span class="st">"rs17716502"</span>,<span class="st">"rs1411432"</span>,<span class="st">"rs2267958"</span>,<span class="st">"rs2450447"</span>,<span class="st">"rs11826177"</span>,<span class="st">"rs7124681"</span>,<span class="st">"rs317687"</span>,<span class="st">"rs3897102"</span>,<span class="st">"rs9506311"</span>,<span class="st">"rs35193668"</span>,<span class="st">"rs3759584"</span>,<span class="st">"rs862320"</span>,<span class="st">"rs7774"</span>,<span class="st">"rs8078135"</span>,<span class="st">"rs11653258"</span>,<span class="st">"rs56212061"</span>,<span class="st">"rs11084554"</span>,<span class="st">"rs2153740"</span>,<span class="st">"rs8134638"</span>,<span class="st">"rs2837398"</span>),</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"rs115866895"</span>,<span class="st">"rs6687953"</span>,<span class="st">"rs935166"</span>,<span class="st">"rs13002946"</span>,<span class="st">"rs72820274"</span>,<span class="st">"rs12619626"</span>,<span class="st">"rs13427822"</span>,<span class="st">"rs72967047"</span>,<span class="st">"rs9843653"</span>,<span class="st">"rs1454687"</span>,<span class="st">"rs34811474"</span>,<span class="st">"rs17085463"</span>,<span class="st">"rs1383723"</span>,<span class="st">"rs35853157"</span>,<span class="st">"rs1503526"</span>,<span class="st">"rs1477290"</span>,<span class="st">"rs9463511"</span>,<span class="st">"rs9277992"</span>,<span class="st">"rs236660"</span>,<span class="st">"rs2045293"</span>,<span class="st">"rs10954772"</span>,<span class="st">"rs77883185"</span>,<span class="st">"rs35529153"</span>,<span class="st">"rs11782074"</span>,<span class="st">"rs2398861"</span>,<span class="st">"rs7030732"</span>,<span class="st">"rs61845249"</span>,<span class="st">"rs4595495"</span>,<span class="st">"rs61903695"</span>,<span class="st">"rs1048932"</span>,<span class="st">"rs2292238"</span>,<span class="st">"rs116394958"</span>,<span class="st">"rs2933223"</span>,<span class="st">"rs217672"</span>,<span class="st">"rs2333012"</span>,<span class="st">"rs11855853"</span>,<span class="st">"rs62037365"</span>,<span class="st">"rs34966008"</span>,<span class="st">"rs1788808"</span>,<span class="st">"rs784257"</span>,<span class="st">"rs11666480"</span>),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"rs4648450"</span>,<span class="st">"rs12031634"</span>,<span class="st">"rs1778830"</span>,<span class="st">"rs61826867"</span>,<span class="st">"rs170553"</span>,<span class="st">"rs10185199"</span>,<span class="st">"rs6545144"</span>,<span class="st">"rs3806572"</span>,<span class="st">"rs2861685"</span>,<span class="st">"rs7557796"</span>,<span class="st">"rs72844755"</span>,<span class="st">"rs115584509"</span>,<span class="st">"rs35882248"</span>,<span class="st">"rs34373881"</span>,<span class="st">"rs4377469"</span>,<span class="st">"rs75557510"</span>,<span class="st">"rs2035936"</span>,<span class="st">"rs66679256"</span>,<span class="st">"rs73213484"</span>,<span class="st">"rs6831020"</span>,<span class="st">"rs11099020"</span>,<span class="st">"rs750090"</span>,<span class="st">"rs6536575"</span>,<span class="st">"rs7701777"</span>,<span class="st">"rs9291822"</span>,<span class="st">"rs10059453"</span>,<span class="st">"rs2118793"</span>,<span class="st">"rs4921301"</span>,<span class="st">"rs4467770"</span>,<span class="st">"rs7453694"</span>,<span class="st">"rs9342196"</span>,<span class="st">"rs9489620"</span>,<span class="st">"rs13210756"</span>,<span class="st">"rs3807652"</span>,<span class="st">"rs7810870"</span>,<span class="st">"rs7461253"</span>,<span class="st">"rs2616192"</span>,<span class="st">"rs12681792"</span>,<span class="st">"rs55781253"</span>,<span class="st">"rs13289199"</span>,<span class="st">"rs2254331"</span>,<span class="st">"rs1327808"</span>,<span class="st">"rs6597653"</span>,<span class="st">"rs2439823"</span>,<span class="st">"rs6591"</span>,<span class="st">"rs75936055"</span>,<span class="st">"rs34292685"</span>,<span class="st">"rs7940866"</span>,<span class="st">"rs329651"</span>,<span class="st">"rs12422552"</span>,<span class="st">"rs4761401"</span>,<span class="st">"rs1901241"</span>,<span class="st">"rs11613680"</span>,<span class="st">"rs9579775"</span>,<span class="st">"rs7995015"</span>,<span class="st">"rs9527895"</span>,<span class="st">"rs9522183"</span>,<span class="st">"rs145946602"</span>,<span class="st">"rs8027969"</span>,<span class="st">"rs117632017"</span>,<span class="st">"rs113182412"</span>,<span class="st">"rs756717"</span>,<span class="st">"rs11656076"</span>,<span class="st">"rs2332306"</span>,<span class="st">"rs7237783"</span>,<span class="st">"rs1942826"</span>,<span class="st">"rs45486197"</span>,<span class="st">"rs76040172"</span>,<span class="st">"rs28489620"</span>),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"rs61743745"</span>,<span class="st">"rs10921760"</span>,<span class="st">"rs2141004"</span>,<span class="st">"rs754481"</span>,<span class="st">"rs80330591"</span>,<span class="st">"rs199750218"</span>,<span class="st">"rs12479357"</span>,<span class="st">"rs4485556"</span>,<span class="st">"rs2569993"</span>,<span class="st">"rs9847186"</span>,<span class="st">"rs13076052"</span>,<span class="st">"rs762705"</span>,<span class="st">"rs550669262"</span>,<span class="st">"rs10865612"</span>,<span class="st">"rs6780459"</span>,<span class="st">"rs73169730"</span>,<span class="st">"rs10938397"</span>,<span class="st">"rs35851183"</span>,<span class="st">"rs190301182"</span>,<span class="st">"rs1428120"</span>,<span class="st">"rs245775"</span>,<span class="st">"rs1775255"</span>,<span class="st">"rs2749929"</span>,<span class="st">"rs6973656"</span>,<span class="st">"rs12537134"</span>,<span class="st">"rs1425717"</span>,<span class="st">"rs11012732"</span>,<span class="st">"rs12260817"</span>,<span class="st">"rs112921972"</span>,<span class="st">"rs61871615"</span>,<span class="st">"rs10749233"</span>,<span class="st">"rs845084"</span>,<span class="st">"rs67609008"</span>,<span class="st">"rs2035806"</span>,<span class="st">"rs12575252"</span>,<span class="st">"rs555754158"</span>,<span class="st">"rs2234458"</span>,<span class="st">"rs704061"</span>,<span class="st">"rs13353100"</span>,<span class="st">"rs7498044"</span>,<span class="st">"rs2342892"</span>,<span class="st">"rs55931203"</span>,<span class="st">"rs60764613"</span>,<span class="st">"rs2155869"</span>,<span class="st">"rs1389067"</span>,<span class="st">"rs2247593"</span>,<span class="st">"rs273505"</span>,<span class="st">"rs10404726"</span>,<span class="st">"rs112693590"</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Extract instruments from the population and sibling GWASs</p>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-2_aed1915f03faa302bfc2faeabfa10950">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>wfest <span class="ot">&lt;-</span> ieugwasr<span class="sc">::</span><span class="fu">associations</span>(<span class="fu">unlist</span>(bmi_inst), <span class="st">"ieu-b-4815"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>popest <span class="ot">&lt;-</span> ieugwasr<span class="sc">::</span><span class="fu">associations</span>(<span class="fu">unlist</span>(bmi_inst), <span class="st">"ieu-b-4816"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>giantest <span class="ot">&lt;-</span> ieugwasr<span class="sc">::</span><span class="fu">associations</span>(<span class="fu">unlist</span>(bmi_inst), <span class="st">"ieu-b-40"</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>ukbest <span class="ot">&lt;-</span> ieugwasr<span class="sc">::</span><span class="fu">associations</span>(<span class="fu">unlist</span>(bmi_inst), <span class="st">"ukb-b-19953"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Replication rates function</p>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-3_cd58fd51fc3965a4e7f1a8761722e14e">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>exp_rep <span class="ot">&lt;-</span> <span class="cf">function</span>(b_disc, b_rep, se_disc, se_rep, alpha)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  p_sign <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="fu">abs</span>(b_disc) <span class="sc">/</span> se_disc) <span class="sc">*</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="fu">abs</span>(b_disc) <span class="sc">/</span> se_rep) <span class="sc">+</span> ((<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="fu">abs</span>(b_disc) <span class="sc">/</span> se_disc)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="fu">abs</span>(b_disc) <span class="sc">/</span> se_rep)))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  p_sig <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="fu">abs</span>(b_disc) <span class="sc">/</span> se_rep <span class="sc">+</span> <span class="fu">qnorm</span>(alpha <span class="sc">/</span> <span class="dv">2</span>)) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="fu">abs</span>(b_disc) <span class="sc">/</span> se_rep <span class="sc">-</span> <span class="fu">qnorm</span>(alpha <span class="sc">/</span> <span class="dv">2</span>)))</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  p_rep <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(<span class="fu">abs</span>(b_rep)<span class="sc">/</span>se_rep, <span class="at">lower.tail=</span><span class="cn">FALSE</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  res <span class="ot">&lt;-</span> tibble<span class="sc">::</span><span class="fu">tibble</span>(</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">nsnp=</span><span class="fu">length</span>(b_disc),</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">metric=</span><span class="fu">c</span>(<span class="st">"Sign"</span>, <span class="st">"Sign"</span>, <span class="st">"P-value"</span>, <span class="st">"P-value"</span>),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">datum=</span><span class="fu">c</span>(<span class="st">"Expected"</span>, <span class="st">"Observed"</span>, <span class="st">"Expected"</span>, <span class="st">"Observed"</span>),</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">value=</span><span class="fu">c</span>(<span class="fu">sum</span>(p_sign, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="fu">sum</span>(<span class="fu">sign</span>(b_disc) <span class="sc">==</span> <span class="fu">sign</span>(b_rep)), <span class="fu">sum</span>(p_sig, <span class="at">na.rm=</span><span class="cn">TRUE</span>), <span class="fu">sum</span>(p_rep <span class="sc">&lt;</span> alpha, <span class="at">na.rm=</span><span class="cn">TRUE</span>))</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">res=</span>res, <span class="at">variants=</span>dplyr<span class="sc">::</span><span class="fu">tibble</span>(<span class="at">sig=</span>p_sig, <span class="at">sign=</span>p_sign)))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Analysis</p>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-4_4552e4705e30c261698b232ad2a2f518">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ests <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(giantest, wfest, popest, ukbest) <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cluster=</span><span class="cn">NA</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(bmi_inst))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  ests<span class="sc">$</span>cluster[ests<span class="sc">$</span>rsid <span class="sc">%in%</span> bmi_inst[[i]]] <span class="ot">&lt;-</span> i</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>ests <span class="sc">%&gt;%</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(id, cluster) <span class="sc">%&gt;%</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n=</span><span class="fu">n</span>(), <span class="at">psig =</span> <span class="fu">sum</span>(p <span class="sc">&lt;</span> <span class="fl">5e-3</span>)<span class="sc">/</span>n) <span class="sc">%&gt;%</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(., <span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.factor</span>(cluster), <span class="at">y=</span>psig)) <span class="sc">+</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">position=</span><span class="st">"dodge"</span>, <span class="at">stat=</span><span class="st">"identity"</span>, <span class="fu">aes</span>(<span class="at">fill=</span>id))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'id'. You can override using the `.groups`
+argument.</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Expected vs observed replication rates</p>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-5_a81b60b22e4119f24f18134f3ea00fbc">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>o <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(bmi_inst), <span class="cf">function</span>(i)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> bmi_inst[[i]]</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  dat <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">subset</span>(popest, rsid <span class="sc">%in%</span> x),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">subset</span>(wfest, rsid <span class="sc">%in%</span> x),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">by=</span><span class="st">"rsid"</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">exp_rep</span>(dat<span class="sc">$</span>beta.x, dat<span class="sc">$</span>beta.y, dat<span class="sc">$</span>se.x, dat<span class="sc">$</span>se.y, <span class="fl">1e-3</span>)[[<span class="dv">1</span>]] <span class="sc">%&gt;%</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">cluster=</span>i)</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>o <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.factor</span>(cluster), <span class="at">y=</span>value<span class="sc">/</span>nsnp)) <span class="sc">+</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">colour=</span>datum)) <span class="sc">+</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(. <span class="sc">~</span> metric) <span class="sc">+</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Cluster"</span>, <span class="at">y=</span><span class="st">"Fraction of sig. instruments"</span>, <span class="at">colour=</span><span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>All clusters appear to replicate as expected in the within-family GWAS, which is consistent with there being almost no shrinkage of the effect sizes.</p>
+</section>
+<section id="childhood-vs-adulthood-relationship-to-ses" class="level2">
+<h2 class="anchored" data-anchor-id="childhood-vs-adulthood-relationship-to-ses">Childhood vs adulthood relationship to SES</h2>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-6_a4f1a232ed483e0fc4a0af62a8dcf5ce">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(TwoSampleMR)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>TwoSampleMR version 0.5.6 
+[&gt;] New: Option to use non-European LD reference panels for clumping etc
+[&gt;] Some studies temporarily quarantined to verify effect allele
+[&gt;] See news(package='TwoSampleMR') and https://gwas.mrcieu.ac.uk for further details</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'TwoSampleMR'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:ieugwasr':
+
+    ld_matrix</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>child <span class="ot">&lt;-</span> <span class="fu">make_dat</span>(<span class="st">"ukb-b-10011"</span>, <span class="st">"ebi-a-GCST90002409"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extracting data for 18 SNP(s) from 1 GWAS(s)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Harmonising Townsend deprivation index at recruitment || id:ukb-b-10011 (ukb-b-10011) and Childhood body mass index || id:ebi-a-GCST90002409 (ebi-a-GCST90002409)</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mr</span>(child) <span class="sc">%&gt;%</span> <span class="fu">select</span>(nsnp, b, se, pval)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Analysing 'ukb-b-10011' on 'ebi-a-GCST90002409'</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  nsnp           b        se      pval
+1   18  0.00605344 1.4172450 0.9966448
+2   18 -0.07468209 0.2308366 0.7462954
+3   18 -0.05801819 0.2184155 0.7905224
+4   18 -0.11644263 0.4977415 0.8178241
+5   18 -0.11644263 0.4702948 0.8074135</code></pre>
+</div>
+</div>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-7_e58e09ab5c1b3f87e284cfbe36d775ee">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>adult <span class="ot">&lt;-</span> <span class="fu">make_dat</span>(<span class="st">"ukb-b-10011"</span>, <span class="st">"ukb-b-19953"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Extracting data for 18 SNP(s) from 1 GWAS(s)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Harmonising Townsend deprivation index at recruitment || id:ukb-b-10011 (ukb-b-10011) and Body mass index (BMI) || id:ukb-b-19953 (ukb-b-19953)</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mr</span>(adult) <span class="sc">%&gt;%</span> <span class="fu">select</span>(nsnp, b, se, pval)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Analysing 'ukb-b-10011' on 'ukb-b-19953'</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  nsnp          b         se         pval
+1   18 -0.2812238 0.80612571 7.317440e-01
+2   18  0.3450191 0.07873753 1.176549e-05
+3   18  0.4835539 0.13327136 2.852487e-04
+4   18  0.3588983 0.15546210 3.380204e-02
+5   18  0.3128024 0.12623146 2.400304e-02</code></pre>
+</div>
+</div>
+<p>Replication of clustered instruments from adult to child</p>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-8_8b4ae0752d2fb6ddef5dd397601559ef">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>ukbest <span class="ot">&lt;-</span> ieugwasr<span class="sc">::</span><span class="fu">associations</span>(<span class="fu">unlist</span>(bmi_inst), <span class="st">"ukb-b-19953"</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>childest <span class="ot">&lt;-</span> ieugwasr<span class="sc">::</span><span class="fu">associations</span>(<span class="fu">unlist</span>(bmi_inst), <span class="st">"ebi-a-GCST90002409"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-9_2fa958bac462e15ebc83d08ad9fb3d76">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>o1 <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(bmi_inst), <span class="cf">function</span>(i)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> bmi_inst[[i]]</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  dat <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">subset</span>(ukbest, rsid <span class="sc">%in%</span> x),</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">subset</span>(childest, rsid <span class="sc">%in%</span> x),</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">by=</span><span class="st">"rsid"</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">exp_rep</span>(dat<span class="sc">$</span>beta.x, dat<span class="sc">$</span>beta.y, dat<span class="sc">$</span>se.x, dat<span class="sc">$</span>se.y, <span class="fl">1e-3</span>)[[<span class="dv">1</span>]] <span class="sc">%&gt;%</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">cluster=</span>i)</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>o1 <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.factor</span>(cluster), <span class="at">y=</span>value<span class="sc">/</span>nsnp)) <span class="sc">+</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">colour=</span>datum)) <span class="sc">+</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(. <span class="sc">~</span> metric) <span class="sc">+</span></span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Cluster"</span>, <span class="at">y=</span><span class="st">"Fraction of sig. instruments"</span>, <span class="at">colour=</span><span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<section id="summary-1" class="level3">
+<h3 class="anchored" data-anchor-id="summary-1">Summary</h3>
+<ul>
+<li><p>SES has an influence on BMI in adulthood but not childhood</p></li>
+<li><p>The replication rate amongst clusters appears to be relatively consistent, except cluster 2 replicates particularly well</p></li>
+</ul>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

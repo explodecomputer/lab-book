@@ -1,0 +1,14 @@
+{
+  "hash": "d5d220ea75772095a6a4e27736e561a7",
+  "result": {
+    "markdown": "---\ntitle: \"Citation counts\"\nauthor: \"Gibran Hemani\"\ndraft: true\n---\n\n\nTime to write a paper\n\nAverage authors per paper\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(dplyr)\nn <- 100000\nlambda <- 10\nauthors <- tibble(\n  id = 1:n,\n  nperyear = rpois(n, lambda),\n  pcite = runif(n),\n  pauthor = pcite\n)\n\npapers <- tibble(\n  id - \n)\n\n\nlapply(1:length(authors))\ndo({\n    x <- .\n    lapply(1:x$nperyear, function(i)\n      {\n        tibble(id=paste(x$id, i),\n               authors = c(x$id, sample(authors$id, replace=FALSE, nauthors-1, prob=authors$pcite)),\n               )\n    })\n    tibble(\n      id = 1:x$nperyear,\n      \n    )\n  })\n\nnauthors <- 10\nncitations <- 40\ngenerate_paper <- function(authors, nauthors, papers, nrefs)\n{\n  sample(authors$id, replace=FALSE, nauthors-1, prob=authors$pcite)\n}\n\n\n\npapers <- tibble(\n  id = 1\n)\n\n\n\nannual_citations <- function(time, authors)\n```\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "omitParentDirectory": true,
+  "openFilesWhenDone": [
+    "index.qmd"
+  ]  
+}
