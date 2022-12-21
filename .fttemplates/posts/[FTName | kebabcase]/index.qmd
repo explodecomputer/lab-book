@@ -1,7 +1,7 @@
 ---
 title: "[FTName]"
 author: Gibran Hemani
-date: "[$CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE]"
+date: "`r Sys.Date()`"
 categories: []
 ---
 
