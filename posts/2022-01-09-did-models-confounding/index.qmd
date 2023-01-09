@@ -1,0 +1,129 @@
+---
+title: "Difference in difference models in observational data are still potentially confounded"
+author: "Gibran Hemani"
+date: "2022-01-09"
+---
+
+Motivated by discussion with Tim Cadman relating to this [Renzi et al (2019). Long-Term PM10 Exposure and Cause-Specific Mortality in the Latium Region (Italy): A Difference-in-Differences Approach](https://ehp.niehs.nih.gov/doi/full/10.1289/EHP3759).
+
+For argument's sake suppose that air pollution (PM10) isn't causal for deaths. Simulate a situation where wealth varies by region, and each region has a different wealth trajectory over time. Some info:
+
+-   Wealth, PM10 and deaths are measured for 10 years in 300 regions.
+-   Wealth causes PM10 and deaths.
+-   There is a global confounder for the start point of wealth and deaths
+-   Time has an additional effect on both deaths and wealth - i.e. it's also a global confounder
+-   The causal effect of wealth on death = 1. We want our model to get that right.
+
+```{r}
+library(dplyr)
+nregion <- 300
+region <- 1:300
+wealth_int <- rnorm(nregion)
+wealth_slope <- rnorm(nregion)
+global_confounder <- rnorm(nregion, sd=10)
+nyear <- 10
+
+dat <- lapply(1:nregion, function(i)
+  {
+    tibble(
+      region=i,
+      year=1:nyear,
+      # wealth goes up due to global confounder, year, random error
+      wealth = global_confounder[i] + wealth_int[i] + year * wealth_slope[i] + rnorm(nyear),
+      # PM10 only related to wealth and random error
+      pm10 = wealth + rnorm(nyear, sd=5),
+      # deaths go up due to global confounders, wealth, year and random term
+      deaths = global_confounder[i] + wealth + rnorm(nyear) + year
+    )
+}) %>%
+  bind_rows()
+```
+
+```{r}
+dat
+```
+
+Plot it showing change in deaths over time by region
+
+```{r}
+library(ggplot2)
+ggplot(dat, aes(x=year, y=deaths)) +
+  geom_point(aes(group=as.factor(region))) +
+  geom_line(aes(group=as.factor(region)))
+```
+
+Try again but just regression lines per region
+
+```{r}
+ggplot(dat, aes(x=year, y=deaths)) +
+  geom_point(aes(group=as.factor(region))) +
+  geom_smooth(method="lm", aes(group=as.factor(region)), se=FALSE)
+```
+
+Show that PM10 is closely coupled with wealth
+
+```{r}
+plot(pm10 ~ wealth, dat)
+```
+
+Use regression to test for influence of wealth on deaths - this gives a very confounded result because of the global confounder.
+
+```{r}
+summary(lm(deaths ~ wealth, dat))
+```
+
+Same will be true for PM10
+
+```{r}
+summary(lm(deaths ~ pm10, dat))
+```
+
+So PM10 is confounded at two levels - the between-region (global) level and the within-region level.
+
+Now do a DiD model for wealth - it should give us an unbiased estimate of 1. Note that this long form of DiD is sometimes called a fixed-effects model.
+
+```{r}
+summary(lm(deaths ~ wealth + as.factor(region) + as.factor(year), dat)) %>%
+  coefficients %>% as_tibble %>% slice(n=2)
+```
+
+It does. What about DiD model for PM10? This should be less confounded because it eliminates the global confounder, but still confounded by the structural confounding that happens at all areas
+
+```{r}
+summary(lm(deaths ~ pm10 + as.factor(region) + as.factor(year), dat)) %>%
+  coefficients %>% as_tibble %>% slice(n=2)
+```
+
+If we control for wealth, the effect of PM10 will be unbiased because the within-region bias has been removed, and the global bias acted via wealth anyway so that's been removed also
+
+```{r}
+summary(lm(deaths ~ pm10 + wealth, dat)) %>%
+  coefficients %>% as_tibble %>% slice(n=2)
+```
+
+We could try to simplify by doing the more explicit difference in difference estimate. Compare the change in deaths with the change in wealth (or PM10) over the 10 year period.
+
+```{r}
+dat2 <- group_by(dat, region) %>%
+  summarise(
+    delta_deaths = deaths[nyear] - deaths[1],
+    delta_wealth = wealth[nyear] - wealth[1],
+    delta_pm10 = pm10[nyear] - pm10[1]
+  )
+dat2
+
+```
+
+Do the DiD estimates using these - should recapitulate what we got above
+
+```{r}
+summary(lm(delta_deaths ~ delta_wealth, dat2))
+```
+
+```{r}
+summary(lm(delta_deaths ~ delta_pm10, dat2))
+```
+
+Weirdly, it works for wealth but we do get a slightly difference answer for PM10. There is probably a lot of literature on what makes a fixed effects model (the first version of the DiD we did above) different from an explicit version like this one.
+
+To summarise - the DiD model is useful to account for unmeasured global confounders (including time), but it might not be too surprising that it doesn't control for all confounders - you really do need some sort of experiment / randomisation that specifically mimics the exact intervention you want to make to get to completely unconfounded effects.
