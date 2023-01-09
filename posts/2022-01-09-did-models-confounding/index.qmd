@@ -14,8 +14,13 @@ For argument's sake suppose that air pollution (PM10) isn't causal for deaths. S
 -   Time has an additional effect on both deaths and wealth - i.e. it's also a global confounder
 -   The causal effect of wealth on death = 1. We want our model to get that right.
 
-```{r}
+```{r load-packages}
+#| warning: false
 library(dplyr)
+library(ggplot2)
+```
+
+```{r}
 nregion <- 300
 region <- 1:300
 wealth_int <- rnorm(nregion)
@@ -46,7 +51,6 @@ dat
 Plot it showing change in deaths over time by region
 
 ```{r}
-library(ggplot2)
 ggplot(dat, aes(x=year, y=deaths)) +
   geom_point(aes(group=as.factor(region))) +
   geom_line(aes(group=as.factor(region)))
@@ -127,3 +131,9 @@ summary(lm(delta_deaths ~ delta_pm10, dat2))
 Weirdly, it works for wealth but we do get a slightly difference answer for PM10. There is probably a lot of literature on what makes a fixed effects model (the first version of the DiD we did above) different from an explicit version like this one.
 
 To summarise - the DiD model is useful to account for unmeasured global confounders (including time), but it might not be too surprising that it doesn't control for all confounders - you really do need some sort of experiment / randomisation that specifically mimics the exact intervention you want to make to get to completely unconfounded effects.
+
+---
+
+```{r}
+sessionInfo()
+```

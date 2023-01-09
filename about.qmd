@@ -13,4 +13,4 @@ about:
 
 ---
 
-Need a place to put my dynamic document notes
+I use this place to keep track of miscellaneous code and dynamic documents. It's always rough work, unpolished, potentially full of errors.
