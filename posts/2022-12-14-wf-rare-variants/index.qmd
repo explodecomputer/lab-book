@@ -1,0 +1,146 @@
+---
+title: "Sibling replication of Backman rare variants"
+author: Gibran Hemani
+date: "2022-12-14"
+categories: [rare variants, genetics, family studies]
+---
+
+## Objective
+
+Backman et al 2022 (https://www.nature.com/articles/s41586-021-04103-z) performed exome GWAS of 4k traits, and found 564 rare-variant - trait pairs. They corrected for 20 PCs from common variants and 20 PCs from rare variants.
+
+Question: Is uncontrolled recent population stratification biasing these associations or even driving false positives?
+
+We could use siblings to estimate the direct effects for these discovery associations. There would be two major hits to power, first only 20k of the 500k UK Biobank will be used. Second, power to detect direct effects using siblings is reduced. So we can't conclude that these are false positives if they simply don't replicate in the sibling analysis.
+
+Instead, we can ask to what extent are the replication associations consistent with the original estimates, given the reduction in precision. i.e. What fraction are expected to replicate at some nominal threshold, and what fraction are observed to replicate. If there is a significant difference between the observed and expected replication rate, then that indicates uncorrected inflation in the discovery exome GWAS.
+
+This analysis: Power calculation - how much shrinkage would there need to be before there is 80% power to detect a difference between the sibling estimate and the population estimate?
+
+Read in Backman results
+
+There were 564 rare-variant - trait pairs in Backman et al 2022. Of these 484 were for quantitative traits, restricting to those here for simplicity.
+
+```{r}
+library(here)
+library(dplyr)
+library(ggplot2)
+set.seed(12345)
+dat <- read.csv("Book3.csv", stringsAsFactors=FALSE, header=TRUE) %>% 
+  as_tibble() %>%
+  mutate(se = (uci - beta)/1.96)
+dat %>% glimpse()
+plot(-log10(dat$P.value), abs(dat$beta)/dat$se)
+```
+
+Functions from Alex for relative sample size between designs:
+
+```{r}
+unrel_vs_sib = function(h2){
+  return(1+h2*(1-h2)/(4-h2))
+}
+
+unrel_vs_sib_inv = function(h2){
+  return((1+h2*(1-h2)/(4-h2))^(-1))
+}
+
+unrel_vs_trio = function(h2){
+  return(1+h2*(1-h2)/(3-h2*(1+h2/2)))
+}
+
+unrel_vs_trio_inv = function(h2){
+  return((1+h2*(1-h2)/(3-h2*(1+h2/2)))^(-1))
+}
+
+unrel_vs_direct_trio = function(h2){return(0.5/3)}
+unrel_vs_direct_sibdiff = function(h2){return((2*(2-h2))^(-1))}
+unrel_vs_direct_sibimp = function(h2){return((2+h2/2)/(6*(1-(h2/2)^2)))}
+```
+
+Function to estimate expected replication rate
+
+```{r}
+prop_overlap <- function(b_disc, b_rep, se_disc, se_rep, alpha)
+{
+  p_sign <- pnorm(-abs(b_disc) / se_disc) * pnorm(-abs(b_disc) / se_rep) + ((1 - pnorm(-abs(b_disc) / se_disc)) * (1 - pnorm(-abs(b_disc) / se_rep)))
+  p_sig <- pnorm(-abs(b_disc) / se_rep + qnorm(alpha / 2)) + (1 - pnorm(-abs(b_disc) / se_rep - qnorm(alpha / 2)))
+  p_rep <- pnorm(abs(b_rep)/se_rep, lower.tail=FALSE)
+  res <- tibble::tibble(
+    nsnp=length(b_disc),
+    metric=c("Sign", "Sign", "P-value", "P-value"),
+    datum=c("Expected", "Observed", "Expected", "Observed"),
+    value=c(sum(p_sign, na.rm=TRUE), sum(sign(b_disc) == sign(b_rep)), sum(p_sig, na.rm=TRUE), sum(p_rep < alpha, na.rm=TRUE))
+  )
+  pdif <- list(
+    Sign = binom.test(res$value[2], res$nsnp[1], res$value[1] / res$nsnp[1])$p.value,
+    `P-value` = binom.test(res$value[4], res$nsnp[1], res$value[3] / res$nsnp[1])$p.value
+  ) %>% as_tibble()
+  return(list(res=res, pdif=pdif, variants=dplyr::tibble(sig=p_sig, sign=p_sign)))
+}
+```
+
+Function to simulate assocs in siblings
+
+```{r}
+expected_se <- function (beta, af, n, vy) 
+{
+    sqrt(c(vy) - beta^2 * 2 * af * (1 - af))/sqrt(n) * (1/sqrt(2 * 
+        af * (1 - af)))
+}
+
+expected_vy <- function(beta, af, n, se)
+{
+  se^2 * 2 * af * (1 - af)*n + beta^2 * 2 * af * (1 - af)
+}
+
+# check algebra!
+# expected_se(0.2, 0.4, 1000, 10)
+# expected_vy(0.2, 0.4, 1000, expected_se(0.2, 0.4, 1000, 10))
+
+simgwas_sib <- function(beta_disc, se_disc, af_disc, n_disc, prop_sibs, h2, alpha, shrinkage)
+{
+  d <- tibble(
+    beta_disc = beta_disc,
+    beta_true = beta_disc * shrinkage,
+    vy = expected_vy(beta_disc, af_disc, n_disc, se_disc),
+    n_rep = n_disc * prop_sibs * unrel_vs_direct_sibimp(h2),
+    se_rep = expected_se(beta_disc, af_disc, n_rep, vy),
+    beta_rep = rnorm(length(beta_disc), beta_true, se_rep)
+  ) 
+  d %>%
+    {prop_overlap(.$beta_disc, .$beta_rep, se_disc, .$se_rep, alpha)}
+}
+```
+
+Power analysis
+
+```{r}
+params <- expand.grid(sim=1:500, shrinkage=seq(0,1,0.05))
+res <- lapply(1:nrow(params), function(i) 
+  simgwas_sib(dat$beta, dat$se, dat$Effect.allele.frequency, dat$N, 20000/500000,0.5, 0.05/nrow(dat), params$shrinkage[i])
+  ) %>%
+  lapply(., function(x) x$pdif) %>% bind_rows() %>% bind_cols(., params)
+res
+```
+
+```{r}
+res %>% 
+  group_by(shrinkage) %>%
+  summarise(Sign=sum(Sign < 0.05)/n(), `P-value`=sum(`P-value` < 0.05)/n()) %>%
+  tidyr::gather(key="key", value="value", c(`Sign`, `P-value`)) %>%
+  ggplot(., aes(x=shrinkage, y=value)) +
+    geom_point(aes(colour=key)) +
+    geom_line(aes(colour=key)) +
+    labs(x="Shrinkage of effect size, or 1-FDR", y="Power to detect difference from expectation")
+```
+
+
+## Summary
+
+Power is quite high to detect a difference!
+
+---
+
+```{r}
+sessionInfo()
+```
