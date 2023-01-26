@@ -1,0 +1,164 @@
+---
+title: "Convert Bayes factors to beta and standard error"
+author: Gibran Hemani
+date: "`r Sys.Date()`"
+categories: [statistics, fine mapping]
+---
+
+## Background
+
+Is it possible to convert BF to beta and standard error? According to [Giambartolomei et al 2014](https://pubmed.ncbi.nlm.nih.gov/24830394/) -
+
+$$
+ABF = \sqrt{1-r} \times exp(rZ^2/2)
+$$
+
+so
+
+$$
+|Z| = \sqrt{\frac{2 * log(ABF) - log(\sqrt{1-r})}{r}}
+$$
+
+here $r = W / V$ where V is the variance of the SNP effect estimate
+
+$$
+V \approx \frac{1}{2np(1-p)}
+$$
+
+where n is sample size and p is allele frequency (assumes small amount of variance explained in trait and sd of trait is 1).
+
+Run simulation 
+
+1. Use regional LD matrix to generate summary statistics with a single causal variant
+2. Use SuSiE to perform fine mapping
+3. Convert SuSiE Bayes Factors into Z scores, betas, standard errors
+4. Compare converted Z, beta, se against original simulated Z, beta, SE
+
+
+## Simulation
+
+Libraries
+
+```{r}
+library(simulateGP)
+library(susieR)
+library(here)
+library(dplyr)
+```
+
+Conversion function for logBF to z, beta, se
+
+```{r}
+#' Convert log Bayes Factor to summary stats
+#'
+#' @param lbf p-vector of log Bayes Factors for each SNP
+#' @param n Overall sample size
+#' @param af p-vector of allele frequencies for each SNP
+#' @param prior_v Variance of prior distribution. SuSiE uses 50
+#'
+#' @return tibble with lbf, af, beta, se, z
+lbf_to_z_cont <- function(lbf, n, af, prior_v=50)
+{
+  se = sqrt(1 / (2 * n * af * (1-af)))
+  r = prior_v / (prior_v + se^2)
+  z = sqrt((2 * lbf - log(sqrt(1-r)))/r)
+  beta <- z * se
+  return(tibble(lbf, af, z, beta, se))
+}
+```
+
+Read in example LD matrix from simulateGP repository
+
+```{r}
+map <- readRDS(url("https://github.com/explodecomputer/simulateGP/raw/master/data/ldobj_5_141345062_141478055.rds", "rb"))
+glimpse(map)
+```
+
+Generate summary statistics for a single causal variant and 
+
+```{r}
+set.seed(1234)
+ss <- map$map %>%
+    generate_gwas_params(h2=0.003, Pi=1/nrow(.)) %>%
+    generate_gwas_ss(50000, ld=map$ld)
+table(ss$beta == 0)
+```
+
+```{r}
+plot(-log10(pval) ~ pos, ss)
+```
+
+Run SuSiE
+
+```{r}
+sout <- susie_rss(ss$bhat / ss$se, R = map$ld, n = 50000, bhat = ss$bhat, var_y=1)
+summary(sout)
+```
+
+```{r}
+glimpse(sout)
+```
+
+Get Z scores from lbf
+
+```{r}
+a <- lbf_to_z_cont(sout$lbf_variable[1,], 50000, ss$af, prior_v = 50)
+a
+```
+
+Relationship between lbf and re-estimated z
+
+```{r}
+plot(z ~ lbf, a)
+```
+
+New Z vs original Z
+
+```{r}
+plot(a$z^2 ~ ss$fval)
+```
+
+```{r}
+lm(a$z^2 ~ ss$fval)
+```
+
+New beta vs original beta
+
+```{r}
+plot(a$beta ~ ss$bhat)
+```
+
+Two causal variants
+
+Set two causal variants at either end of the region
+
+```{r}
+set.seed(12)
+param <- map$map
+param$beta <- 0
+param$beta[c(10, 490)] <- 0.3
+ss <- generate_gwas_ss(param, 50000, ld=map$ld)
+plot(-log10(pval) ~ pos, ss)
+```
+
+
+First variant
+
+```{r}
+sout <- susie_rss(ss$bhat / ss$se, R = map$ld, n = 50000, bhat = ss$bhat, var_y=1)
+a1 <- lbf_to_z_cont(sout$lbf_variable[1,], 50000, ss$af, prior_v = 50)
+plot(a1$beta ~ ss$bhat)
+```
+
+```{r}
+a2 <- lbf_to_z_cont(sout$lbf_variable[2,], 50000, ss$af, prior_v = 50)
+plot(a2$beta ~ ss$bhat)
+```
+
+This looks good - it's setting different values to 0 in the two lbf vectors that correspond to two causal variants
+
+---
+
+```{r}
+sessionInfo()
+```
