@@ -1,7 +1,7 @@
 ---
 title: "Convert Bayes factors to beta and standard error"
 author: Gibran Hemani
-date: "`r Sys.Date()`"
+date: "2023-01-26"
 categories: [statistics, fine mapping]
 ---
 
