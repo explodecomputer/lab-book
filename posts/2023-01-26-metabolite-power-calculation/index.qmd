@@ -1,0 +1,73 @@
+---
+title: "Metabolite power calculation"
+author: Gibran Hemani and Nic Timpson
+date: "2023-01-26"
+categories: [power calculation]
+---
+
+## Background
+
+Sample of individuals who have had heart surgery, followed up and some number go on to have kidney disease. What is the predictive rsq of a metabolite on kidney disease outcome, that has 80% power to be detected after multiple testing correction?
+
+## Simulation
+
+Call libraries
+
+```{r}
+library(fmsb)
+library(dplyr)
+library(ggplot2)
+```
+
+Define model
+
+```{r}
+sim <- function(ncase, ncontrol, b)
+{
+  met <- rnorm(ncase+ncontrol)
+  y <- rbinom(ncase+ncontrol, 1, plogis(log(ncase/(ncase+ncontrol)) + met*b + rnorm(ncase+ncontrol)))
+  table(y)
+  mod <- glm(y ~ met)
+  rsq <- NagelkerkeR2(mod)$R2
+  pval <- summary(mod)$coef[2,4]
+  return(tibble(rsq, pval, ncase, ncontrol, b))
+}
+```
+
+Set parameters
+
+```{r}
+# Parameters
+ntest <- 1500
+ncase <- 70
+ncontrol <- 100
+```
+
+Run
+
+```{r}
+param <- expand.grid(
+  b = seq(0, 1.5, by=0.01),
+  sim = 1:100
+)
+res <- lapply(1:nrow(param), function(i) {
+  sim(ncase=ncase, ncontrol=ncontrol, b=param$b[i])
+}) %>% bind_rows()
+```
+
+Visualise
+
+```{r}
+res %>% group_by(b) %>%
+  summarise(rsq=mean(rsq), psig = sum(pval < (0.05/ntest))/n()) %>%
+  ggplot(., aes(x=rsq, y=psig)) +
+  geom_point() +
+  geom_hline(yintercept=0.8) +
+  labs(x="Negelkerke R2", y="Power", title=paste0(ncase, " cases, ", ncontrol, " controls, ", ntest, " independent tests"))
+```
+
+---
+
+```{r}
+sessionInfo()
+```
