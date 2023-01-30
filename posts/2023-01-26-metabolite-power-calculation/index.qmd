@@ -3,6 +3,9 @@ title: "Metabolite power calculation"
 author: Gibran Hemani and Nic Timpson
 date: "2023-01-26"
 categories: [power calculation]
+format:
+  html:
+    embed-resources: true
 ---
 
 ## Background
