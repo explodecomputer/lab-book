@@ -1,0 +1,115 @@
+---
+title: "Cell-specific effects for mQTLs from bulk tissue"
+author: Gibran Hemani
+date: "2023-02-07"
+categories: [DNA methylation, statistics]
+---
+
+## Background
+
+- What is the data generating model for the mQTL x celltype interaction analysis?
+- Does this rescue the per-celltype mQTL effects?
+
+## Basic simulation
+
+- Five cell types
+- 10k individuals
+- Different SNP effect on methylation in each cell type
+- Each individual has a different cell type proportion
+- Bulk tissue is the weighted average of all the cell types (weighted by cell type proportion in the individual)
+- Can we recapitulate the cell-type specific effect through the interaction term?
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+sim <- function(nc, n)
+{
+    g <- rbinom(n, 2, 0.4)
+    betas <- runif(nc, -2, 2)
+    m <- sapply(1:nc, function(i)
+    {
+        g * betas[i] + rnorm(n)
+    })
+    # for each individual sample cell type proportions
+    cellprop <- sapply(1:n, function(x) {a <- runif(nc); a/sum(a)}) %>% t()
+    # weighted sum
+    M <- (scale(m) * cellprop) %>% rowSums
+    res <- sapply(1:nc, function(i)
+    {
+      summary(lm(M ~ g * cellprop[,i]))$coef[4,1]
+    })
+    return(tibble(res, betas))
+}
+
+o <- lapply(1:1000, function(i) sim(5, 10000) %>% mutate(sim=i)) %>% bind_rows()
+o
+```
+
+```{r}
+ggplot(o, aes(x=betas, y=res)) +
+geom_point() +
+geom_abline(colour="red") +
+geom_smooth()
+```
+
+
+Generally seems to work but expect some shrinkage of large effects
+
+## Introduce measurement error in cell-type proportions
+
+```{r}
+cellprop_noise <- function(cellprop, sigma)
+{
+    apply(cellprop, 1, function(x)
+    {
+        a <- rnorm(length(x), x, sigma)
+        a / sum(a)
+    }) %>% t()
+}
+```
+
+
+```{r}
+sim2 <- function(nc, n, noise_sigma)
+{
+    g <- rbinom(n, 2, 0.4)
+    betas <- runif(nc, -2, 2)
+    m <- sapply(1:nc, function(i)
+    {
+        g * betas[i] + rnorm(n)
+    })
+    # for each individual sample cell type proportions
+    cellprop <- sapply(1:n, function(x) {a <- runif(nc); a/sum(a)}) %>% t()
+    cpn <- cellprop_noise(cellprop, noise_sigma)
+    # weighted sum
+    M <- (scale(m) * cellprop) %>% rowSums
+    res <- sapply(1:nc, function(i)
+    {
+      summary(lm(M ~ g * cpn[,i]))$coef[4,1]
+    })
+    return(tibble(res, betas))
+}
+
+o2 <- lapply(1:1000, function(i) {
+    s <- sample(c(0, 0.05, 0.1), 1)
+    sim2(5, 10000, s) %>% mutate(sim=i, s=s)
+}) %>% bind_rows()
+o2
+```
+
+```{r}
+ggplot(o2, aes(x=betas, y=res)) +
+geom_point() +
+geom_smooth() +
+geom_abline(colour="red") +
+facet_wrap(~ s)
+```
+
+Noisy estimates of cell type proportions will lead to attenuated effect estimates
+
+---
+
+```{r}
+sessionInfo()
+```
