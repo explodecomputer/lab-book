@@ -1,0 +1,50 @@
+---
+title: "Overlapping genes"
+author: Gibran Hemani
+date: "2023-02-18"
+categories: [genomics]
+---
+
+## Background
+
+For a list of positions, identify all genes that overlap +/- 200kb.
+
+Use Ensembl database of gene positions 
+
+```{r}
+library(EnsDb.Hsapiens.v75) # For convenience hg19
+library(ieugwasr)
+library(dplyr)
+genelist <- genes(EnsDb.Hsapiens.v75) %>% 
+    subset(., gene_biotype=="protein_coding")
+genelist
+```
+
+SNP list
+
+```{r}
+snps_cluster1 <- c("rs1097327","rs2186120","rs2166172","rs75641275","rs12037698","rs1446585","rs16846140","rs13062093","rs2051559","rs6861649","rs2281819","rs12662900","rs9388681","rs17132130","rs215634","rs79682948","rs2192649","rs13294945","rs7357754","rs4749937","rs1465900","rs1799992","rs55938344","rs7987928","rs7331420","rs9522279","rs55689274","rs4777541","rs7189149","rs11079849","rs113230003","rs150998792")
+```
+
+Get positions
+
+```{r}
+bmi <- associations(snps_cluster1, "ukb-a-248")
+target <- GRanges(bmi$chr, IRanges(bmi$position - 200000, bmi$position + 200000))
+target
+```
+
+Find overlaps with genelist
+
+```{r}
+overlaps <- findOverlaps(target, genelist)
+overlaps
+```
+
+Overall about 116 overlapping protein coding genes found for 30 SNPs.
+
+---
+
+```{r}
+sessionInfo()
+```

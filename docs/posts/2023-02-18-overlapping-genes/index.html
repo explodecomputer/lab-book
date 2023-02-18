@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.313">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Gibran Hemani">
+<meta name="dcterms.date" content="2023-02-18">
+
+<title>Gibran Hemani’s lab book - Overlapping genes</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Gibran Hemani’s lab book</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Overlapping genes</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">genomics</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Gibran Hemani </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">February 18, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<p>For a list of positions, identify all genes that overlap +/- 200kb.</p>
+<p>Use Ensembl database of gene positions</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(EnsDb.Hsapiens.v75) <span class="co"># For convenience hg19</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: ensembldb</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: BiocGenerics</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'BiocGenerics'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    IQR, mad, sd, var, xtabs</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    anyDuplicated, aperm, append, as.data.frame, basename, cbind,
+    colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
+    get, grep, grepl, intersect, is.unsorted, lapply, Map, mapply,
+    match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,
+    Position, rank, rbind, Reduce, rownames, sapply, setdiff, sort,
+    table, tapply, union, unique, unsplit, which.max, which.min</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: GenomicRanges</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: stats4</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: S4Vectors</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'S4Vectors'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    expand.grid, I, unname</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: IRanges</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: GenomeInfoDb</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'GenomeInfoDb' was built under R version 4.2.2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: GenomicFeatures</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: package 'GenomicFeatures' was built under R version 4.2.2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: AnnotationDbi</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: Biobase</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with
+    'browseVignettes()'. To cite Bioconductor, see
+    'citation("Biobase")', and for packages 'citation("pkgname")'.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: AnnotationFilter</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'ensembldb'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:stats':
+
+    filter</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ieugwasr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>API: public: http://gwas-api.mrcieu.ac.uk/</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'ieugwasr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:IRanges':
+
+    cor</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:S4Vectors':
+
+    cor</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:ensembldb':
+
+    filter, select</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:AnnotationDbi':
+
+    select</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:Biobase':
+
+    combine</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:GenomicRanges':
+
+    intersect, setdiff, union</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:GenomeInfoDb':
+
+    intersect</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:IRanges':
+
+    collapse, desc, intersect, setdiff, slice, union</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:S4Vectors':
+
+    first, intersect, rename, setdiff, setequal, union</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:BiocGenerics':
+
+    combine, intersect, setdiff, union</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>genelist <span class="ot">&lt;-</span> <span class="fu">genes</span>(EnsDb.Hsapiens.v75) <span class="sc">%&gt;%</span> </span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">subset</span>(., gene_biotype<span class="sc">==</span><span class="st">"protein_coding"</span>)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>genelist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 22810 ranges and 6 metadata columns:
+                  seqnames            ranges strand |         gene_id
+                     &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;character&gt;
+  ENSG00000186092        1       69091-70008      + | ENSG00000186092
+  ENSG00000237683        1     134901-139379      - | ENSG00000237683
+  ENSG00000235249        1     367640-368634      + | ENSG00000235249
+  ENSG00000185097        1     621059-622053      - | ENSG00000185097
+  ENSG00000269831        1     738532-739137      - | ENSG00000269831
+              ...      ...               ...    ... .             ...
+  ENSG00000187191        Y 26909216-26959626      - | ENSG00000187191
+  ENSG00000205916        Y 26980008-27053183      + | ENSG00000205916
+  ENSG00000185894        Y 27177048-27208695      - | ENSG00000185894
+  ENSG00000172288        Y 27768264-27771049      + | ENSG00000172288
+  ENSG00000269393        Y 28111776-28114889      - | ENSG00000269393
+                    gene_name   gene_biotype seq_coord_system      symbol
+                  &lt;character&gt;    &lt;character&gt;      &lt;character&gt; &lt;character&gt;
+  ENSG00000186092       OR4F5 protein_coding       chromosome       OR4F5
+  ENSG00000237683  AL627309.1 protein_coding       chromosome  AL627309.1
+  ENSG00000235249      OR4F29 protein_coding       chromosome      OR4F29
+  ENSG00000185097      OR4F16 protein_coding       chromosome      OR4F16
+  ENSG00000269831  AL669831.1 protein_coding       chromosome  AL669831.1
+              ...         ...            ...              ...         ...
+  ENSG00000187191        DAZ3 protein_coding       chromosome        DAZ3
+  ENSG00000205916        DAZ4 protein_coding       chromosome        DAZ4
+  ENSG00000185894       BPY2C protein_coding       chromosome       BPY2C
+  ENSG00000172288        CDY1 protein_coding       chromosome        CDY1
+  ENSG00000269393  AC007965.1 protein_coding       chromosome  AC007965.1
+                                    entrezid
+                                      &lt;list&gt;
+  ENSG00000186092                      79501
+  ENSG00000237683 101929819,100996768,728728
+  ENSG00000235249         729759,81399,26683
+  ENSG00000185097         729759,81399,26683
+  ENSG00000269831                       &lt;NA&gt;
+              ...                        ...
+  ENSG00000187191                57055,57054
+  ENSG00000205916           57135,57055,1617
+  ENSG00000185894         442868,442867,9083
+  ENSG00000172288                253175,9085
+  ENSG00000269393                       &lt;NA&gt;
+  -------
+  seqinfo: 273 sequences (1 circular) from GRCh37 genome</code></pre>
+</div>
+</div>
+<p>SNP list</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>snps_cluster1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"rs1097327"</span>,<span class="st">"rs2186120"</span>,<span class="st">"rs2166172"</span>,<span class="st">"rs75641275"</span>,<span class="st">"rs12037698"</span>,<span class="st">"rs1446585"</span>,<span class="st">"rs16846140"</span>,<span class="st">"rs13062093"</span>,<span class="st">"rs2051559"</span>,<span class="st">"rs6861649"</span>,<span class="st">"rs2281819"</span>,<span class="st">"rs12662900"</span>,<span class="st">"rs9388681"</span>,<span class="st">"rs17132130"</span>,<span class="st">"rs215634"</span>,<span class="st">"rs79682948"</span>,<span class="st">"rs2192649"</span>,<span class="st">"rs13294945"</span>,<span class="st">"rs7357754"</span>,<span class="st">"rs4749937"</span>,<span class="st">"rs1465900"</span>,<span class="st">"rs1799992"</span>,<span class="st">"rs55938344"</span>,<span class="st">"rs7987928"</span>,<span class="st">"rs7331420"</span>,<span class="st">"rs9522279"</span>,<span class="st">"rs55689274"</span>,<span class="st">"rs4777541"</span>,<span class="st">"rs7189149"</span>,<span class="st">"rs11079849"</span>,<span class="st">"rs113230003"</span>,<span class="st">"rs150998792"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Get positions</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>bmi <span class="ot">&lt;-</span> <span class="fu">associations</span>(snps_cluster1, <span class="st">"ukb-a-248"</span>)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>target <span class="ot">&lt;-</span> <span class="fu">GRanges</span>(bmi<span class="sc">$</span>chr, <span class="fu">IRanges</span>(bmi<span class="sc">$</span>position <span class="sc">-</span> <span class="dv">200000</span>, bmi<span class="sc">$</span>position <span class="sc">+</span> <span class="dv">200000</span>))</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>target</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 30 ranges and 0 metadata columns:
+       seqnames              ranges strand
+          &lt;Rle&gt;           &lt;IRanges&gt;  &lt;Rle&gt;
+   [1]        1   23137075-23537075      *
+   [2]        1   66253163-66653163      *
+   [3]        1   91008514-91408514      *
+   [4]        1   98127133-98527133      *
+   [5]        1 243384345-243784345      *
+   ...      ...                 ...    ...
+  [26]       15   47558909-47958909      *
+  [27]       15   72882240-73282240      *
+  [28]       16   68944151-69344151      *
+  [29]       17   46890785-47290785      *
+  [30]       19   18260956-18660956      *
+  -------
+  seqinfo: 16 sequences from an unspecified genome; no seqlengths</code></pre>
+</div>
+</div>
+<p>Find overlaps with genelist</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>overlaps <span class="ot">&lt;-</span> <span class="fu">findOverlaps</span>(target, genelist)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>overlaps</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Hits object with 116 hits and 0 metadata columns:
+        queryHits subjectHits
+        &lt;integer&gt;   &lt;integer&gt;
+    [1]         1         306
+    [2]         1         307
+    [3]         1         308
+    [4]         1         309
+    [5]         1         310
+    ...       ...         ...
+  [112]        30        9758
+  [113]        30        9759
+  [114]        30        9760
+  [115]        30        9761
+  [116]        30        9762
+  -------
+  queryLength: 30 / subjectLength: 22810</code></pre>
+</div>
+</div>
+<p>Overall about 116 overlapping protein coding genes found for 30 SNPs.</p>
+<hr>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>R version 4.2.1 Patched (2022-09-06 r82817)
+Platform: aarch64-apple-darwin20 (64-bit)
+Running under: macOS Monterey 12.6.2
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats4    stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] dplyr_1.0.10              ieugwasr_0.1.5           
+ [3] EnsDb.Hsapiens.v75_2.99.0 ensembldb_2.22.0         
+ [5] AnnotationFilter_1.22.0   GenomicFeatures_1.50.4   
+ [7] AnnotationDbi_1.60.0      Biobase_2.56.0           
+ [9] GenomicRanges_1.50.2      GenomeInfoDb_1.34.9      
+[11] IRanges_2.32.0            S4Vectors_0.36.1         
+[13] BiocGenerics_0.44.0      
+
+loaded via a namespace (and not attached):
+ [1] MatrixGenerics_1.8.1        httr_1.4.4                 
+ [3] bit64_4.0.5                 jsonlite_1.8.4             
+ [5] assertthat_0.2.1            BiocFileCache_2.4.0        
+ [7] blob_1.2.3                  GenomeInfoDbData_1.2.8     
+ [9] Rsamtools_2.14.0            yaml_2.3.6                 
+[11] progress_1.2.2              pillar_1.8.1               
+[13] RSQLite_2.2.20              lattice_0.20-45            
+[15] glue_1.6.2                  digest_0.6.31              
+[17] XVector_0.38.0              htmltools_0.5.4            
+[19] Matrix_1.4-1                XML_3.99-0.13              
+[21] pkgconfig_2.0.3             biomaRt_2.54.0             
+[23] zlibbioc_1.42.0             BiocParallel_1.30.4        
+[25] tibble_3.1.8                KEGGREST_1.38.0            
+[27] generics_0.1.3              ellipsis_0.3.2             
+[29] cachem_1.0.6                SummarizedExperiment_1.28.0
+[31] lazyeval_0.2.2              cli_3.5.0                  
+[33] magrittr_2.0.3              crayon_1.5.2               
+[35] memoise_2.0.1               evaluate_0.19              
+[37] fansi_1.0.3                 xml2_1.3.3                 
+[39] tools_4.2.1                 prettyunits_1.1.1          
+[41] hms_1.1.2                   BiocIO_1.8.0               
+[43] lifecycle_1.0.3             matrixStats_0.63.0         
+[45] stringr_1.5.0               DelayedArray_0.24.0        
+[47] Biostrings_2.66.0           compiler_4.2.1             
+[49] rlang_1.0.6                 grid_4.2.1                 
+[51] RCurl_1.98-1.9              rjson_0.2.21               
+[53] rappdirs_0.3.3              htmlwidgets_1.5.4          
+[55] bitops_1.0-7                rmarkdown_2.16             
+[57] restfulr_0.0.15             codetools_0.2-18           
+[59] DBI_1.1.3                   curl_4.3.3                 
+[61] R6_2.5.1                    GenomicAlignments_1.34.0   
+[63] knitr_1.41                  rtracklayer_1.58.0         
+[65] fastmap_1.1.0               bit_4.0.5                  
+[67] utf8_1.2.2                  filelock_1.0.2             
+[69] ProtGenerics_1.30.0         stringi_1.7.8              
+[71] parallel_4.2.1              Rcpp_1.0.9                 
+[73] vctrs_0.5.1                 png_0.1-8                  
+[75] dbplyr_2.2.1                tidyselect_1.2.0           
+[77] xfun_0.36                  </code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

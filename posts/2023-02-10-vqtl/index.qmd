@@ -1,0 +1,206 @@
+---
+title: "Sandwich variance estimators to control LD leakage"
+author: Gibran Hemani
+date: "2023-02-10"
+categories: []
+---
+
+## Background
+
+See https://explodecomputer.github.io/lab-book/posts/2022-12-16-vqtl/ for inflation issues with vQTLs.
+
+Can sandwich estimators help https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5943197/
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(sandwich)
+set.seed(12345)
+
+test_drm <- function(g, y, sandwich)
+{
+  nom <- c(b="Estimate", se="Std. Error", tval="t value", pval="Pr(>|t|)")
+  y.i <- tapply(y, g, median, na.rm=T)
+  z.ij <- abs(y - y.i[g+1])
+  a <- lm(z.ij ~ g)
+  m1 <- a %>%
+    summary %>%
+    coef %>%
+    as_tibble() %>%
+    # rename(all_of(nom)) %>%
+    slice(2) %>%
+    mutate(method="drm")
+  if(sandwich)
+  {
+    o <- sandwich::vcovHC(a, type="HC")
+    m2 <- m1
+    m2$`Std. Error` <- sqrt(o[2,2])
+    m2$`t value` <- m2$Estimate / m2$`Std. Error`
+    m2$`Pr(>|t|)` <- pnorm(m2$`t value`, lower.tail=FALSE)
+    m2$method <- "drm sandwich"
+    return(m2)
+  }
+  return(m1)
+}
+
+correlated_binomial <- function (nid, p1, p2, rho, n = 2, round = TRUE, print = FALSE) 
+{
+    p <- p1
+    q <- p2
+    a <- function(rho, p, q) {
+        rho * sqrt(p * q * (1 - p) * (1 - q)) + (1 - p) * (1 - q)
+    }
+    a.0 <- a(rho, p, q)
+    prob <- c(`(0,0)` = a.0, `(1,0)` = 1 - q - a.0, `(0,1)` = 1 - 
+        p - a.0, `(1,1)` = a.0 + p + q - 1)
+    if (min(prob) < 0) {
+        print(prob)
+        stop("Error: a probability is negative.")
+    }
+    n.sim <- nid
+    u <- sample.int(4, n.sim * n, replace = TRUE, prob = prob)
+    y <- floor((u - 1)/2)
+    x <- 1 - u%%2
+    x <- colSums(matrix(x, nrow = n))
+    y <- colSums(matrix(y, nrow = n))
+    if (round) {
+        x <- round(x)
+        y <- round(y)
+    }
+    if (print) {
+        print(table(x, y))
+        print(stats::cor(x, y))
+    }
+    return(cbind(x, y))
+}
+
+gendatp <- function(n, p1, p2, p3, r1)
+{
+	dat <- correlated_binomial(n, p1, p2, r1) %>% as_tibble()
+	names(dat) <- c("y1", "y2")
+	dat$y3 <- rbinom(n, 1, p3)
+	return(dat)
+}
+
+run_simp <- function(param, i)
+{
+	set.seed(i*10)
+	dat <- gendatp(param$n[i], param$p1[i], param$p2[i], param$p3[i], param$r1[i])
+	x <- dat$y1 + rnorm(nrow(dat), sd=sd(dat$y1)/4)
+	mod1 <- lm(x ~ y2 + y3, dat)
+	mod2 <- lm(x ~ y2 + y3 + y2*y3, dat)
+	amod <- anova(mod1, mod2)
+	param$F[i] <- amod$P[2]
+	o1 <- test_drm(dat$y1, x, param$sandwich[i])
+	o2 <- test_drm(dat$y2, x, param$sandwich[i])
+	o3 <- test_drm(dat$y3, x, param$sandwich[i])
+	param$drm1[i] <- o1$`Pr(>|t|)`
+	param$drm2[i] <- o2$`Pr(>|t|)`
+	param$drm3[i] <- o3$`Pr(>|t|)`
+	return(param[i,])
+}
+
+param <- expand.grid(
+    sandwich=c(T,F),
+	p1=0.1,
+	p2=0.1,
+	p3=0.5,
+	p4=0.1,
+	n=1000,
+	r1=seq(0, 1, by=0.2),
+	sim=1:250,
+	r2=NA,
+	F=NA,
+	drm1=NA,
+	drm2=NA,
+	drm3=NA
+)
+
+resp <- lapply(1:nrow(param), function(x) run_simp(param, x)) %>% bind_rows()
+str(resp)
+
+```
+
+
+```{r}
+ggplot(resp, aes(x=r1, y=-log10(drm2))) +
+geom_boxplot(aes(fill=as.factor(r1))) +
+scale_fill_brewer(type="seq") +
+labs(y="DRM -log10 p", x="LD between tagging\nvariant and causal variant", fill="") +
+facet_grid(. ~ sandwich)
+```
+
+
+Power
+
+```{r}
+
+run_simp2 <- function(param, i)
+{
+	set.seed(i*10)
+	dat <- gendatp(param$n[i], param$p1[i], param$p2[i], param$p3[i], param$r1[i])
+	x <- dat$y1 + dat$y2 * dat$y3 * param$b[i] + rnorm(nrow(dat), sd=sd(dat$y1)/4)
+	mod1 <- lm(x ~ y2 + y3, dat)
+	mod2 <- lm(x ~ y2 + y3 + y2*y3, dat)
+	amod <- anova(mod1, mod2)
+	param$F[i] <- amod$P[2]
+	o1 <- test_drm(dat$y1, x, param$sandwich[i])
+	o2 <- test_drm(dat$y2, x, param$sandwich[i])
+	o3 <- test_drm(dat$y3, x, param$sandwich[i])
+	param$drm1[i] <- o1$`Pr(>|t|)`
+	param$drm2[i] <- o2$`Pr(>|t|)`
+	param$drm3[i] <- o3$`Pr(>|t|)`
+	return(param[i,])
+}
+
+param <- expand.grid(
+    sandwich=c(T,F),
+    b=c(0, 1, 10),
+	p1=0.1,
+	p2=0.1,
+	p3=0.5,
+	p4=0.1,
+	n=1000,
+	r1=seq(0, 1, by=0.2),
+	sim=1:250,
+	r2=NA,
+	F=NA,
+	drm1=NA,
+	drm2=NA,
+	drm3=NA
+)
+
+resp2 <- lapply(1:nrow(param), function(x) run_simp2(param, x)) %>% bind_rows()
+str(resp)
+
+```
+
+```{r}
+ggplot(resp2, aes(x=r1, y=-log10(drm2))) +
+geom_boxplot(aes(fill=as.factor(r1))) +
+scale_fill_brewer(type="seq") +
+labs(y="DRM -log10 p", x="LD between tagging\nvariant and causal variant", fill="") +
+facet_grid(b ~ sandwich, scale="free_y")
+```
+
+```{r}
+group_by(resp2, b, r1, sandwich) %>%
+summarise(pow=sum(drm2))
+```
+
+
+```{r}
+g1 <- rbinom(1000, 2, 0.3)
+g2 <- rbinom(1000, 2, 0.3)
+
+y <- g1 + g2 + g1 * g2 + rnorm(1000)
+test_drm(g1, y, F)
+test_drm(g1, y, T)
+
+```
+
+---
+
+```{r}
+sessionInfo()
+```

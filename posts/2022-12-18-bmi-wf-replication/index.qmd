@@ -2,6 +2,7 @@
 title: "BMI instrument replication"
 author: "Gibran Hemani"
 date: "2022-12-18"
+categories: [statistics, genetics]
 ---
 
 ## Background

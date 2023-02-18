@@ -2,6 +2,7 @@
 title: "Inflation of vQTLs"
 author: "Gibran Hemani"
 date: "2022-12-16"
+categories: [statistics, genetics, interactions]
 ---
 
 ## Background
