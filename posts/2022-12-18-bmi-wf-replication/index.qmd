@@ -36,6 +36,7 @@ ukbest <- ieugwasr::associations(unlist(bmi_inst), "ukb-b-19953")
 
 Replication rates function
 
+
 ```{r}
 exp_rep <- function(b_disc, b_rep, se_disc, se_rep, alpha)
 {

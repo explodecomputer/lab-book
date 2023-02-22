@@ -12,6 +12,9 @@ For a list of positions, identify all genes that overlap +/- 200kb.
 Use Ensembl database of gene positions 
 
 ```{r}
+#| message: false
+#| warning: false
+
 library(EnsDb.Hsapiens.v75) # For convenience hg19
 library(ieugwasr)
 library(dplyr)

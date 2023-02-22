@@ -211,166 +211,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>For a list of positions, identify all genes that overlap +/- 200kb.</p>
 <p>Use Ensembl database of gene positions</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(EnsDb.Hsapiens.v75) <span class="co"># For convenience hg19</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: ensembldb</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: BiocGenerics</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'BiocGenerics'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:stats':
-
-    IQR, mad, sd, var, xtabs</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:base':
-
-    anyDuplicated, aperm, append, as.data.frame, basename, cbind,
-    colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
-    get, grep, grepl, intersect, is.unsorted, lapply, Map, mapply,
-    match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,
-    Position, rank, rbind, Reduce, rownames, sapply, setdiff, sort,
-    table, tapply, union, unique, unsplit, which.max, which.min</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: GenomicRanges</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: stats4</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: S4Vectors</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'S4Vectors'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:base':
-
-    expand.grid, I, unname</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: IRanges</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: GenomeInfoDb</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'GenomeInfoDb' was built under R version 4.2.2</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: GenomicFeatures</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'GenomicFeatures' was built under R version 4.2.2</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: AnnotationDbi</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: Biobase</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Welcome to Bioconductor
-
-    Vignettes contain introductory material; view with
-    'browseVignettes()'. To cite Bioconductor, see
-    'citation("Biobase")', and for packages 'citation("pkgname")'.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: AnnotationFilter</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'ensembldb'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following object is masked from 'package:stats':
-
-    filter</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ieugwasr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>API: public: http://gwas-api.mrcieu.ac.uk/</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'ieugwasr'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following object is masked from 'package:IRanges':
-
-    cor</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following object is masked from 'package:S4Vectors':
-
-    cor</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'dplyr'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:ensembldb':
-
-    filter, select</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following object is masked from 'package:AnnotationDbi':
-
-    select</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following object is masked from 'package:Biobase':
-
-    combine</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:GenomicRanges':
-
-    intersect, setdiff, union</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following object is masked from 'package:GenomeInfoDb':
-
-    intersect</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:IRanges':
-
-    collapse, desc, intersect, setdiff, slice, union</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:S4Vectors':
-
-    first, intersect, rename, setdiff, setequal, union</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:BiocGenerics':
-
-    combine, intersect, setdiff, union</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:stats':
-
-    filter, lag</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:base':
-
-    intersect, setdiff, setequal, union</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>genelist <span class="ot">&lt;-</span> <span class="fu">genes</span>(EnsDb.Hsapiens.v75) <span class="sc">%&gt;%</span> </span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">subset</span>(., gene_biotype<span class="sc">==</span><span class="st">"protein_coding"</span>)</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>genelist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(EnsDb.Hsapiens.v75) <span class="co"># For convenience hg19</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ieugwasr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>genelist <span class="ot">&lt;-</span> <span class="fu">genes</span>(EnsDb.Hsapiens.v75) <span class="sc">%&gt;%</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">subset</span>(gene_biotype<span class="sc">==</span><span class="st">"protein_coding"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>genelist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GRanges object with 22810 ranges and 6 metadata columns:
                   seqnames            ranges strand |         gene_id
@@ -418,13 +264,13 @@ Attaching package: 'dplyr'</code></pre>
 </div>
 <p>SNP list</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>snps_cluster1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"rs1097327"</span>,<span class="st">"rs2186120"</span>,<span class="st">"rs2166172"</span>,<span class="st">"rs75641275"</span>,<span class="st">"rs12037698"</span>,<span class="st">"rs1446585"</span>,<span class="st">"rs16846140"</span>,<span class="st">"rs13062093"</span>,<span class="st">"rs2051559"</span>,<span class="st">"rs6861649"</span>,<span class="st">"rs2281819"</span>,<span class="st">"rs12662900"</span>,<span class="st">"rs9388681"</span>,<span class="st">"rs17132130"</span>,<span class="st">"rs215634"</span>,<span class="st">"rs79682948"</span>,<span class="st">"rs2192649"</span>,<span class="st">"rs13294945"</span>,<span class="st">"rs7357754"</span>,<span class="st">"rs4749937"</span>,<span class="st">"rs1465900"</span>,<span class="st">"rs1799992"</span>,<span class="st">"rs55938344"</span>,<span class="st">"rs7987928"</span>,<span class="st">"rs7331420"</span>,<span class="st">"rs9522279"</span>,<span class="st">"rs55689274"</span>,<span class="st">"rs4777541"</span>,<span class="st">"rs7189149"</span>,<span class="st">"rs11079849"</span>,<span class="st">"rs113230003"</span>,<span class="st">"rs150998792"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>snps_cluster1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"rs1097327"</span>,<span class="st">"rs2186120"</span>,<span class="st">"rs2166172"</span>,<span class="st">"rs75641275"</span>,<span class="st">"rs12037698"</span>,<span class="st">"rs1446585"</span>,<span class="st">"rs16846140"</span>,<span class="st">"rs13062093"</span>,<span class="st">"rs2051559"</span>,<span class="st">"rs6861649"</span>,<span class="st">"rs2281819"</span>,<span class="st">"rs12662900"</span>,<span class="st">"rs9388681"</span>,<span class="st">"rs17132130"</span>,<span class="st">"rs215634"</span>,<span class="st">"rs79682948"</span>,<span class="st">"rs2192649"</span>,<span class="st">"rs13294945"</span>,<span class="st">"rs7357754"</span>,<span class="st">"rs4749937"</span>,<span class="st">"rs1465900"</span>,<span class="st">"rs1799992"</span>,<span class="st">"rs55938344"</span>,<span class="st">"rs7987928"</span>,<span class="st">"rs7331420"</span>,<span class="st">"rs9522279"</span>,<span class="st">"rs55689274"</span>,<span class="st">"rs4777541"</span>,<span class="st">"rs7189149"</span>,<span class="st">"rs11079849"</span>,<span class="st">"rs113230003"</span>,<span class="st">"rs150998792"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Get positions</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>bmi <span class="ot">&lt;-</span> <span class="fu">associations</span>(snps_cluster1, <span class="st">"ukb-a-248"</span>)</span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>target <span class="ot">&lt;-</span> <span class="fu">GRanges</span>(bmi<span class="sc">$</span>chr, <span class="fu">IRanges</span>(bmi<span class="sc">$</span>position <span class="sc">-</span> <span class="dv">200000</span>, bmi<span class="sc">$</span>position <span class="sc">+</span> <span class="dv">200000</span>))</span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>target</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>bmi <span class="ot">&lt;-</span> <span class="fu">associations</span>(snps_cluster1, <span class="st">"ukb-a-248"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>target <span class="ot">&lt;-</span> <span class="fu">GRanges</span>(bmi<span class="sc">$</span>chr, <span class="fu">IRanges</span>(bmi<span class="sc">$</span>position <span class="sc">-</span> <span class="dv">200000</span>, bmi<span class="sc">$</span>position <span class="sc">+</span> <span class="dv">200000</span>))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>target</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>GRanges object with 30 ranges and 0 metadata columns:
        seqnames              ranges strand
@@ -446,8 +292,8 @@ Attaching package: 'dplyr'</code></pre>
 </div>
 <p>Find overlaps with genelist</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>overlaps <span class="ot">&lt;-</span> <span class="fu">findOverlaps</span>(target, genelist)</span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>overlaps</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>overlaps <span class="ot">&lt;-</span> <span class="fu">findOverlaps</span>(target, genelist)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>overlaps</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Hits object with 116 hits and 0 metadata columns:
         queryHits subjectHits
@@ -469,8 +315,316 @@ Attaching package: 'dplyr'</code></pre>
 </div>
 <p>Overall about 116 overlapping protein coding genes found for 30 SNPs.</p>
 <hr>
+<p>Try with all ensembl annotations, not just protein coding</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>genelist_all <span class="ot">&lt;-</span> <span class="fu">genes</span>(EnsDb.Hsapiens.v75)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>genelist_all</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 64102 ranges and 6 metadata columns:
+                  seqnames            ranges strand |         gene_id
+                     &lt;Rle&gt;         &lt;IRanges&gt;  &lt;Rle&gt; |     &lt;character&gt;
+  ENSG00000223972        1       11869-14412      + | ENSG00000223972
+  ENSG00000227232        1       14363-29806      - | ENSG00000227232
+  ENSG00000243485        1       29554-31109      + | ENSG00000243485
+  ENSG00000237613        1       34554-36081      - | ENSG00000237613
+  ENSG00000268020        1       52473-54936      + | ENSG00000268020
+              ...      ...               ...    ... .             ...
+  ENSG00000224240        Y 28695572-28695890      + | ENSG00000224240
+  ENSG00000227629        Y 28732789-28737748      - | ENSG00000227629
+  ENSG00000237917        Y 28740998-28780799      - | ENSG00000237917
+  ENSG00000231514        Y 28772667-28773306      - | ENSG00000231514
+  ENSG00000235857        Y 59001391-59001635      + | ENSG00000235857
+                    gene_name gene_biotype seq_coord_system      symbol
+                  &lt;character&gt;  &lt;character&gt;      &lt;character&gt; &lt;character&gt;
+  ENSG00000223972     DDX11L1   pseudogene       chromosome     DDX11L1
+  ENSG00000227232      WASH7P   pseudogene       chromosome      WASH7P
+  ENSG00000243485  MIR1302-10      lincRNA       chromosome  MIR1302-10
+  ENSG00000237613     FAM138A      lincRNA       chromosome     FAM138A
+  ENSG00000268020      OR4G4P   pseudogene       chromosome      OR4G4P
+              ...         ...          ...              ...         ...
+  ENSG00000224240     CYCSP49   pseudogene       chromosome     CYCSP49
+  ENSG00000227629  SLC25A15P1   pseudogene       chromosome  SLC25A15P1
+  ENSG00000237917     PARP4P1   pseudogene       chromosome     PARP4P1
+  ENSG00000231514     FAM58CP   pseudogene       chromosome     FAM58CP
+  ENSG00000235857     CTBP2P1   pseudogene       chromosome     CTBP2P1
+                                           entrezid
+                                             &lt;list&gt;
+  ENSG00000223972               100287596,100287102
+  ENSG00000227232                  100287171,653635
+  ENSG00000243485 100422919,100422834,100422831,...
+  ENSG00000237613              654835,645520,641702
+  ENSG00000268020                              &lt;NA&gt;
+              ...                               ...
+  ENSG00000224240                              &lt;NA&gt;
+  ENSG00000227629                              &lt;NA&gt;
+  ENSG00000237917                              &lt;NA&gt;
+  ENSG00000231514                              &lt;NA&gt;
+  ENSG00000235857                              &lt;NA&gt;
+  -------
+  seqinfo: 273 sequences (1 circular) from GRCh37 genome</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>overlaps1 <span class="ot">&lt;-</span> <span class="fu">findOverlaps</span>(target, genelist_all)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>overlaps1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Hits object with 277 hits and 0 metadata columns:
+        queryHits subjectHits
+        &lt;integer&gt;   &lt;integer&gt;
+    [1]         1         725
+    [2]         1         728
+    [3]         1         729
+    [4]         1         730
+    [5]         1         731
+    ...       ...         ...
+  [273]        30       26788
+  [274]        30       26789
+  [275]        30       26790
+  [276]        30       26791
+  [277]        30       26792
+  -------
+  queryLength: 30 / subjectLength: 64102</code></pre>
+</div>
+</div>
+<p>Still only 277</p>
+<hr>
+<p>Try with HumanHT-12 v3.0 probes. Download manifest file to get probe coordinates:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>temp <span class="ot">&lt;-</span> <span class="fu">tempfile</span>()</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">download.file</span>(<span class="st">"https://emea.support.illumina.com/content/dam/illumina-support/documents/downloads/productfiles/humanht-12/v3/humanht-12_v3_0_r3_11283641_a_txt.zip"</span>, temp)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'data.table'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:dplyr':
+
+    between, first, last</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:GenomicRanges':
+
+    shift</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:IRanges':
+
+    shift</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:S4Vectors':
+
+    first, second</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">fread</span>(<span class="fu">paste0</span>(<span class="st">"unzip -p "</span>, temp), <span class="at">skip=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Taking input= as a system command ('unzip -p /var/folders/pp/6w3v08jx2p3ct76tptkmt0qh0000gq/T//RtmpYrlwQo/file7e866d3df1ff') and a variable has been used in the expression passed to `input=`. Please use fread(cmd=...). There is a security concern if you are creating an app, and the app could have a malicious user, and the app is not running in a secure environment; e.g. the app is running as root. Please read item 5 in the NEWS file for v1.11.6 for more information and for the option to suppress this message.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in fread(paste0("unzip -p ", temp), skip = 8): Stopped early on line
+48813. Expected 28 fields but found 1. Consider fill=TRUE and comment.char=.
+First discarded non-empty line: &lt;&lt;[Controls]&gt;&gt;</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(a)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Classes 'data.table' and 'data.frame':  48803 obs. of  28 variables:
+ $ Species              : chr  "Homo sapiens" "Homo sapiens" "Homo sapiens" "Homo sapiens" ...
+ $ Source               : chr  "RefSeq" "Unigene" "RefSeq" "RefSeq" ...
+ $ Search_Key           : chr  "ILMN_44919" "ILMN_127219" "ILMN_139282" "ILMN_5006" ...
+ $ Transcript           : chr  "ILMN_44919" "ILMN_127219" "ILMN_139282" "ILMN_5006" ...
+ $ ILMN_Gene            : chr  "LOC23117" "HS.575038" "FCGR2B" "TRIM44" ...
+ $ Source_Reference_ID  : chr  "XM_933824.1" "Hs.575038" "XM_938851.1" "NM_017583.3" ...
+ $ RefSeq_ID            : chr  "XM_933824.1" "" "XM_938851.1" "NM_017583.3" ...
+ $ Unigene_ID           : chr  "" "Hs.575038" "" "" ...
+ $ Entrez_Gene_ID       : int  23117 NA 2213 54765 653895 158833 387701 NA 56905 NA ...
+ $ GI                   : int  89040007 10437021 88952550 29029528 89033487 61888901 89031576 27826545 153251858 1999235 ...
+ $ Accession            : chr  "XM_933824.1" "AK024680" "XM_938851.1" "NM_017583.3" ...
+ $ Symbol               : chr  "LOC23117" "" "FCGR2B" "TRIM44" ...
+ $ Protein_Product      : chr  "XP_938917.1" "" "XP_943944.1" "NP_060053.2" ...
+ $ Probe_Id             : chr  "ILMN_1725881" "ILMN_1910180" "ILMN_1804174" "ILMN_1796063" ...
+ $ Array_Address_Id     : int  1710221 5900364 2480717 1300239 4480719 6020725 3870215 2710020 870110 290020 ...
+ $ Probe_Type           : chr  "I" "S" "I" "S" ...
+ $ Probe_Start          : int  122 1409 1643 2901 25 782 301 324 3585 139 ...
+ $ Probe_Sequence       : chr  "GGCTCCTCTTTGGGCTCCTACTGGAATTTATCAGCCATCAGTGCATCTCT" "ACACCTTCAGGAGGGAAGCCCTTATTTCTGGGTTGAACTCCCCTTCCATG" "TAGGGGCAATAGGCTATACGCTACAGCCTAGGTGTGTAGTAGGCCACACC" "CCTGCCTGTCTGCCTGTGACCTGTGTACGTATTACAGGCTTTAGGACCAG" ...
+ $ Chromosome           : chr  "16" "2" "" "11" ...
+ $ Probe_Chr_Orientation: chr  "-" "+" "" "+" ...
+ $ Probe_Coordinates    : chr  "21766363-21766363:21769901-21769949" "206352194-206352243" "" "35786070-35786119" ...
+ $ Cytoband             : chr  "16p12.2a" "" "1q23.3b" "11p13a" ...
+ $ Definition           : chr  "PREDICTED: Homo sapiens KIAA0220-like protein, transcript variant 11 (LOC23117), mRNA." "Homo sapiens cDNA: FLJ21027 fis, clone CAE07110" "PREDICTED: Homo sapiens Fc fragment of IgG, low affinity IIb, receptor (CD32) (FCGR2B), mRNA." "Homo sapiens tripartite motif-containing 44 (TRIM44), mRNA." ...
+ $ Ontology_Component   : chr  "" "" "The membrane surrounding a cell that separates the cell from its external environment. It consists of a phospho"| __truncated__ "" ...
+ $ Ontology_Process     : chr  "" "" "Any immune system process that functions in the calibrated response of an organism to a potential internal or i"| __truncated__ "" ...
+ $ Ontology_Function    : chr  "" "" "Combining with an extracellular or intracellular messenger to initiate a change in cell activity [goid 4872] [e"| __truncated__ "" ...
+ $ Synonyms             : chr  "" "" "" "MGC3490; MC7; HSA249128; DIPB" ...
+ $ Obsolete_Probe_Id    : chr  "" "" "" "MGC3490; MC7; HSA249128; DIPB" ...
+ - attr(*, ".internal.selfref")=&lt;externalptr&gt; </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>a<span class="sc">$</span>bp <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">strsplit</span>(a<span class="sc">$</span>Probe_Coordinates, <span class="st">"-"</span>), <span class="cf">function</span>(o) <span class="fu">as.numeric</span>(o[<span class="dv">1</span>]))</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(a)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Classes 'data.table' and 'data.frame':  48803 obs. of  29 variables:
+ $ Species              : chr  "Homo sapiens" "Homo sapiens" "Homo sapiens" "Homo sapiens" ...
+ $ Source               : chr  "RefSeq" "Unigene" "RefSeq" "RefSeq" ...
+ $ Search_Key           : chr  "ILMN_44919" "ILMN_127219" "ILMN_139282" "ILMN_5006" ...
+ $ Transcript           : chr  "ILMN_44919" "ILMN_127219" "ILMN_139282" "ILMN_5006" ...
+ $ ILMN_Gene            : chr  "LOC23117" "HS.575038" "FCGR2B" "TRIM44" ...
+ $ Source_Reference_ID  : chr  "XM_933824.1" "Hs.575038" "XM_938851.1" "NM_017583.3" ...
+ $ RefSeq_ID            : chr  "XM_933824.1" "" "XM_938851.1" "NM_017583.3" ...
+ $ Unigene_ID           : chr  "" "Hs.575038" "" "" ...
+ $ Entrez_Gene_ID       : int  23117 NA 2213 54765 653895 158833 387701 NA 56905 NA ...
+ $ GI                   : int  89040007 10437021 88952550 29029528 89033487 61888901 89031576 27826545 153251858 1999235 ...
+ $ Accession            : chr  "XM_933824.1" "AK024680" "XM_938851.1" "NM_017583.3" ...
+ $ Symbol               : chr  "LOC23117" "" "FCGR2B" "TRIM44" ...
+ $ Protein_Product      : chr  "XP_938917.1" "" "XP_943944.1" "NP_060053.2" ...
+ $ Probe_Id             : chr  "ILMN_1725881" "ILMN_1910180" "ILMN_1804174" "ILMN_1796063" ...
+ $ Array_Address_Id     : int  1710221 5900364 2480717 1300239 4480719 6020725 3870215 2710020 870110 290020 ...
+ $ Probe_Type           : chr  "I" "S" "I" "S" ...
+ $ Probe_Start          : int  122 1409 1643 2901 25 782 301 324 3585 139 ...
+ $ Probe_Sequence       : chr  "GGCTCCTCTTTGGGCTCCTACTGGAATTTATCAGCCATCAGTGCATCTCT" "ACACCTTCAGGAGGGAAGCCCTTATTTCTGGGTTGAACTCCCCTTCCATG" "TAGGGGCAATAGGCTATACGCTACAGCCTAGGTGTGTAGTAGGCCACACC" "CCTGCCTGTCTGCCTGTGACCTGTGTACGTATTACAGGCTTTAGGACCAG" ...
+ $ Chromosome           : chr  "16" "2" "" "11" ...
+ $ Probe_Chr_Orientation: chr  "-" "+" "" "+" ...
+ $ Probe_Coordinates    : chr  "21766363-21766363:21769901-21769949" "206352194-206352243" "" "35786070-35786119" ...
+ $ Cytoband             : chr  "16p12.2a" "" "1q23.3b" "11p13a" ...
+ $ Definition           : chr  "PREDICTED: Homo sapiens KIAA0220-like protein, transcript variant 11 (LOC23117), mRNA." "Homo sapiens cDNA: FLJ21027 fis, clone CAE07110" "PREDICTED: Homo sapiens Fc fragment of IgG, low affinity IIb, receptor (CD32) (FCGR2B), mRNA." "Homo sapiens tripartite motif-containing 44 (TRIM44), mRNA." ...
+ $ Ontology_Component   : chr  "" "" "The membrane surrounding a cell that separates the cell from its external environment. It consists of a phospho"| __truncated__ "" ...
+ $ Ontology_Process     : chr  "" "" "Any immune system process that functions in the calibrated response of an organism to a potential internal or i"| __truncated__ "" ...
+ $ Ontology_Function    : chr  "" "" "Combining with an extracellular or intracellular messenger to initiate a change in cell activity [goid 4872] [e"| __truncated__ "" ...
+ $ Synonyms             : chr  "" "" "" "MGC3490; MC7; HSA249128; DIPB" ...
+ $ Obsolete_Probe_Id    : chr  "" "" "" "MGC3490; MC7; HSA249128; DIPB" ...
+ $ bp                   : num  2.18e+07 2.06e+08 NA 3.58e+07 NA ...
+ - attr(*, ".internal.selfref")=&lt;externalptr&gt; </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">subset</span>(a, <span class="sc">!</span><span class="fu">is.na</span>(bp))</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(a)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 42945    29</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">GRanges</span>(a<span class="sc">$</span>Chromosome, <span class="fu">IRanges</span>(a<span class="sc">$</span>bp, a<span class="sc">$</span>bp), <span class="at">Transcript=</span>a<span class="sc">$</span>Transcript)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>overlaps2 <span class="ot">&lt;-</span> <span class="fu">findOverlaps</span>(target, b)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>overlaps2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Hits object with 165 hits and 0 metadata columns:
+        queryHits subjectHits
+        &lt;integer&gt;   &lt;integer&gt;
+    [1]         1        3073
+    [2]         1        3658
+    [3]         1       20306
+    [4]         1       25574
+    [5]         1       42634
+    ...       ...         ...
+  [161]        30       34706
+  [162]        30       36225
+  [163]        30       39738
+  [164]        30       39832
+  [165]        30       42330
+  -------
+  queryLength: 30 / subjectLength: 42945</code></pre>
+</div>
+</div>
+<p>Still only 165</p>
+<hr>
+<p>Looks like the overlaps are actually only for eQTL SNP positions, rather than probe or annotation locations. So get MuTHER eQTL results, and lookup how many eQTLs overlap BMI SNPs +/-200kb</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>temp <span class="ot">&lt;-</span> <span class="fu">tempfile</span>()</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">download.file</span>(<span class="st">"http://www.muther.ac.uk/DataForWebsite/MuTHER_top_cis_eQTL_per_probe_Fat.txt.gz"</span>, temp)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">fread</span>(<span class="fu">paste0</span>(<span class="st">"gunzip -c "</span>, temp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Taking input= as a system command ('gunzip -c /var/folders/pp/6w3v08jx2p3ct76tptkmt0qh0000gq/T//RtmpYrlwQo/file7e8627edacbb') and a variable has been used in the expression passed to `input=`. Please use fread(cmd=...). There is a security concern if you are creating an app, and the app could have a malicious user, and the app is not running in a secure environment; e.g. the app is running as root. Please read item 5 in the NEWS file for v1.11.6 for more information and for the option to suppress this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       CHR        PROBE   Gene       TSS       TSE        SNP SNP_INFO
+    1:   1 ILMN_1651229  IPO13  44185064  44206280   rs621559    0.997
+    2:  16 ILMN_1651230 TESSP1   2788487   2795134  rs6600200    0.939
+    3:   4 ILMN_1651235  AFAP1   7811339   7992553 rs13122226    0.853
+    4:  16 ILMN_1651237   CDT1  87397686  87403167  rs7500824    0.924
+    5:  17 ILMN_1651238  TRPV1   3415489   3445874 rs11078512    1.000
+   ---                                                                
+23223:  16 ILMN_2415776   WWOX  76691051  76691596  rs4887991    0.918
+23224:   3 ILMN_2415786   CD96 112743615 112853896  rs2634545    0.968
+23225:  17 ILMN_2415826  CYTSB  19999993  20081083  rs9911605    0.907
+23226:  23 ILMN_2415911  ENOX2 129585037 129864889  rs5932853    1.000
+23227:   9 ILMN_2415949   MRRF 124066702 124125561 rs12156510    0.851
+        SNP_Coor A1 Freq_A1   Fat_beta Fat_sebeta     Fat_p     LCL_beta
+    1:  43417998  G  0.9370  0.0779514 0.02857380 0.0064000  0.017058900
+    2:   2383771  T  0.3520 -0.0145240 0.00513359 0.0047000  0.004936040
+    3:   8171020  T  0.7380  0.0182723 0.00577418 0.0016000 -0.007693140
+    4:  86856992  G  0.6750  0.0203629 0.00648465 0.0017000  0.046034300
+    5:   4345191  G  0.8340 -0.0239871 0.00733934 0.0011000 -0.000181549
+   ---                                                                  
+23223:  77478564  G  0.3230  0.0650150 0.01937710 0.0007929  0.001083580
+23224: 112459042  T  0.6060  0.0459368 0.01336570 0.0005884 -0.051241700
+23225:  19957683  T  0.1950  0.0240481 0.00645100 0.0001932 -0.003798860
+23226: 130113107  T  0.2265 -0.0298614 0.01057420 0.0047000 -0.024893400
+23227: 123959794  G  0.2710  0.0456188 0.01213610 0.0001706  0.006575610
+       LCL_sebeta  LCL_p    Skin_beta Skin_sebeta Skin_p
+    1: 0.02432060 0.4830 -0.010652100  0.02916640 0.7149
+    2: 0.00545402 0.3655 -0.005986190  0.00569460 0.2932
+    3: 0.00617687 0.2130  0.003836190  0.00581005 0.5091
+    4: 0.02385430 0.0536 -0.021171000  0.01904700 0.2663
+    5: 0.00746635 0.9806 -0.000843489  0.00764613 0.9122
+   ---                                                  
+23223: 0.01777060 0.9514 -0.003480850  0.02788380 0.9007
+23224: 0.03088650 0.0971 -0.015326200  0.01731080 0.3760
+23225: 0.00897785 0.6722  0.001083930  0.00802034 0.8925
+23226: 0.01307960 0.0570  0.001724490  0.01235640 0.8890
+23227: 0.01614070 0.6837  0.014399600  0.01556960 0.3550</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>bg <span class="ot">&lt;-</span> <span class="fu">GRanges</span>(b<span class="sc">$</span>CHR, <span class="fu">IRanges</span>(b<span class="sc">$</span>SNP_Coor, b<span class="sc">$</span>SNP_Coor), <span class="at">Gene=</span>b<span class="sc">$</span>Gene)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>bg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 23227 ranges and 1 metadata column:
+          seqnames    ranges strand |        Gene
+             &lt;Rle&gt; &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt;
+      [1]        1  43417998      * |       IPO13
+      [2]       16   2383771      * |      TESSP1
+      [3]        4   8171020      * |       AFAP1
+      [4]       16  86856992      * |        CDT1
+      [5]       17   4345191      * |       TRPV1
+      ...      ...       ...    ... .         ...
+  [23223]       16  77478564      * |        WWOX
+  [23224]        3 112459042      * |        CD96
+  [23225]       17  19957683      * |       CYTSB
+  [23226]       23 130113107      * |       ENOX2
+  [23227]        9 123959794      * |        MRRF
+  -------
+  seqinfo: 23 sequences from an unspecified genome; no seqlengths</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>overlaps3 <span class="ot">&lt;-</span> <span class="fu">findOverlaps</span>(target, bg)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">unique</span>(b<span class="sc">$</span>Gene[overlaps3<span class="sc">@</span>to]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 106</code></pre>
+</div>
+</div>
+<p>Still not much. But I think in the script it suggests that all cis-SNPs were included without filtering for p-value, so actually it’s looking for any overlap with any genes +/- 1Mb?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>bg <span class="ot">&lt;-</span> <span class="fu">GRanges</span>(b<span class="sc">$</span>CHR, <span class="fu">IRanges</span>(b<span class="sc">$</span>TSS<span class="dv">-1000000</span>, b<span class="sc">$</span>TSS<span class="sc">+</span><span class="dv">1000000</span>), <span class="at">Gene=</span>b<span class="sc">$</span>Gene)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>bg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>GRanges object with 23227 ranges and 1 metadata column:
+          seqnames              ranges strand |        Gene
+             &lt;Rle&gt;           &lt;IRanges&gt;  &lt;Rle&gt; | &lt;character&gt;
+      [1]        1   43185064-45185064      * |       IPO13
+      [2]       16     1788487-3788487      * |      TESSP1
+      [3]        4     6811339-8811339      * |       AFAP1
+      [4]       16   86397686-88397686      * |        CDT1
+      [5]       17     2415489-4415489      * |       TRPV1
+      ...      ...                 ...    ... .         ...
+  [23223]       16   75691051-77691051      * |        WWOX
+  [23224]        3 111743615-113743615      * |        CD96
+  [23225]       17   18999993-20999993      * |       CYTSB
+  [23226]       23 128585037-130585037      * |       ENOX2
+  [23227]        9 123066702-125066702      * |        MRRF
+  -------
+  seqinfo: 23 sequences from an unspecified genome; no seqlengths</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>overlaps3 <span class="ot">&lt;-</span> <span class="fu">findOverlaps</span>(target, bg)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(<span class="fu">unique</span>(b<span class="sc">$</span>Gene[overlaps3<span class="sc">@</span>to]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 504</code></pre>
+</div>
+</div>
+<p>Now it’s quite a it higher.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>R version 4.2.1 Patched (2022-09-06 r82817)
 Platform: aarch64-apple-darwin20 (64-bit)
@@ -488,13 +642,13 @@ attached base packages:
 [8] base     
 
 other attached packages:
- [1] dplyr_1.0.10              ieugwasr_0.1.5           
- [3] EnsDb.Hsapiens.v75_2.99.0 ensembldb_2.22.0         
- [5] AnnotationFilter_1.22.0   GenomicFeatures_1.50.4   
- [7] AnnotationDbi_1.60.0      Biobase_2.56.0           
- [9] GenomicRanges_1.50.2      GenomeInfoDb_1.34.9      
-[11] IRanges_2.32.0            S4Vectors_0.36.1         
-[13] BiocGenerics_0.44.0      
+ [1] data.table_1.14.2         dplyr_1.0.10             
+ [3] ieugwasr_0.1.5            EnsDb.Hsapiens.v75_2.99.0
+ [5] ensembldb_2.22.0          AnnotationFilter_1.22.0  
+ [7] GenomicFeatures_1.50.4    AnnotationDbi_1.60.0     
+ [9] Biobase_2.56.0            GenomicRanges_1.50.2     
+[11] GenomeInfoDb_1.34.9       IRanges_2.32.0           
+[13] S4Vectors_0.36.1          BiocGenerics_0.44.0      
 
 loaded via a namespace (and not attached):
  [1] MatrixGenerics_1.8.1        httr_1.4.4                 
@@ -506,7 +660,7 @@ loaded via a namespace (and not attached):
 [13] RSQLite_2.2.20              lattice_0.20-45            
 [15] glue_1.6.2                  digest_0.6.31              
 [17] XVector_0.38.0              htmltools_0.5.4            
-[19] Matrix_1.4-1                XML_3.99-0.13              
+[19] Matrix_1.5-3                XML_3.99-0.13              
 [21] pkgconfig_2.0.3             biomaRt_2.54.0             
 [23] zlibbioc_1.42.0             BiocParallel_1.30.4        
 [25] tibble_3.1.8                KEGGREST_1.38.0            

@@ -11,7 +11,7 @@ This paper describes how incomplete linkage disequilibrium can lead to inflated 
 
 Example model
 
-Suppose a system with three variants and one trait. The trait \$x\$ is influenced by a single additive causal variant \$y_1\$. But there is another variant in LD with this causal variant \$y_2\$. Finally, a third variant is independent of all other variables (think of that as a trans SNP). So
+Suppose a system with three variants and one trait. The trait \$x\$ is influenced by a single additive causal variant \$y_1\$. But there is another variant in LD with this causal variant \$y_2\$. Finally, a third variant is independent of all other variables (think of that as a trans SNP). So 
 
 $$
 x_i = y_{1,i} + e_i

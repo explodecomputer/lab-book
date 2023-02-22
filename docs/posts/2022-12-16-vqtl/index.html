@@ -219,7 +219,7 @@ x_i = y_{1,i} + e_i
 \]</span></p>
 <p>But we test for an interaction between y_2 and y_3.</p>
 <p>Run some simulations…</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-1_7cd4ca94b2fd57a8af9e9a7a5d101abc">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>
@@ -359,7 +359,7 @@ Attaching package: 'dplyr'</code></pre>
 <section id="type-1-error-of-vqtls" class="level2">
 <h2 class="anchored" data-anchor-id="type-1-error-of-vqtls">Type 1 error of vQTLs</h2>
 <p>This is what happens to the genetic interaction between y_2 and y_3 - remember that neither of these have a causal effect, and there is no interaction term, however y_2 is correlated with the causal variant y_1</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-2_f2e111432ff52b3b2a4997188881bde9">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(resp, <span class="fu">aes</span>(<span class="at">x=</span><span class="fu">as.factor</span>(r1), <span class="at">y=</span><span class="sc">-</span><span class="fu">log10</span>(F))) <span class="sc">+</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="sc">-</span><span class="fu">log10</span>(<span class="fl">0.05</span><span class="sc">/</span><span class="fu">nrow</span>(resp))) <span class="sc">+</span></span>
@@ -370,7 +370,7 @@ Attaching package: 'dplyr'</code></pre>
 </div>
 </div>
 <p>So you get some false positives even after bonferroni correction. However now look at what happens to the variance QTL estimate for y_2 (the SNP that has no interaction but is in incomplete LD with the additive SNP y_1). Here we’ll use the DRM method to test for vQTL effects at y_2</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-3_4f18f64acc3aa337eb6598ab07d89bff">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(resp, <span class="fu">aes</span>(<span class="at">x=</span>r1, <span class="at">y=</span><span class="sc">-</span><span class="fu">log10</span>(drm2))) <span class="sc">+</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">fill=</span><span class="fu">as.factor</span>(r1))) <span class="sc">+</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_fill_brewer</span>(<span class="at">type=</span><span class="st">"seq"</span>) <span class="sc">+</span></span>
@@ -380,7 +380,7 @@ Attaching package: 'dplyr'</code></pre>
 </div>
 </div>
 <p>This is really extreme type 1 sensitivity to incomplete LD. There’s no problem at the actual causal locus (y_1)</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-4_9213f9c00be852e9afad0c7e8a2092ae">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(resp, <span class="fu">aes</span>(<span class="at">x=</span>r1, <span class="at">y=</span><span class="sc">-</span><span class="fu">log10</span>(drm1))) <span class="sc">+</span></span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">fill=</span><span class="fu">as.factor</span>(r1))) <span class="sc">+</span></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_fill_brewer</span>(<span class="at">type=</span><span class="st">"seq"</span>) <span class="sc">+</span></span>
@@ -390,7 +390,7 @@ Attaching package: 'dplyr'</code></pre>
 </div>
 </div>
 <p>Or at the unlinked locus y_3</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-5_0f66fc42579ec1de08480b97a7ced76d">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(resp, <span class="fu">aes</span>(<span class="at">x=</span>r1, <span class="at">y=</span><span class="sc">-</span><span class="fu">log10</span>(drm3))) <span class="sc">+</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_boxplot</span>(<span class="fu">aes</span>(<span class="at">fill=</span><span class="fu">as.factor</span>(r1))) <span class="sc">+</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_fill_brewer</span>(<span class="at">type=</span><span class="st">"seq"</span>) <span class="sc">+</span></span>
@@ -404,7 +404,7 @@ Attaching package: 'dplyr'</code></pre>
 <section id="power-issues-when-controlling-for-main-effects" class="level2">
 <h2 class="anchored" data-anchor-id="power-issues-when-controlling-for-main-effects">Power issues when controlling for main effects</h2>
 <p>The other problem is actually controlling for main effects. Suppose that a probe has two distal SNPs that interact e.g.</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-6_4b947b26aa55e95a6e50a258a84865b6">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>g1 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">2</span>, <span class="fl">0.4</span>)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>g2 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">2</span>, <span class="fl">0.4</span>)</span>
@@ -421,7 +421,7 @@ Attaching package: 'dplyr'</code></pre>
 </div>
 <p>The DRM method finds a big vQTL effect here because of the GxG interaction - so it’s detecting that g1 might be interacting with something.</p>
 <p>If we adjust for the main effects of g1 and g2 now look at DRM</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-7_4aad84578c00e818844cb58d8ff2cac8">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>yres <span class="ot">&lt;-</span> <span class="fu">residuals</span>(<span class="fu">lm</span>(y <span class="sc">~</span> g1 <span class="sc">+</span> g2))</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">test_drm</span>(g1, yres) <span class="sc">%&gt;%</span> str</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -445,7 +445,7 @@ Attaching package: 'dplyr'</code></pre>
 <section id="power-of-vqtl-vs-interaction" class="level2">
 <h2 class="anchored" data-anchor-id="power-of-vqtl-vs-interaction">Power of vQTL vs interaction</h2>
 <p>Suppose we simulate a GxE interaction. We can try to detect it either using a vQTL method (e.g.&nbsp;DRM) or using a direct interaction test.</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-8_47c71e8fafbc3b734daa89ad16221afe">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>sim_gxe <span class="ot">&lt;-</span> <span class="cf">function</span>(n, p, bi)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>{</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  params <span class="ot">&lt;-</span> <span class="fu">environment</span>() <span class="sc">%&gt;%</span> <span class="fu">as.list</span>() <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>()</span>

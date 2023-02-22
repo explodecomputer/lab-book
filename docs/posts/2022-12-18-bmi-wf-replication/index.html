@@ -213,7 +213,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section id="instruments" class="level2">
 <h2 class="anchored" data-anchor-id="instruments">Instruments</h2>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-1_289ef45db63a62f083def06367637c5c">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ieugwasr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>API: public: http://gwas-api.mrcieu.ac.uk/</code></pre>
@@ -244,14 +244,14 @@ Attaching package: 'dplyr'</code></pre>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Extract instruments from the population and sibling GWASs</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-2_aed1915f03faa302bfc2faeabfa10950">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>wfest <span class="ot">&lt;-</span> ieugwasr<span class="sc">::</span><span class="fu">associations</span>(<span class="fu">unlist</span>(bmi_inst), <span class="st">"ieu-b-4815"</span>)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>popest <span class="ot">&lt;-</span> ieugwasr<span class="sc">::</span><span class="fu">associations</span>(<span class="fu">unlist</span>(bmi_inst), <span class="st">"ieu-b-4816"</span>)</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>giantest <span class="ot">&lt;-</span> ieugwasr<span class="sc">::</span><span class="fu">associations</span>(<span class="fu">unlist</span>(bmi_inst), <span class="st">"ieu-b-40"</span>)</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>ukbest <span class="ot">&lt;-</span> ieugwasr<span class="sc">::</span><span class="fu">associations</span>(<span class="fu">unlist</span>(bmi_inst), <span class="st">"ukb-b-19953"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Replication rates function</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-3_cd58fd51fc3965a4e7f1a8761722e14e">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>exp_rep <span class="ot">&lt;-</span> <span class="cf">function</span>(b_disc, b_rep, se_disc, se_rep, alpha)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>{</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  p_sign <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="fu">abs</span>(b_disc) <span class="sc">/</span> se_disc) <span class="sc">*</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="fu">abs</span>(b_disc) <span class="sc">/</span> se_rep) <span class="sc">+</span> ((<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="fu">abs</span>(b_disc) <span class="sc">/</span> se_disc)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="fu">abs</span>(b_disc) <span class="sc">/</span> se_rep)))</span>
@@ -267,7 +267,7 @@ Attaching package: 'dplyr'</code></pre>
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Analysis</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-4_4552e4705e30c261698b232ad2a2f518">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ests <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(giantest, wfest, popest, ukbest) <span class="sc">%&gt;%</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cluster=</span><span class="cn">NA</span>)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(bmi_inst))</span>
@@ -289,7 +289,7 @@ argument.</code></pre>
 </div>
 </div>
 <p>Expected vs observed replication rates</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-5_a81b60b22e4119f24f18134f3ea00fbc">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>o <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(bmi_inst), <span class="cf">function</span>(i)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>{</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> bmi_inst[[i]]</span>
@@ -317,7 +317,7 @@ argument.</code></pre>
 </section>
 <section id="childhood-vs-adulthood-relationship-to-ses" class="level2">
 <h2 class="anchored" data-anchor-id="childhood-vs-adulthood-relationship-to-ses">Childhood vs adulthood relationship to SES</h2>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-6_a4f1a232ed483e0fc4a0af62a8dcf5ce">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(TwoSampleMR)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>TwoSampleMR version 0.5.6 
@@ -348,13 +348,13 @@ Attaching package: 'TwoSampleMR'</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>  nsnp           b        se      pval
 1   18  0.00605344 1.4172450 0.9966448
-2   18 -0.07468209 0.2308366 0.7462954
+2   18 -0.07468209 0.2430043 0.7585935
 3   18 -0.05801819 0.2184155 0.7905224
-4   18 -0.11644263 0.4977415 0.8178241
-5   18 -0.11644263 0.4702948 0.8074135</code></pre>
+4   18 -0.11644263 0.4970446 0.8175736
+5   18 -0.11644263 0.5171974 0.8245533</code></pre>
 </div>
 </div>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-7_e58e09ab5c1b3f87e284cfbe36d775ee">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>adult <span class="ot">&lt;-</span> <span class="fu">make_dat</span>(<span class="st">"ukb-b-10011"</span>, <span class="st">"ukb-b-19953"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Extracting data for 18 SNP(s) from 1 GWAS(s)</code></pre>
@@ -369,18 +369,18 @@ Attaching package: 'TwoSampleMR'</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>  nsnp          b         se         pval
 1   18 -0.2812238 0.80612571 7.317440e-01
-2   18  0.3450191 0.07873753 1.176549e-05
+2   18  0.3450191 0.08009526 1.650282e-05
 3   18  0.4835539 0.13327136 2.852487e-04
-4   18  0.3588983 0.15546210 3.380204e-02
-5   18  0.3128024 0.12623146 2.400304e-02</code></pre>
+4   18  0.3588983 0.16017759 3.869475e-02
+5   18  0.3128024 0.11209131 1.255107e-02</code></pre>
 </div>
 </div>
 <p>Replication of clustered instruments from adult to child</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-8_8b4ae0752d2fb6ddef5dd397601559ef">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>ukbest <span class="ot">&lt;-</span> ieugwasr<span class="sc">::</span><span class="fu">associations</span>(<span class="fu">unlist</span>(bmi_inst), <span class="st">"ukb-b-19953"</span>)</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>childest <span class="ot">&lt;-</span> ieugwasr<span class="sc">::</span><span class="fu">associations</span>(<span class="fu">unlist</span>(bmi_inst), <span class="st">"ebi-a-GCST90002409"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-9_2fa958bac462e15ebc83d08ad9fb3d76">
+<div class="cell">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>o1 <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(bmi_inst), <span class="cf">function</span>(i)</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>{</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> bmi_inst[[i]]</span>
