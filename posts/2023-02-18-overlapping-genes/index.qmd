@@ -15,8 +15,8 @@ Use Ensembl database of gene positions
 library(EnsDb.Hsapiens.v75) # For convenience hg19
 library(ieugwasr)
 library(dplyr)
-genelist <- genes(EnsDb.Hsapiens.v75) %>% 
-    subset(., gene_biotype=="protein_coding")
+genelist <- genes(EnsDb.Hsapiens.v75) %>%
+    subset(gene_biotype=="protein_coding")
 genelist
 ```
 
@@ -44,6 +44,64 @@ overlaps
 Overall about 116 overlapping protein coding genes found for 30 SNPs.
 
 ---
+
+Try with all ensembl annotations, not just protein coding
+
+```{r}
+genelist_all <- genes(EnsDb.Hsapiens.v75)
+genelist_all
+overlaps1 <- findOverlaps(target, genelist_all)
+overlaps1
+```
+
+Still only 277
+
+---
+
+Try with HumanHT-12 v3.0 probes. Download manifest file to get probe coordinates:
+
+```{r}
+temp <- tempfile()
+download.file("https://emea.support.illumina.com/content/dam/illumina-support/documents/downloads/productfiles/humanht-12/v3/humanht-12_v3_0_r3_11283641_a_txt.zip", temp)
+library(data.table)
+a <- fread(paste0("unzip -p ", temp), skip=8)
+str(a)
+a$bp <- sapply(strsplit(a$Probe_Coordinates, "-"), function(o) as.numeric(o[1]))
+str(a)
+a <- subset(a, !is.na(bp))
+dim(a)
+b <- GRanges(a$Chromosome, IRanges(a$bp, a$bp), Transcript=a$Transcript)
+overlaps2 <- findOverlaps(target, b)
+overlaps2
+```
+
+Still only 165
+
+---
+
+Looks like the overlaps are actually only for eQTL SNP positions, rather than probe or annotation locations. So get MuTHER eQTL results, and lookup how many eQTLs overlap BMI SNPs +/-200kb
+
+```{r}
+temp <- tempfile()
+download.file("http://www.muther.ac.uk/DataForWebsite/MuTHER_top_cis_eQTL_per_probe_Fat.txt.gz", temp)
+b <- fread(paste0("gunzip -c ", temp))
+b
+bg <- GRanges(b$CHR, IRanges(b$SNP_Coor, b$SNP_Coor), Gene=b$Gene)
+bg
+overlaps3 <- findOverlaps(target, bg)
+length(unique(b$Gene[overlaps3@to]))
+```
+
+Still not much. But I think in the script it suggests that all cis-SNPs were included without filtering for p-value, so actually it's looking for any overlap with any genes +/- 1Mb?
+
+```{r}
+bg <- GRanges(b$CHR, IRanges(b$TSS-1000000, b$TSS+1000000), Gene=b$Gene)
+bg
+overlaps3 <- findOverlaps(target, bg)
+length(unique(b$Gene[overlaps3@to]))
+```
+
+Now it's quite a it higher.
 
 ```{r}
 sessionInfo()
