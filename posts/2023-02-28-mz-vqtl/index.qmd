@@ -1,0 +1,676 @@
+---
+title: "Variance QTL using MZs"
+author: Gibran Hemani
+date: "2023-02-28"
+categories: ['interactions', 'genetics', 'statistics']
+---
+
+## Background
+
+Data generating model
+
+$$
+y_i = \alpha + \beta_{1,j}G_{ij} + z_i + v_i + e_i
+$$
+
+where $\alpha$ is an intercept term, $\beta_{1,j}$ is the additive effect of SNP \$j\$, $G_{i,j}$ is the genotype value for individual $i$ at SNP \$j\$, $z_i$ is the remaining polygenic risk
+
+$$
+z_i \sim N(0, \sigma^2_{g} - 2p_j(1-p_j)\beta_{1,j}^2)
+$$
+
+$v_i$ is the SNP's influence on dispersion where
+
+$$
+v_i \sim N(0, \beta_{2,j}G_{i,j})
+$$
+
+and $e_i$ is the residual variance
+
+$$
+e_i \sim N(0, 1 - \sigma^2_g - \sigma^2_v)
+$$
+
+To estimate dispersion effects amongst unrelateds use the deviation regression model (DRM) from Marderstein et al 2021 AJHG (<https://doi.org/10.1016/j.ajhg.2020.11.016>).
+
+To estimate variance heterogeneity effects using MZs, simply
+
+$$
+|y_{i,A} - y_{i,B}| = \hat{\beta}_{2,j}G_{i,j} + \epsilon_i
+$$
+
+where A and B represent the individuals in the MZ pair.
+
+To estimate variance heterogeneity effects using siblings, it is identical to the MZ method but restricted to sibling pairs who have identity by state value of 2 (i.e. share the same genotype value at the SNP being tested).
+
+## Simulations
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(simulateGP)
+```
+
+Method for simulating dispersion effects in unrelated individuals
+
+```{r}
+sim_pop <- function(n, beta1, beta2, af, h2)
+{
+  g <- rbinom(n, 2, af)
+  prs <- g * beta1
+  vg <- rnorm(n, 0, h2)
+  v <- rnorm(n, 0, beta2 * g)
+  ve <- rnorm(n, 0, sqrt(1 - var(vg) - var(v) - var(prs)))
+  y <- prs + v + vg + ve
+  return(tibble(
+    g, y
+  ))
+}
+a <- sim_pop(100000, 0.1, 0.5, 0.3, 0.1)
+var(a)
+```
+
+Method for simulating dispersion effects in monozogytic twins
+
+```{r}
+sim_mz <- function(n, beta1, beta2, af, h2)
+{
+  g <- rbinom(n, 2, af)
+  prs <- g * beta1
+  vg <- rnorm(n, 0, h2)
+  v1 <- rnorm(n, 0, beta2 * g)
+  ve1 <- rnorm(n, 0, sqrt(1 - var(vg) - var(v1) - var(prs)))
+  y1 <- prs + v1 + vg + ve1
+  v2 <- rnorm(n, 0, beta2 * g)
+  ve2 <- rnorm(n, 0, sqrt(1 - var(vg) - var(v2) - var(prs)))
+  y2 <- prs + v2 + vg + ve2
+  return(tibble(
+    g, y1, y2
+  ))
+}
+a <- sim_mz(100000, 0.1, 0.5, 0.3, 0.1)
+var(a)
+```
+
+See what dispersion looks like from this simulation
+
+```{r}
+a %>%
+  ggplot(., aes(x=as.factor(g), y=y1)) +
+  geom_boxplot()
+```
+
+Summarise the dispersion. Note - how would you scale it to the MZ pair mean?
+
+```{r}
+a <- sim_mz(100000, 0.1, 0.5, 0.3, 0.8)
+a %>% 
+  group_by(g) %>% 
+  summarise(
+    m=mean(y1), 
+    v=var(y1), 
+    mzv=mean(abs(y1-y2))
+  )
+```
+
+Method for testing unrelateds using DRM
+
+```{r}
+test_drm <- function(g, y)
+{
+  y.i <- tapply(y, g, median, na.rm=T)  
+  z.ij <- abs(y - y.i[g+1])
+  summary(lm(z.ij ~ g))$coef %>%
+    as_tibble() %>%
+    slice(2) %>%
+    mutate(method="drm")
+}
+test_drm(a$g, a$y1)
+```
+
+Method for testing using MZs
+
+```{r}
+test_mz <- function(g, y1, y2)
+{
+  yd1 <- abs(y1-y2)
+  r1 <- summary(lm(yd1 ~ g))$coef %>%
+    as_tibble() %>%
+    slice(2) %>%
+    mutate(method="mzdiff")
+  r1
+}
+
+test_mz(a$g, a$y1, a$y2)
+
+```
+
+## Power simulations
+
+A trait with high heritability will have vQTL (dispersion) effects that are relatively large in MZs, but heritability shouldn't have a major part to play in unrelateds for estimating vQTL effects.
+
+Start with simulations where population is compared against mz and n pop = n mz pairs.
+
+```{r}
+param <- expand.grid(
+  beta1 = 0,
+  beta2 = seq(0, 0.5, by=0.01),
+  h2 = c(0.1, 0.9),
+  af = 0.3,
+  n = 10000
+)
+dim(param)
+
+res1 <- lapply(1:nrow(param), function(i)
+  {
+  a <- do.call(sim_mz, param[i,])
+  if(any(is.na(a$y1)) | any(is.na(a$y2)))
+  {
+    return(NULL)
+  }
+  bind_rows(
+    test_mz(a$g, a$y1, a$y2),
+    test_drm(a$g, a$y1)
+  ) %>%
+    bind_cols(., param[i,])
+}) %>%
+  bind_rows()
+```
+
+```{r}
+res1 %>% filter(n==10000) %>%
+ggplot(., aes(x=beta2, y=-log10(`Pr(>|t|)`))) +
+  geom_line(aes(colour=method)) +
+  facet_grid(. ~ h2)
+```
+
+They are comparable at low heritability but as heritability increases, MZ method has a distinct advantage.
+
+Now compare with more realistic sample sizes, 10k mz pairs vs 500k unrelateds
+
+```{r}
+param <- expand.grid(
+  beta1 = 0,
+  beta2 = seq(0, 0.5, by=0.01),
+  h2 = c(0.1, 0.9),
+  af = 0.32
+)
+dim(param)
+
+res2 <- lapply(1:nrow(param), function(i)
+  {
+  a1 <- do.call(sim_mz, param[i,] %>% mutate(n=10000))
+  a2 <- do.call(sim_mz, param[i,] %>% mutate(n=500000))
+  if(any(is.na(a1$y1)) | any(is.na(a1$y2)) | any(is.na(a2$y1)) | any(is.na(a2$y2)))
+  {
+    return(NULL)
+  }
+  bind_rows(
+    test_mz(a1$g, a1$y1, a1$y2),
+    test_drm(a2$g, a2$y1)
+  ) %>%
+    bind_cols(., param[i,])
+}) %>%
+  bind_rows()
+```
+
+```{r}
+ggplot(res2, aes(x=beta2, y=-log10(`Pr(>|t|)`))) +
+  geom_line(aes(colour=method)) +
+  facet_grid(. ~ h2)
+```
+
+It looks like you'd just be better off with estimation in populations.
+
+## Type 1 error
+
+```{r}
+param <- expand.grid(
+  beta1 = seq(0, 0.5, by=0.002),
+  beta2 = 0,
+  h2 = c(0.1, 0.9),
+  af = 0.32
+)
+dim(param)
+
+res3 <- lapply(1:nrow(param), function(i)
+  {
+  a1 <- do.call(sim_mz, param[i,] %>% mutate(n=10000))
+  a2 <- do.call(sim_mz, param[i,] %>% mutate(n=500000))
+  if(any(is.na(a1$y1)) | any(is.na(a1$y2)) | any(is.na(a2$y1)) | any(is.na(a2$y2)))
+  {
+    return(NULL)
+  }
+  bind_rows(
+    test_mz(a1$g, a1$y1, a1$y2),
+    test_drm(a2$g, a2$y1)
+  ) %>%
+    bind_cols(., param[i,])
+}) %>%
+  bind_rows()
+```
+
+Plot type 1 error
+
+```{r}
+ggplot(res3, aes(x=beta1, y=-log10(`Pr(>|t|)`))) +
+  geom_line(aes(colour=method)) +
+  facet_grid(. ~ h2)
+```
+
+Type 1 error and number of false positives after multiple testing correction
+
+```{r}
+res3 %>% 
+  mutate(fdr=p.adjust(`Pr(>|t|)`, "fdr")) %>%
+  group_by(method, h2) %>%
+  summarise(
+    t1 = sum(`Pr(>|t|)` < 0.05, na.rm=T)/sum(!is.na(`Pr(>|t|)`)),
+    nfdr = sum(fdr < 0.05)/sum(!is.na(`Pr(>|t|)`))
+  )
+```
+
+Under normal distribution type-1 error rate is well controlled.
+
+## Simulations using siblings
+
+Generate a set of sib pairs with the following specification
+
+-   Have PRS such that IBD \~ N(0.5, sqrt(0.037))
+
+-   h2 specified
+
+-   ce specified (shared variance between sibs
+
+-   one SNP has a mean and variance effect
+
+-   scaled phenotypes \~ N(0, 1)
+
+```{r}
+sim_sibs <- function(af, nfam, beta1, beta2, h2, c2)
+{
+  # Choose number of SNPs to be expected number of recombination events
+  # in order to give appropriate distribution of IBD
+	nsnp <- 87
+	af <- rep(af, nsnp)
+	dads <- matrix(0, nfam, nsnp)
+	mums <- matrix(0, nfam, nsnp)
+	sibs1 <- matrix(0, nfam, nsnp)
+	sibs2 <- matrix(0, nfam, nsnp)
+	ibd <- matrix(0, nfam, nsnp)
+	ibs <- matrix(0, nfam, nsnp)
+	for(i in 1:nsnp)
+	{
+		dad1 <- rbinom(nfam, 1, af[i]) + 1
+		dad2 <- (rbinom(nfam, 1, af[i]) + 1) * -1
+		mum1 <- rbinom(nfam, 1, af[i]) + 1
+		mum2 <- (rbinom(nfam, 1, af[i]) + 1) * -1
+
+		dadindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		dadh <- rep(NA, nfam)
+		dadh[dadindex] <- dad1[dadindex]
+		dadh[!dadindex] <- dad2[!dadindex]
+
+		mumindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		mumh <- rep(NA, nfam)
+		mumh[mumindex] <- mum1[mumindex]
+		mumh[!mumindex] <- mum2[!mumindex]
+
+		sib1 <- cbind(dadh, mumh)
+
+		dadindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		dadh <- rep(NA, nfam)
+		dadh[dadindex] <- dad1[dadindex]
+		dadh[!dadindex] <- dad2[!dadindex]
+
+		mumindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		mumh <- rep(NA, nfam)
+		mumh[mumindex] <- mum1[mumindex]
+		mumh[!mumindex] <- mum2[!mumindex]
+
+		sib2 <- cbind(dadh, mumh)
+
+		ibd[,i] <- (as.numeric(sib1[,1] == sib2[,1]) + as.numeric(sib1[,2] == sib2[,2])) / 2
+
+		sibs1[,i] <- rowSums(abs(sib1) - 1)
+		sibs2[,i] <- rowSums(abs(sib2) - 1)
+		dads[,i] <- dad1 - 1 + abs(dad2) - 1
+		mums[,i] <- mum1 - 1 + abs(mum2) - 1
+
+		# l[[i]] <- (sum(sib1[,1] == sib2[,1]) / nsnp + sum(sib1[,2] == sib2[,2]) / nsnp) / 2
+
+	}
+	n <- nfam
+	# Make phenotypes
+	ce <- rnorm(n, 0, sqrt(c2))
+	v1 <- rnorm(n, 0, beta2 * sibs1[,1])
+	v2 <- rnorm(n, 0, beta2 * sibs2[,1])
+	e1 <- rnorm(n, 0, sqrt(1 - h2 - c2 - var(v1)))
+	e2 <- rnorm(n, 0, sqrt(1 - h2 - c2 - var(v2)))
+	b <- rnorm(nsnp-1, 0, 1)
+	h2_1 <- beta1^2 * af[1] * (1-af[1]) * 2
+	h2_res <- h2 - h2_1
+	prs1 <- scale(sibs1[,-1] %*% b) * sqrt(h2_res)
+	prs2 <- scale(sibs2[,-1] %*% b) * sqrt(h2_res)
+	y1 <- sibs1[,1] * beta1 + prs1 + v1 + ce + e1
+	y2 <- sibs2[,1] * beta1 + prs2 + v2 + ce + e2
+	return(tibble(
+	  ibd = rowMeans(ibd),
+	  g1 = sibs1[,1],
+	  g2 = sibs2[,1],
+	  prs1,
+	  prs2,
+	  y1, 
+	  y2
+	))
+}
+```
+
+Notes
+
+-   In this model if the allele frequency is higher, then the genotype class with the larger variance is more common, which means that effect alleles are not reflexive in terms of variances
+
+-   I think this use with siblings may have problems due to LD. If there is incomplete LD with another causal variant elsewhere close by then the mean effect of that causal variant will contribute to the variance effect estimated at the variant
+
+```{r}
+fam <- sim_sibs(0.3, 10000, 0.1, 0.4, 0.6, 0.1)
+cor(fam) %>% round(4)
+```
+
+Now how to estimate variance effect? At a locus restrict to sib pairs who are IBD = 1
+
+```{r}
+fam <- sim_sibs(af=0.5, nfam=40000, beta1=0.1, beta2=0.2, h2=0.3, c2=0.1)
+fam
+```
+
+Test for variance QTL
+
+```{r}
+fam <- sim_sibs(af=0.5, nfam=40000, beta1=0.1, beta2=0.2, h2=0.01, c2=0.01)
+f1 <- subset(fam, g1==g2)
+test_mz(f1$g1, f1$y1, f1$y2)
+```
+
+Power sims
+
+```{r}
+param <- expand.grid(
+  beta1 = 0,
+  beta2 = seq(0, 0.5, by=0.01),
+  c2 = c(0),
+  h2 = c(0.1, 0.5),
+  af = c(0.5)
+)
+dim(param)
+
+res4 <- lapply(1:nrow(param), function(i)
+  {
+  a1 <- do.call(sim_sibs, param[i,] %>% mutate(nfam=22000))
+  a2 <- do.call(sim_pop, param[i,] %>% select(-c(c2)) %>% mutate(n=500000))
+  if(any(is.na(a1$y1)) | any(is.na(a1$y2)) | any(is.na(a2$y)))
+  {
+    return(NULL)
+  }
+  bind_rows(
+    a1 %>% filter(g1==g2) %>% select(g=g1, y1, y2) %>% do.call(test_mz, .),
+    do.call(test_drm, a2)
+  ) %>%
+    bind_cols(., param[i,])
+}) %>%
+  bind_rows()
+```
+
+```{r}
+res4 %>% mutate(sharing=c2+h2) %>% filter(beta1==0) %>%
+  ggplot(., aes(x=beta2, y=-log10(`Pr(>|t|)`))) +
+  geom_line(aes(colour=method, groups=af)) +
+  facet_grid(. ~ sharing)
+```
+
+Similar to MZ method - quite a substantial benefit from leveraging large sample sizes of unrelateds compared to using siblings.
+
+## SVLM
+
+Adjust the phenotype for covariates + genotype, square residuals and then test in linear model against genotype.
+
+```{r}
+test_svlm <- function(g, y)
+{
+  yres <- residuals(lm(y ~ g))^2
+  summary(lm(yres ~ g))$coefficients %>%
+    as_tibble() %>%
+    slice(n=2) %>%
+    mutate(method="svlm")
+}
+```
+
+```{r}
+n <- 10000
+g1 <- rbinom(n, 2, 0.4)
+g2 <- rbinom(n, 2, 0.4)
+y <- g1 + g2 + g1 * g2
+bind_rows(
+  test_drm(g1, y),
+  test_svlm(g1, y)
+)
+```
+
+```{r}
+y <- g1 + g2 + rnorm(n)
+bind_rows(
+  test_drm(g1, y),
+  test_svlm(g1, y)
+)
+```
+
+```{r}
+y <- g1 + g2 + g1 * g2
+yres <- residuals(lm(y ~ g1 + g2))^2
+summary(lm(yres ~ g1))
+```
+
+```{r}
+yres <- residuals(lm(y ~ g1))^2
+summary(lm(yres ~ g1))
+```
+
+## Inflation due to LD
+
+```{r}
+res <- sapply(1:1000, function(i){
+  g <- correlated_binomial(n, 0.5, 0.5, 0.8)
+  g2 <- rbinom(n, 2, 0.5)
+  y <- g[,1] + rnorm(n)
+  summary(lm(y ~ g[,2]*g2))$coef[4,4] 
+})
+hist(res)
+```
+
+```{r}
+gendatp <- function(n, p1, p2, p3, r1)
+{
+	# dat <- simulateGP:::simulate_geno(n, r1, p1, p2) %>% as_tibble
+	dat <- correlated_binomial(n, p1, p2, r1) %>% as_tibble()
+	names(dat) <- c("y1", "y2")
+	dat$y3 <- rbinom(n, 1, p3)
+	return(dat)
+}
+
+run_simp <- function(param, i)
+{
+	set.seed(i*10)
+	dat <- gendatp(param$n[i], param$p1[i], param$p2[i], param$p3[i], param$r1[i])
+	x <- dat$y1 + rnorm(nrow(dat), sd=sd(dat$y1)/2)
+	mod1 <- lm(x ~ y2 + y3, dat)
+	mod2 <- lm(x ~ y2 + y3 + y2*y3, dat)
+	amod <- anova(mod1, mod2)
+	param$F[i] <- amod$F[2]
+	o1 <- test_drm(dat$y1, x)
+	o2 <- test_drm(dat$y2, x)
+	o3 <- test_drm(dat$y3, x)
+	param$drm1[i] <- o1$`Pr(>|t|)`
+	param$drm2[i] <- o2$`Pr(>|t|)`
+	param$drm3[i] <- o3$`Pr(>|t|)`
+	return(param[i,])
+}
+param <- expand.grid(
+	p1=0.1,
+	p2=0.1,
+	p3=0.5,
+	p4=0.1,
+	n=1000,
+	r1=seq(0, 1, by=0.2),
+	sim=1:100,
+	r2=NA,
+	F=NA,
+	drm1=NA,
+	drm2=NA,
+	drm3=NA
+)
+resp <- lapply(1:nrow(param), function(x) run_simp(param, x)) %>% bind_rows()
+str(resp)
+```
+
+Result using the actual causal variant
+
+```{r}
+ggplot(resp, aes(x=r1, y=-log10(drm1))) +
+geom_boxplot(aes(fill=as.factor(r1))) +
+scale_fill_brewer(type="seq") +
+labs(y="DRM -log10 p", x="Measurement precision of causal additive variant", fill="LD between tagging\nvariant and causal variant")
+```
+
+Result using
+
+```{r}
+ggplot(resp, aes(x=r1, y=-log10(drm2))) +
+geom_boxplot(aes(fill=as.factor(r1))) +
+scale_fill_brewer(type="seq") +
+labs(y="DRM -log10 p", x="Measurement precision of causal additive variant", fill="LD between tagging\nvariant and causal variant")
+```
+
+```{r}
+ggplot(resp, aes(x=r1, y=-log10(drm3))) +
+geom_boxplot(aes(fill=as.factor(r1))) +
+scale_fill_brewer(type="seq") +
+labs(y="DRM -log10 p", x="Measurement precision of causal additive variant", fill="LD between tagging\nvariant and causal variant")
+```
+
+
+LD issue persists with MZ analysis?
+
+```{r}
+sim_mz2 <- function(g, beta1, beta2, h2)
+{
+  n <- length(g)
+  prs <- g * beta1
+  vg <- rnorm(n, 0, h2)
+  v1 <- rnorm(n, 0, beta2 * g)
+  ve1 <- rnorm(n, 0, sqrt(1 - var(vg) - var(v1) - var(prs)))
+  y1 <- prs + v1 + vg + ve1
+  v2 <- rnorm(n, 0, beta2 * g)
+  ve2 <- rnorm(n, 0, sqrt(1 - var(vg) - var(v2) - var(prs)))
+  y2 <- prs + v2 + vg + ve2
+  return(tibble(
+    g, y1, y2
+  ))
+}
+
+test_mz <- function(g, y1, y2)
+{
+  yd1 <- abs(y1-y2)
+  r1 <- summary(lm(yd1 ~ g))$coef %>%
+    as_tibble() %>%
+    slice(2) %>%
+    mutate(method="mzdiff")
+  r1
+}
+
+gendatp <- function(n, p1, p2, p3, r1)
+{
+	# dat <- simulateGP:::simulate_geno(n, r1, p1, p2) %>% as_tibble
+	dat <- correlated_binomial(n, p1, p2, r1) %>% as_tibble()
+	names(dat) <- c("g1", "g2")
+	dat$g3 <- rbinom(n, 1, p3)
+	return(dat)
+}
+
+run_simp_mz <- function(param, i)
+{
+	set.seed(i*10)
+	dat <- gendatp(param$n[i], param$p1[i], param$p2[i], param$p3[i], param$r1[i])
+	mzdat <- sim_mz2(dat$g1, param$beta1[i], param$beta2[i], param$h2)
+	#x <- dat$y1 + rnorm(nrow(dat), sd=sd(dat$y1)/2)
+	o1 <- test_drm(dat$g1, mzdat$y1)
+	o2 <- test_drm(dat$g2, mzdat$y1)
+	o3 <- test_drm(dat$g3, mzdat$y1)
+	m1 <- test_mz(dat$g1, mzdat$y1, mzdat$y2)
+	m2 <- test_mz(dat$g2, mzdat$y1, mzdat$y2)
+	m3 <- test_mz(dat$g3, mzdat$y1, mzdat$y2)
+	param$drm1[i] <- o1$`Pr(>|t|)`
+	param$drm2[i] <- o2$`Pr(>|t|)`
+	param$drm3[i] <- o3$`Pr(>|t|)`
+	param$mz1[i] <- m1$`Pr(>|t|)`
+	param$mz2[i] <- m2$`Pr(>|t|)`
+	param$mz3[i] <- m3$`Pr(>|t|)`
+	return(param[i,])
+}
+
+param <- expand.grid(
+	p1=0.1,
+	p2=0.1,
+	p3=0.5,
+	p4=0.1,
+	n=1000,
+	r1=seq(0, 1, by=0.2),
+	beta1=1,
+	beta2=0,
+	h2=0.5,
+	sim=1:500,
+	r2=NA,
+	F=NA,
+	drm1=NA,
+	drm2=NA,
+	drm3=NA,
+	mz1=NA,
+	mz2=NA,
+	mz3=NA
+)
+
+resmz <- lapply(1:nrow(param), function(i) run_simp_mz(param, i)) %>% bind_rows()
+resmz %>% str
+```
+
+```{r}
+ggplot(resmz, aes(x=r1, y=-log10(drm2))) +
+geom_boxplot(aes(fill=as.factor(r1))) +
+scale_fill_brewer(type="seq") +
+labs(y="DRM -log10 p", x="LD between tagging\nvariant and causal variant", fill="LD")
+```
+
+```{r}
+resmz %>% 
+  dplyr::select(r1, MZ=mz2, pop=drm2) %>% gather(., "key", "value", MZ, pop) %>%
+  ggplot(., aes(x=r1, y=-log10(value))) +
+  geom_boxplot(aes(fill=as.factor(r1))) +
+  scale_fill_brewer(type="seq") +
+  facet_grid(. ~ key) +
+  labs(y="MZ dispersion -log10 p", x="LD between tagging\nvariant and causal variant", fill="LD")
+```
+
+
+## Summary
+
+- Using MZs is better powered than populations given equal sample sizes especially when h2 is large, but population sample sizes can be much larger which outweighs the power advantage of MZs
+- MZs restricted to GxE or true variance heterogeneity (no GxG)
+- MZs not liable to the LD leakage issue
+- Using DZs at loci where IBD=1 is possible which could boost power
+- Could expand DZ model to all loci but would need to generate model appropriately.
+
+---
+
+```{r}
+sessionInfo()
+```
