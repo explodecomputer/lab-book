@@ -1,0 +1,128 @@
+---
+title: "Spurious vQTL simulation"
+author: Gibran Hemani
+date: "2023-02-28"
+categories: ['genetics', 'interactions', 'statistics']
+---
+
+## Background
+
+How sensitive is DRM to incomplete LD in more realistic scenarios? Take a region of 1000 genomes data and choose a SNP at random to have an additive effect of some determined magnitude. We'd now determine how many SNPs in the region (i.e. with incomplete LD with the causal SNP) have evidence of vQTL using DRM or SVLM. How does genetic effect size and sample size relate to minimum p-value and number of positions with FDR < 0.05.
+
+```{r}
+#| message: false
+#| warning: false
+
+library(glue)
+library(data.table)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+test_drm <- function(g, y)
+{
+  y.i <- tapply(y, g, median, na.rm=T)
+  z.ij <- abs(y - y.i[g+1])
+  summary(lm(z.ij ~ g))$coef %>%
+    as_tibble() %>%
+    slice(2) %>%
+    mutate(method="drm")
+}
+
+test_svlm <- function(g, y)
+{
+  yres <- residuals(lm(y ~ g))^2
+  summary(lm(yres ~ g))$coefficients %>%
+    as_tibble() %>%
+    slice(n=2) %>%
+    mutate(method="svlm")
+}
+```
+
+Get some plink data - e.g. just 1-2k SNPs from 1000 genomes European samples
+
+```{bash}
+/Users/gh13047/Downloads/plink_mac_20230116/plink \
+    --bfile /Users/gh13047/repo/opengwas-api-internal/opengwas-api/app/ld_files/EUR \
+    --chr 22 \
+    --recode A \
+    --out eur22 \
+    --from-bp 0 --to-bp 17000000
+```
+
+Read in genotype data
+
+```{r}
+geno <- fread("eur22.raw")
+fam <- geno[,1:6]
+geno <- as.matrix(geno[,-c(1:6)])
+geno[1:10,1:10]
+dim(geno)
+```
+
+Test DRM on each SNP in region for varying sample sizes and additive variance explained in the region
+
+```{r}
+sim <- function(rsq, geno, n)
+{
+  i <- sample(1:ncol(geno), 1)
+  y <- as.numeric(scale(geno[,i])) * sqrt(rsq) + rnorm(nrow(geno), 0, sqrt(1-rsq))
+  res <- lapply(1:ncol(geno), function(i)
+  {
+    bind_rows(
+        test_drm(geno[1:n,i], y[1:n]),
+        test_svlm(geno[1:n,i], y[1:n])
+    )
+  }) %>% bind_rows()
+
+  res %>% 
+    group_by(method) %>%
+    mutate(fdr = p.adjust(`Pr(>|t|)`, "fdr")) %>%
+    summarise(
+        minp = min(`Pr(>|t|)`, na.rm=T),
+        nfdr = sum(fdr < 0.05, na.rm=T)
+        ) %>%
+    mutate(rsq = rsq, n = n) %>%
+    ungroup()
+}
+
+param <- expand.grid(
+  rsq = seq(0, 1, by=0.02),
+  n = c(250, 500)
+)
+o <- lapply(1:nrow(param), function(i) {
+  sim(param$rsq[i], geno, param$n[i])
+}) %>% bind_rows()
+```
+
+```{r}
+ggplot(o, aes(x=rsq, y=nfdr)) +
+geom_point(aes(colour=as.factor(n))) +
+geom_smooth(aes(colour=as.factor(n))) +
+facet_grid(method ~ .)
+```
+
+```{r}
+ggplot(o, aes(x=rsq, y=-log10(minp))) +
+geom_point(aes(colour=as.factor(n))) +
+geom_smooth(aes(colour=as.factor(n))) +
+facet_grid(method ~ .)
+```
+
+## Summary
+
+- SVLM and DGLM suffer equally from the issue
+- The problem is likely a function of F statistic and LD - i.e. as sample sizes get larger, smaller effects additive become more relevant
+- With n=500 additive effect of rsq = 0.1 is enough to generate a spurious significant vQTL
+
+
+```{r}
+unlink("eur22*")
+```
+
+---
+
+```{r}
+sessionInfo()
+```
