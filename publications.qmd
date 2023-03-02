@@ -1,5 +1,5 @@
 ---
-title: "Notes"
+title: "Publications"
 page-layout: full
 title-block-banner: true
 ---
