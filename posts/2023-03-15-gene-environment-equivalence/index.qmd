@@ -1,0 +1,281 @@
+---
+title: "Gene-environment equivalence"
+author: Gibran Hemani
+date: "2023-03-15"
+categories: []
+---
+
+## Background
+
+Latest PRS for height explains \~40% of the variance. Heritability \~0.7. Height has a negative association with coronary heart disease. Height is fixed after adolescence, which means it can only be influenced by a) genetic factors; b) early life exposures; c) stochasticity.
+
+Question: Is the influence of height on CHD different when the modifier is genetic vs non-genetic?
+
+Analysis: Estimate the association of height PRS on CHD, and then residualise height for the PRS and determine the residual height association with CHD.
+
+## Model
+
+### Gene environment equivalence
+
+Under gene-environment equivalence, the following model:
+
+$$
+y_i = \alpha + \beta_{xy} x_i + \epsilon_i
+$$
+
+where $y_i$ is the outcome (e.g. CHD), $\beta_{xy}$ is the causal effect of the exposure on the outcome and
+
+$$
+x_i = a + \sqrt{h^2} g_i + \sqrt{1-h^2} e_i
+$$
+
+where $x_i$ is the exposure (height) in the $i$th individual, $h^2$ is the heritability of height, $g_i$ is the (perfectly measured) genetic value for individual $i$ and $e_i$ is the non-genetic component of height. There is no confounding in this simple model. **What is the expected association of g on y?**
+
+$$
+\begin{aligned}
+\beta_{gy} &= \frac{cov(y, g)}{var(g)} \\
+&= \frac{cov(\beta_{xy}x, g)}{ var(g) } \\
+&= \frac{cov(\beta_{xy}\sqrt{h^2}g, g)}{ var(g) } \\
+&= \frac{\beta_{xy}\sqrt{h^2}var(g)}{ var(g) } \\
+&= \beta_{xy}\sqrt{h^2}
+\end{aligned}
+$$
+
+So this is expected and the basic result for MR. **What is the expected association of x on y after it has been residualised for g?** First get the residual assuming perfect information of $g$
+
+$$
+\begin{aligned}
+\hat{e_i} &= x_i - \hat{\sqrt{h^2}}g_i \\
+&\approx \sqrt{1-h^2}e_i
+\end{aligned}
+$$
+
+Now find the association of $\hat{e}_i$ with $y_i$
+
+$$
+\begin{aligned}
+\beta_{\hat{e}y} &= \frac{cov(\hat{e}, y)}{var(\hat{e})} \\
+&= \frac{cov(\sqrt{1-h^2}e, \beta_{xy}(\sqrt{1-h^2}e)}{(1-h^2)var(e)} \\
+&= \frac{\beta_{xy}(1-h^2)var(e)}{(1-h^2)var(e)} \\
+&= \beta_{xy}
+\end{aligned}
+$$
+
+**RESULT:** The residual height association with y is expected to be equal to the raw height association with y.
+
+### Gene environment non-equivalence
+
+Now allow the genetic and non-genetic components of height to have independent influences on CHD.
+
+$$
+x_i = \sqrt{h^2}g_i + \sqrt{1-h^2}e_i
+$$
+
+as before, and now
+
+$$
+y_i = \beta_g g_i + \beta_e e_i + \epsilon_i
+$$
+
+Expected association of x on y
+
+$$
+\begin{aligned}
+\beta_{xy} &= \frac{cov(\sqrt{h^2}g_i + \sqrt{1-h^2}e_i,\beta_g g_i + \beta_e e_i)}{var(x)} \\
+&= \frac{\sqrt{h^2}\beta_g var(g) + \sqrt{1-h^2}\beta_e var(e)}{h^2 var(g) + (1-h^2) var(e)} \\
+\end{aligned}
+$$
+
+Assuming $var(g)=var(e)=1$ this reduces to
+
+$$
+\beta_{xy} = \sqrt{h^2}\beta_g + \sqrt{1-h^2}\beta_e
+$$
+
+**Now what is the expected association of x on y after it has been residualised for g?**
+
+$$
+\begin{aligned}
+\beta_{\hat{e}y} &= cov(\hat{e}, y) / var(\hat{e}) \\
+&= \frac{cov(\sqrt{1-h^2}e, \beta_g g + \beta_e e)}{(1-h^2)var(e)} \\
+&= \frac{\sqrt{1-h^2}\beta_evar(e)}{(1-h^2)var(e)} \\
+&= \sqrt{\frac{(1-h^2)\beta_e^2 var(e)^2}{(1-h^2)^2 var(e)^2}} \\
+&= \frac{\beta_e}{\sqrt{1-h^2}}
+\end{aligned}
+$$
+
+## Check with simulations
+
+### Gene environment equivalence
+
+```{r}
+n <- 100000
+bxy <- 0.3
+h2 <- 0.7
+g <- rnorm(n)
+e <- rnorm(n)
+x <- sqrt(h2) * g + sqrt(1-h2) * e
+y <- x * bxy + rnorm(n)
+```
+
+Get residual
+
+```{r}
+xres <- residuals(lm(x ~ g)) # sim
+xres_exp <- sqrt(1-h2) * e # expected
+# check they're the same
+cor(xres, xres_exp)
+lm(xres ~ xres_exp)$coef[2]
+```
+
+Assoc of x on y should be
+
+```{r}
+lm(y ~ x)$coef[2] # sim
+bxy # expected
+```
+
+Expected assoc of g on y
+
+```{r}
+lm(y ~ g)$coef[2] # sim
+sqrt(h2)*bxy # expected
+```
+
+Expected assoc of residual x on y
+
+```{r}
+lm(y ~ xres)$coef[2] # sim
+bxy
+```
+
+### Gene environment non-equivalence
+
+```{r}
+n <- 100000
+bg <- 0.3
+be <- 0.6
+h2 <- 0.7
+g <- rnorm(n)
+e <- rnorm(n)
+x <- sqrt(h2) * g + sqrt(1-h2) * e
+y <- g * bg + e * be + rnorm(n)
+```
+
+Get residual
+
+```{r}
+xres <- residuals(lm(x ~ g)) # sim
+xres_exp <- sqrt(1-h2) * e # expected
+# check they're the same
+cor(xres, xres_exp)
+lm(xres ~ xres_exp)$coef[2]
+```
+
+Association of xres and y
+
+```{r}
+lm(y ~ xres)$coef[2] # sim
+be / sqrt(1-h2)
+```
+
+Assoc of x and y - simulation
+
+```{r}
+lm(y ~ x)$coef[2] # sim
+bg * sqrt(h2) + be * sqrt(1-h2) # exp
+```
+
+## Incomplete adjustment of g
+
+Does incomplete adjustment of g change things much?
+
+### Gene environment equivalence
+
+```{r}
+n <- 100000
+bxy <- 0.3
+h2 <- 0.7
+g_exp <- 0.5 # proportion of g explained by prs
+g_explained <- rnorm(n) * sqrt(g_exp)
+g_unexplained <- rnorm(n) * sqrt(1-g_exp)
+g <- g_explained + g_unexplained
+e <- rnorm(n)
+x <- sqrt(h2) * g + sqrt(1-h2) * e
+y <- x * bxy + rnorm(n)
+```
+
+Get residual - now this is different from expected above due to residual including some unadjusted genetic variance, but linearly still related
+
+```{r}
+xres <- residuals(lm(x ~ g_explained)) # sim
+xres_exp <- sqrt(1-h2) * e # expected
+# check they're the same
+cor(xres, xres_exp)
+lm(xres ~ xres_exp)$coef[2]
+```
+
+What is the PRS (explained g) assoc with y?
+
+```{r}
+lm(y ~ g_explained)$coef[2]
+```
+
+Assoc of height with y
+
+```{r}
+lm(y ~ x)$coef[2]
+```
+
+And residual with y
+
+```{r}
+lm(y ~ xres)$coef[2]
+```
+
+**So the residual x effect remains identical to the raw effect of x.**
+
+## In progress... (ignore for now)
+
+Does confounding change things much?
+
+```{r}
+n <- 100000
+bxy <- 0.3
+bu <- 0.3
+h2 <- 0.7
+u <- rnorm(n)
+g <- rnorm(n)
+e <- rnorm(n)
+x <- sqrt(h2) * g + sqrt(1-h2) * e + u * bu
+y <- x * bxy + rnorm(n) + u * bu
+```
+
+y \~ x
+
+```{r}
+lm(y ~ x)$coef[2]
+```
+
+y \~ x_res
+
+```{r}
+xres <- residuals(lm(x ~ g)) # sim
+xres_exp <- sqrt(1-h2) * e # expected
+# check they're the same
+cor(xres, xres_exp)
+lm(xres ~ xres_exp)$coef[2]
+```
+
+```{r}
+lm(y ~ xres)$coef[2]
+
+```
+
+```{r}
+lm(y ~ xres_exp)$coef[2]
+```
+
+```{r}
+lm(y ~ g)$coef[2]
+```

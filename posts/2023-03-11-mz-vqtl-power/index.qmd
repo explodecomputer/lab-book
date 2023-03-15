@@ -1,0 +1,202 @@
+---
+title: "Boosting MZ vQTL power"
+author: Gibran Hemani
+date: "2023-03-11"
+categories: []
+---
+
+## Background
+
+The MZ difference design is reasonably well powered against DRM method used for population-based analysis. However, are these two estimates orthogonal even if estimated in the same set of MZs?
+
+1. MZ difference
+2. DRM in MZ1 + MZ2 accounting for relatedness
+3. Meta analyse (1) and (2)
+
+## Simulations
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(simulateGP)
+library(here)
+library(parallel)
+library(lme4)
+library(lmerTest)
+library(metafor)
+
+sim_pop <- function(n, beta1, beta2, af, h2)
+{
+  g <- rbinom(n, 2, af)
+  prs <- g * beta1
+  vg <- rnorm(n, 0, h2)
+  v <- rnorm(n, 0, beta2 * g)
+  ve <- rnorm(n, 0, sqrt(1 - var(vg) - var(v) - var(prs)))
+  y <- prs + v + vg + ve
+  return(tibble(
+    g, y
+  ))
+}
+
+sim_mz <- function(n, beta1, beta2, af, h2)
+{
+  g <- rbinom(n, 2, af)
+  prs <- g * beta1
+  vg <- rnorm(n, 0, h2)
+  v1 <- rnorm(n, 0, beta2 * g)
+  ve1 <- rnorm(n, 0, sqrt(1 - var(vg) - var(v1) - var(prs)))
+  y1 <- prs + v1 + vg + ve1
+  v2 <- rnorm(n, 0, beta2 * g)
+  ve2 <- rnorm(n, 0, sqrt(1 - var(vg) - var(v2) - var(prs)))
+  y2 <- prs + v2 + vg + ve2
+  return(tibble(
+    g, y1, y2
+  ))
+}
+
+test_drm <- function(g, y)
+{
+  y.i <- tapply(y, g, median, na.rm=T)  
+  z.ij <- abs(y - y.i[g+1])
+  fast_assoc(z.ij, g) %>%
+    as_tibble() %>%
+    mutate(method="drm")
+}
+
+test_mz <- function(g, y1, y2)
+{
+  yd1 <- abs(y1-y2)
+  r1 <- fast_assoc(yd1, g) %>%
+    as_tibble() %>%
+    mutate(method="mzdiff")
+  r1
+}
+
+test_drm_lme4 <- function(g, y1, y2)
+{
+    dat <- tibble(g=c(g,g), y=c(y1,y2), twin=rep(1:length(y1), each=2))
+    y.i <- tapply(dat$y, dat$g, median, na.rm=T)  
+    dat$z.ij <- abs(dat$y - y.i[dat$g+1])
+
+    out <- lmer(z.ij ~ g + (1 | twin), dat) %>% 
+        summary() %>%
+        coef() %>%
+        {
+            tibble(ahat=.[1,1], bhat=.[2,1], se=.[2,2], fval=.[2,4]^2, pval=.[2,5], n=nrow(dat), method="drm_lmer")
+        }
+    return(out)
+}
+```
+
+Check FDR of drm_lme4
+
+```{r}
+set.seed(1234)
+a <- sapply(1:500, function(i)
+{
+    # no vQTL effect
+    temp <- sim_mz(1000, 0.1, 0, 0.5, 0.5)
+    c(
+        test_drm(temp$g, temp$y1)$pval,
+        test_drm_lme4(temp$g, temp$y1, temp$y2)$pval
+    )    
+})
+
+apply(a, 1, function(x) sum(x < 0.05)/length(x))
+```
+
+Seems ok. Test power difference
+
+```{r}
+set.seed(1234)
+a <- sapply(1:500, function(i)
+{
+    # no vQTL effect
+    temp <- sim_mz(1000, 0.1, 0.2, 0.5, 0.5)
+    c(
+        test_drm(temp$g, temp$y1)$pval,
+        test_drm_lme4(temp$g, temp$y1, temp$y2)$pval
+    )    
+})
+
+apply(a, 1, function(x) sum(x < 0.05)/length(x))
+
+```
+
+Ok this seems to boost power. Now meta-analyse with MZ difference
+
+```{r}
+set.seed(1234)
+temp <- sim_mz(1000, 0.1, 0.2, 0.5, 0.5)
+test_meta <- function(g, y1, y2)
+{
+    # mz
+    r1 <- test_mz(g, y1, y2)
+    # drm using just one twin
+    r2 <- test_drm(g, y1)
+    # drm using lme4
+    r3 <- test_drm_lme4(g, y1, y2)
+    # meta_analyse mz + drm_lmer
+    r4 <- metafor::rma(
+        c(r1$bhat, r3$bhat),
+        c(r1$se^2, r3$se^2),
+        method="FE"
+    ) %>%
+    {
+        tibble(ahat=NA, bhat=.$b[1], se=.$se, fval=.$zval^2, pval=.$pval, n=length(g), method="mz+drm_lmer")
+    }
+    # meta_analyse mz + drm
+    r5 <- metafor::rma(
+        c(r1$bhat, r2$bhat),
+        c(r1$se^2, r2$se^2),
+        method="FE"
+    ) %>%
+    {
+        tibble(ahat=NA, bhat=.$b[1], se=.$se, fval=.$zval^2, pval=.$pval, n=length(g), method="mz+drm")
+    }
+    return(bind_rows(r1, r2, r3, r4, r5))
+}
+test_meta(temp$g, temp$y1, temp$y2)
+```
+
+Check fdr
+
+```{r}
+a <- lapply(1:500, function(i)
+{
+    temp <- sim_mz(1000, 0.1, 0, 0.5, 0.5)
+    test_meta(temp$g, temp$y1, temp$y2) %>% mutate(sim=i)
+}) %>% bind_rows()
+a %>%
+    group_by(method) %>%
+    summarise(fdr=sum(pval < 0.05)/n())
+```
+
+check power
+
+```{r}
+b <- lapply(1:500, function(i)
+{
+    temp <- sim_mz(1000, 0.1, 0.2, 0.3, 0.5)
+    test_meta(temp$g, temp$y1, temp$y2) %>% mutate(sim=i)
+}) %>% bind_rows()
+b %>%
+    group_by(method) %>%
+    summarise(pow=sum(pval < 0.05)/n())
+```
+
+```{r}
+library(tidyr)
+spread(a %>% dplyr::select(method, bhat, sim), key=method, value=bhat) %>% 
+    dplyr::select(-sim) %>%
+    cor
+```
+
+This could work if the meta analysis could take into consideration that DRM + MZ have a 0.5 correlation... how do you do that
+
+---
+
+```{r}
+sessionInfo()
+```
