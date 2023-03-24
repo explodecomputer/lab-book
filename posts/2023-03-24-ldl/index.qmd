@@ -1,0 +1,96 @@
+---
+title: "LDL and drug adjustment"
+author: Gibran Hemani
+date: "2023-03-24"
+categories: []
+---
+
+## Background
+
+-   People with high LDL cholesterol tend to take medication that lowers their observed LDL
+-   How does this affect genetic associations?
+
+Get a rough distribution of LDL cholesterol (e.g. like this)
+
+![](https://www.researchgate.net/publication/358644627/figure/fig3/AS:1124416071188480@1645093090168/Distribution-of-LDL-cholesterol-measurements-in-VRONI-Distribution-of-LDL-cholesterol.png)
+
+```{r}
+library(dplyr)
+hist(rnorm(10000, 85, sd=20), breaks=100)
+```
+
+Generate genetic effect for LDL cholesterol with effect `b_gy`
+
+```{r}
+n <- 100000
+g <- rnorm(n)
+mean_ldl <- 85
+sd_ldl <- 20
+b_gy <- 10
+y <- mean_ldl + g * b_gy + rnorm(n, sd=sqrt(sd_ldl^2 - b_gy^2))
+hist(y, breaks=100)
+```
+
+People with high LDL cholesterol more likely to take medication - make an adjusted LDL cholesterol measure which has a reduced value amongst people taking medications
+
+```{r}
+n <- 100000
+g <- rnorm(n)
+mean_ldl <- 130
+sd_ldl <- 20
+b_gy <- 1
+med_effect <- 0.8
+
+y <- mean_ldl + g * b_gy + rnorm(n, sd=sqrt(sd_ldl^2-b_gy^2))
+med <- rbinom(n, 1, plogis(scale(y)))
+y_obs <- y
+y_obs[as.logical(med)] <- y_obs[as.logical(med)] * med_effect
+
+rbind(
+  summary(lm(y ~ g))$coef[2,],
+  summary(lm(y_obs ~ g))$coef[2,]
+) %>% as_tibble() %>% mutate(measure=c("y", "y_obs"))
+```
+
+What happens if you put in an approximate adjustment of y_obs. e.g. the effect of the drug is relative (20% reduction), we could erroneously add an absolute value onto med users to try to adjust
+
+```{r}
+n <- 100000
+g <- rnorm(n)
+mean_ldl <- 130
+sd_ldl <- 20
+b_gy <- 1
+med_effect <- 0.8
+
+y <- mean_ldl + g * b_gy + rnorm(n, sd=sqrt(sd_ldl^2-b_gy^2))
+med <- rbinom(n, 1, plogis(scale(y)))
+y_obs <- y
+y_obs[as.logical(med)] <- y_obs[as.logical(med)] * med_effect
+
+y_adj_true <- y_obs
+y_adj_true[as.logical(med)] <- y_obs[as.logical(med)] / med_effect
+
+y_adj_approx <- y_obs
+y_adj_approx[as.logical(med)] <- y_obs[as.logical(med)] + 20
+
+rbind(
+  summary(lm(y ~ g))$coef[2,],
+  summary(lm(y_obs ~ g))$coef[2,],
+  summary(lm(y_adj_true ~ g))$coef[2,],
+  summary(lm(y_adj_approx ~ g))$coef[2,]
+) %>% as_tibble() %>% mutate(measure=c("y", "y_obs", "y_adj_true", "y_adj_approx"))
+```
+
+### Summary
+
+-   A relative reduction in observed LDL measures due to medication will lead to attenuated genetic effect estimates
+-   Adjustment to correct LDL values amongst medication users potentially resolves the issue
+-   Even an inaccurate adjustment can improve the estimate
+-   Oustanding questions
+    -   Is there a collider bias issue? Selecting non-medication users will induce collider bias. Similarly, adjusting medication users will potentially induce collider bias. (because medication could be influenced by other things that will become associated with genotype)
+
+---
+
+```{r}
+sessionInfo()
+```

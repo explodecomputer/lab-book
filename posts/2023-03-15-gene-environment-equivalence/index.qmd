@@ -109,6 +109,8 @@ $$
 ### Gene environment equivalence
 
 ```{r}
+library(dplyr)
+library(ggplot2)
 n <- 100000
 bxy <- 0.3
 h2 <- 0.7
@@ -278,4 +280,121 @@ lm(y ~ xres_exp)$coef[2]
 
 ```{r}
 lm(y ~ g)$coef[2]
+```
+
+```{r}
+testdat <- function(y, x, g)
+{
+  xres <- residuals(lm(x ~ g))
+  tribble(~model, ~beta,
+          "y ~ x", lm(y ~ x)$coef[2],
+          "y ~ g", lm(y ~ g)$coef[2],
+          "y ~ xres", lm(y ~ xres)$coef[2]
+  )
+}
+```
+
+No confounding, gene environment equivalence
+
+```{r}
+n <- 100000
+bxy <- -0.3
+h2 <- 0.7
+g <- rnorm(n)
+e <- rnorm(n)
+x <- sqrt(h2) * g + sqrt(1-h2) * e
+y <- x * bxy + rnorm(n)
+testdat(y, x, g)
+```
+
+```{r}
+n <- 100000
+buy <- 0.3
+bux <- -0.3
+bxy <- 0.3
+h2 <- 0.7
+u <- rnorm(n)
+g <- rnorm(n)
+e <- rnorm(n)
+x <- sqrt(h2) * g + sqrt(1-h2) * e + bux * u
+y <- x * bxy + rnorm(n) + buy * u
+testdat(y, x, g)
+```
+
+```{r}
+n <- 100000
+buy <- 0.3
+bux <- -0.3
+bg <- -0.2
+be <- -0.3
+h2 <- 0.7
+u <- rnorm(n)
+g <- rnorm(n)
+e <- rnorm(n)
+x <- sqrt(h2) * g + sqrt(1-h2) * e + bux * u
+y <- g * bg + e * be + rnorm(n) + buy * u
+testdat(y, x, g)
+```
+
+```{r}
+param <- expand.grid(
+  buy = seq(-0.3, 0.3, by=0.3),
+  bux = seq(-0.3, 0.3, by=0.3),
+  bg = seq(-0.3, 0.3, by=0.3),
+  be = seq(-0.3, 0.3, by=0.3)
+)
+
+res <- lapply(1:nrow(param), function(i) {
+  n <- 100000
+  buy <- param$buy[i]
+  bux <- param$bux[i]
+  bg <- param$bg[i]
+  be <- param$be[i]
+  h2 <- 0.7
+  u <- rnorm(n)
+  g <- rnorm(n, sd=sqrt(h2))
+  e <- rnorm(n, sd=sqrt(1-h2))
+  x <- g + e + bux * u
+  y <- g * bg + e * be + rnorm(n) + buy * u
+  testdat(y, x, g) %>% bind_cols(param[i,])
+})
+res <- bind_rows(res)
+```
+
+```{r}
+res %>% mutate(ge = bg-be) %>%
+  filter(bg == -0.3) %>%
+  #filter(round(bg, 1) == -0.2, be < 0, round(buy, 1) %in% c(-0.3, 0, 0.3), round(bux, 1) %in% c(-0.3, 0, 0.3)) %>%
+ggplot(., aes(x=beta, y=ge)) +
+  geom_point(aes(colour=model)) +
+  geom_line(aes(colour=model)) +
+  facet_grid(buy ~ bux) +
+  scale_colour_brewer(type="qual")
+```
+
+```{r}
+n <- 100000
+buy <- 0
+bux <- 0
+bg <- -0.4
+be <- -0.2
+h2 <- 0.5
+u <- rnorm(n)
+g <- rnorm(n, sd=sqrt(h2))
+e <- rnorm(n, sd=sqrt(1-h2))
+x <- g + e
+y <- g * bg + e * be + rnorm(n)
+testdat(y, x, g)
+```
+
+```{r}
+library(simulateGP)
+g <- make_geno(1000, 100, 0.3)
+b <- rnorm(100)
+prs <- g %*% b
+ve <- var(prs) / 0.7 - var(prs)
+e <- rnorm(1000, sd=sqrt(ve))
+x <- prs + e
+cor(x, prs)^2
+var(prs) / var(x)
 ```
