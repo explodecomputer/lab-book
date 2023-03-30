@@ -81,13 +81,62 @@ rbind(
 ) %>% as_tibble() %>% mutate(measure=c("y", "y_obs", "y_adj_true", "y_adj_approx"))
 ```
 
+Does collider bias have an impact? Statins are administered due to having a cardio event or being high risk e.g. due to family history. So there could be other non-LDL genetic factors that influence medication usage, and selecting or adjusting for medication usage could induce a collider that associates non-LDL genotypes with the adjusted LDL phenotype. e.g. simulate a large non-LDL factor that influences medication for illustration
+
+```{r}
+n <- 1000000
+g <- rnorm(n)
+g_other <- rnorm(n)
+mean_ldl <- 130
+sd_ldl <- 20
+b_gy <- 1
+b_omed <- 1
+med_effect <- 0.8
+
+y <- mean_ldl + g * b_gy + rnorm(n, sd=sqrt(sd_ldl^2-b_gy^2))
+med <- rbinom(n, 1, plogis(scale(y) + g_other * b_omed))
+y_obs <- y
+y_obs[as.logical(med)] <- y_obs[as.logical(med)] * med_effect
+
+y_adj_true <- y_obs
+y_adj_true[as.logical(med)] <- y_obs[as.logical(med)] / med_effect
+
+y_adj_approx <- y_obs
+y_adj_approx[as.logical(med)] <- y_obs[as.logical(med)] + 20
+```
+
+Result for LDL genotype
+
+```{r}
+rbind(
+  summary(lm(y ~ g))$coef[2,],
+  summary(lm(y_obs ~ g))$coef[2,],
+  summary(lm(y_adj_true ~ g))$coef[2,],
+  summary(lm(y_adj_approx ~ g))$coef[2,]
+) %>% as_tibble() %>% mutate(measure=c("y", "y_obs", "y_adj_true", "y_adj_approx"))
+```
+
+Result for non-LDL genotype
+
+```{r}
+rbind(
+  summary(lm(y ~ g_other))$coef[2,],
+  summary(lm(y_obs ~ g_other))$coef[2,],
+  summary(lm(y_adj_true ~ g_other))$coef[2,],
+  summary(lm(y_adj_approx ~ g_other))$coef[2,]
+) %>% as_tibble() %>% mutate(measure=c("y", "y_obs", "y_adj_true", "y_adj_approx"))
+
+```
+
+
 ### Summary
 
 -   A relative reduction in observed LDL measures due to medication will lead to attenuated genetic effect estimates
 -   Adjustment to correct LDL values amongst medication users potentially resolves the issue
 -   Even an inaccurate adjustment can improve the estimate
--   Oustanding questions
-    -   Is there a collider bias issue? Selecting non-medication users will induce collider bias. Similarly, adjusting medication users will potentially induce collider bias. (because medication could be influenced by other things that will become associated with genotype)
+-   Collider bias induces a negative association between unadjusted LDL and non-LDL genetic factors, but not a great deal of issue at the LDL locus
+-   Perfect adjustment of medication would resolve this problem
+-   Imperfect adjustment partially avoids the issue but some bias remains at the non-LDL genetic factor
 
 ---
 

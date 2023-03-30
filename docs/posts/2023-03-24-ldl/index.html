@@ -267,8 +267,8 @@ Attaching package: 'dplyr'</code></pre>
 <pre><code># A tibble: 2 × 5
   Estimate `Std. Error` `t value` `Pr(&gt;|t|)` measure
      &lt;dbl&gt;        &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;  
-1    1.02        0.0630      16.1   1.80e-58 y      
-2    0.669       0.0550      12.2   5.43e-34 y_obs  </code></pre>
+1    0.909       0.0632      14.4   7.62e-47 y      
+2    0.569       0.0552      10.3   6.46e-25 y_obs  </code></pre>
 </div>
 </div>
 <p>What happens if you put in an approximate adjustment of y_obs. e.g.&nbsp;the effect of the drug is relative (20% reduction), we could erroneously add an absolute value onto med users to try to adjust</p>
@@ -301,10 +301,68 @@ Attaching package: 'dplyr'</code></pre>
 <pre><code># A tibble: 4 × 5
   Estimate `Std. Error` `t value` `Pr(&gt;|t|)` measure     
      &lt;dbl&gt;        &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;       
-1    1.03        0.0632      16.4   4.22e-60 y           
-2    0.643       0.0551      11.7   1.98e-31 y_obs       
-3    1.03        0.0632      16.4   4.22e-60 y_adj_true  
-4    0.871       0.0540      16.1   2.04e-58 y_adj_approx</code></pre>
+1    0.936       0.0631      14.8   1.07e-49 y           
+2    0.602       0.0547      11.0   3.95e-28 y_obs       
+3    0.936       0.0631      14.8   1.07e-49 y_adj_true  
+4    0.789       0.0538      14.7   1.41e-48 y_adj_approx</code></pre>
+</div>
+</div>
+<p>Does collider bias have an impact? Statins are administered due to having a cardio event or being high risk e.g.&nbsp;due to family history. So there could be other non-LDL genetic factors that influence medication usage, and selecting or adjusting for medication usage could induce a collider that associates non-LDL genotypes with the adjusted LDL phenotype. e.g.&nbsp;simulate a large non-LDL factor that influences medication for illustration</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000000</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>g_other <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>mean_ldl <span class="ot">&lt;-</span> <span class="dv">130</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>sd_ldl <span class="ot">&lt;-</span> <span class="dv">20</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>b_gy <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>b_omed <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>med_effect <span class="ot">&lt;-</span> <span class="fl">0.8</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> mean_ldl <span class="sc">+</span> g <span class="sc">*</span> b_gy <span class="sc">+</span> <span class="fu">rnorm</span>(n, <span class="at">sd=</span><span class="fu">sqrt</span>(sd_ldl<span class="sc">^</span><span class="dv">2</span><span class="sc">-</span>b_gy<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>med <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(<span class="fu">scale</span>(y) <span class="sc">+</span> g_other <span class="sc">*</span> b_omed))</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>y_obs <span class="ot">&lt;-</span> y</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>y_obs[<span class="fu">as.logical</span>(med)] <span class="ot">&lt;-</span> y_obs[<span class="fu">as.logical</span>(med)] <span class="sc">*</span> med_effect</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>y_adj_true <span class="ot">&lt;-</span> y_obs</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>y_adj_true[<span class="fu">as.logical</span>(med)] <span class="ot">&lt;-</span> y_obs[<span class="fu">as.logical</span>(med)] <span class="sc">/</span> med_effect</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>y_adj_approx <span class="ot">&lt;-</span> y_obs</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>y_adj_approx[<span class="fu">as.logical</span>(med)] <span class="ot">&lt;-</span> y_obs[<span class="fu">as.logical</span>(med)] <span class="sc">+</span> <span class="dv">20</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Result for LDL genotype</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> g))<span class="sc">$</span>coef[<span class="dv">2</span>,],</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="fu">lm</span>(y_obs <span class="sc">~</span> g))<span class="sc">$</span>coef[<span class="dv">2</span>,],</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="fu">lm</span>(y_adj_true <span class="sc">~</span> g))<span class="sc">$</span>coef[<span class="dv">2</span>,],</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="fu">lm</span>(y_adj_approx <span class="sc">~</span> g))<span class="sc">$</span>coef[<span class="dv">2</span>,]</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">measure=</span><span class="fu">c</span>(<span class="st">"y"</span>, <span class="st">"y_obs"</span>, <span class="st">"y_adj_true"</span>, <span class="st">"y_adj_approx"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 5
+  Estimate `Std. Error` `t value` `Pr(&gt;|t|)` measure     
+     &lt;dbl&gt;        &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;       
+1    1.03        0.0200      51.5  0         y           
+2    0.680       0.0181      37.6  5.73e-309 y_obs       
+3    1.03        0.0200      51.5  0         y_adj_true  
+4    0.871       0.0172      50.5  0         y_adj_approx</code></pre>
+</div>
+</div>
+<p>Result for non-LDL genotype</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> g_other))<span class="sc">$</span>coef[<span class="dv">2</span>,],</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="fu">lm</span>(y_obs <span class="sc">~</span> g_other))<span class="sc">$</span>coef[<span class="dv">2</span>,],</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="fu">lm</span>(y_adj_true <span class="sc">~</span> g_other))<span class="sc">$</span>coef[<span class="dv">2</span>,],</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="fu">lm</span>(y_adj_approx <span class="sc">~</span> g_other))<span class="sc">$</span>coef[<span class="dv">2</span>,]</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">measure=</span><span class="fu">c</span>(<span class="st">"y"</span>, <span class="st">"y_obs"</span>, <span class="st">"y_adj_true"</span>, <span class="st">"y_adj_approx"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 5
+  Estimate `Std. Error` `t value` `Pr(&gt;|t|)` measure     
+     &lt;dbl&gt;        &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;       
+1  -0.0168       0.0200    -0.841      0.401 y           
+2  -4.72         0.0175  -270.         0     y_obs       
+3  -0.0168       0.0200    -0.841      0.401 y_adj_true  
+4  -1.10         0.0172   -63.8        0     y_adj_approx</code></pre>
 </div>
 </div>
 <section id="summary" class="level3">
@@ -313,14 +371,13 @@ Attaching package: 'dplyr'</code></pre>
 <li>A relative reduction in observed LDL measures due to medication will lead to attenuated genetic effect estimates</li>
 <li>Adjustment to correct LDL values amongst medication users potentially resolves the issue</li>
 <li>Even an inaccurate adjustment can improve the estimate</li>
-<li>Oustanding questions
-<ul>
-<li>Is there a collider bias issue? Selecting non-medication users will induce collider bias. Similarly, adjusting medication users will potentially induce collider bias. (because medication could be influenced by other things that will become associated with genotype)</li>
-</ul></li>
+<li>Collider bias induces a negative association between unadjusted LDL and non-LDL genetic factors, but not a great deal of issue at the LDL locus</li>
+<li>Perfect adjustment of medication would resolve this problem</li>
+<li>Imperfect adjustment partially avoids the issue but some bias remains at the non-LDL genetic factor</li>
 </ul>
 <hr>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>R version 4.2.3 Patched (2023-03-15 r84020)
 Platform: aarch64-apple-darwin20 (64-bit)
@@ -331,7 +388,7 @@ BLAS:   /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/lib/libRbla
 LAPACK: /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/lib/libRlapack.dylib
 
 locale:
-[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+[1] en_GB.UTF-8/en_GB.UTF-8/en_GB.UTF-8/C/en_GB.UTF-8/en_GB.UTF-8
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
