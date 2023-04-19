@@ -59,56 +59,92 @@ fam <- geno[,1:6]
 geno <- as.matrix(geno[,-c(1:6)])
 geno[1:10,1:10]
 dim(geno)
+
+cormat <- cor(geno)
+dim(cormat)
 ```
 
-Test DRM on each SNP in region for varying sample sizes and additive variance explained in the region
-
 ```{r}
-sim <- function(rsq, geno, n)
+fast_assoc <- function(y, x)
+{
+    index <- is.finite(y) & is.finite(x)
+    n <- sum(index)
+    y <- y[index]
+    x <- x[index]
+    vx <- var(x)
+    bhat <- stats::cov(y, x)/vx
+    ahat <- mean(y) - bhat * mean(x)
+    rsq <- (bhat * vx)^2/(vx * var(y))
+    fval <- rsq * (n - 2)/(1 - rsq)
+    tval <- sqrt(fval)
+    se <- abs(bhat/tval)
+    p <- stats::pf(fval, 1, n - 2, lower.tail = FALSE)
+    return(list(ahat = ahat, bhat = bhat, se = se, fval = fval, pval = p, n = n))
+}
+
+test_drm <- function(g, y)
+{
+  y.i <- tapply(y, g, median, na.rm=T)
+  z.ij <- abs(y - y.i[g+1])
+  fast_assoc(z.ij, g) %>% as_tibble()
+}
+
+sim_full <- function(rsq, geno, n, cormat)
 {
   i <- sample(1:ncol(geno), 1)
   y <- as.numeric(scale(geno[,i])) * sqrt(rsq) + rnorm(nrow(geno), 0, sqrt(1-rsq))
   res <- lapply(1:ncol(geno), function(i)
   {
-    bind_rows(
-        test_drm(geno[1:n,i], y[1:n]),
-        test_svlm(geno[1:n,i], y[1:n])
-    )
-  }) %>% bind_rows()
-
+      test_drm(geno[1:n,i], y[1:n])
+  }) %>% bind_rows() %>% mutate(snp=1:n(), ldrsq=cormat[i,]^2)
+  return(res)
   res %>% 
-    group_by(method) %>%
-    mutate(fdr = p.adjust(`Pr(>|t|)`, "fdr")) %>%
+    mutate(fdr = p.adjust(pval, "fdr")) %>%
     summarise(
-        minp = min(`Pr(>|t|)`, na.rm=T),
-        nfdr = sum(fdr < 0.05, na.rm=T)
+        vqtl = which.min(pval),
+        minp = min(pval, na.rm=T),
+        nfdr = sum(fdr < 0.05, na.rm=T),
+        vqtl_ldrsq = ldrsq[vqtl]
         ) %>%
-    mutate(rsq = rsq, n = n) %>%
+    mutate(rsq = rsq, n = n, qtl=i, af=sum(geno[,i])/(2*nrow(geno))) %>%
     ungroup()
 }
-
-param <- expand.grid(
-  rsq = seq(0, 1, by=0.02),
-  n = c(250, 500)
-)
-o <- lapply(1:nrow(param), function(i) {
-  sim(param$rsq[i], geno, param$n[i])
-}) %>% bind_rows()
+set.seed(1234)
+o <- sim_full(0.5, geno, 500, cormat)
+o %>% ggplot(., aes(x=ldrsq, y = -log10(pval))) +
+geom_point() +
+geom_smooth()
 ```
 
-```{r}
-ggplot(o, aes(x=rsq, y=nfdr)) +
-geom_point(aes(colour=as.factor(n))) +
-geom_smooth(aes(colour=as.factor(n))) +
-facet_grid(method ~ .)
-```
+
+## Determining spurious effects
+
+Test DRM on each SNP in region for varying sample sizes and additive variance explained in the region
+
+Simulation here: https://github.com/explodecomputer/mz-gwas/blob/main/scripts/drm_sims.r
 
 ```{r}
-ggplot(o, aes(x=rsq, y=-log10(minp))) +
-geom_point(aes(colour=as.factor(n))) +
-geom_smooth(aes(colour=as.factor(n))) +
-facet_grid(method ~ .)
+load(url("https://github.com/explodecomputer/mz-gwas/raw/main/scripts/drm_sims.rdata"))
+
+ggplot(res %>% filter(minp < 5e-8), aes(x=as.factor(rsq), y=nfdr)) +
+geom_boxplot(aes(fill=as.factor(n)))
 ```
+
+
+```{r}
+ggplot(res %>% filter(minp < 5e-8), aes(x=as.factor(rsq), y=-log10(minp))) +
+geom_boxplot(aes(fill=as.factor(n)))
+```
+
+
+```{r}
+ggplot(res %>% filter(minp < 5e-10), aes(x=af, y=vqtl_ldrsq)) +
+geom_point()
+```
+
+
+
+
 
 ## Summary
 
