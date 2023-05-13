@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.313">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Gibran Hemani">
+<meta name="dcterms.date" content="2023-05-13">
+
+<title>Gibran Hemani’s lab book - Genetic confounding as a function of sample size</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Gibran Hemani’s lab book</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Genetic confounding as a function of sample size</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">MR</div>
+                <div class="quarto-category">genetic confounding</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Gibran Hemani </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">May 13, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(simulateGP)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(TwoSampleMR)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(pwr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="bias-from-g-u-instruments" class="level2">
+<h2 class="anchored" data-anchor-id="bias-from-g-u-instruments">Bias from G-U instruments</h2>
+<p>This is the expected effect estimate of X on Y using an instrument that arises via U:</p>
+<p><span class="math display">\[
+\beta_{IV,u} = \frac{\beta_{gu} \beta_{uy} + \beta_{gu} \beta_{ux} \beta_{xy}}{\beta_{gu} \beta_{ux}}
+\]</span></p>
+<p>which simplifies to</p>
+<p><span class="math display">\[
+\beta_{IV,u} = \frac{\beta_{uy}}{\beta_{ux}} + \beta_{xy}
+\]</span></p>
+<p>Check that this is correct</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>nid <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>gx <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(nid, <span class="dv">2</span>, <span class="fl">0.3</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>gu <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(nid, <span class="dv">2</span>, <span class="fl">0.3</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> gu <span class="sc">+</span> <span class="fu">rnorm</span>(nid)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>xl <span class="ot">&lt;-</span> gx <span class="sc">+</span> <span class="fu">rnorm</span>(nid)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>param <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">bux =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">by=</span><span class="fl">0.2</span>),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">buy =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">by=</span><span class="fl">0.2</span>),</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">bxy =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.5</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(bux <span class="sc">!=</span> <span class="dv">0</span>, buy <span class="sc">!=</span> <span class="dv">0</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(param), <span class="cf">function</span>(i)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> xl <span class="sc">+</span> u <span class="sc">*</span> param<span class="sc">$</span>bux[i]</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> x <span class="sc">*</span> param<span class="sc">$</span>bxy[i] <span class="sc">+</span> u <span class="sc">*</span> param<span class="sc">$</span>buy[i] <span class="sc">+</span> <span class="fu">rnorm</span>(nid)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> param[i,]</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    p<span class="sc">$</span>bgx <span class="ot">&lt;-</span> <span class="fu">get_effs</span>(x, y, <span class="fu">matrix</span>(gx, nid, <span class="dv">1</span>)) <span class="sc">%&gt;%</span> <span class="fu">mr</span>() <span class="sc">%&gt;%</span> {.<span class="sc">$</span>b}</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    p<span class="sc">$</span>bgu <span class="ot">&lt;-</span> <span class="fu">get_effs</span>(x, y, <span class="fu">matrix</span>(gu, nid, <span class="dv">1</span>)) <span class="sc">%&gt;%</span> <span class="fu">mr</span>() <span class="sc">%&gt;%</span> {.<span class="sc">$</span>b}</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(p)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>}) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>out<span class="sc">$</span>exp_gu <span class="ot">&lt;-</span> out<span class="sc">$</span>buy <span class="sc">/</span> out<span class="sc">$</span>bux <span class="sc">+</span> out<span class="sc">$</span>bxy</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(bgu <span class="sc">~</span> exp_gu, <span class="fu">subset</span>(out, <span class="sc">!</span><span class="fu">is.infinite</span>(exp_gu)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Similarly, the bias in observational studies is</p>
+<p><span class="math display">\[
+\beta_{OLS} = \beta_{xy} + \beta_{ux}\beta_{uy}
+\]</span></p>
+</section>
+<section id="bias-in-mr-with-heritable-confounders" class="level2">
+<h2 class="anchored" data-anchor-id="bias-in-mr-with-heritable-confounders">Bias in MR with heritable confounders</h2>
+<p>Simulate summary statistics for <code>nsnpx</code> causal variants on <span class="math inline">\(x\)</span> and <code>nsnpu</code> causal variants on <span class="math inline">\(u\)</span> according to a standard polygenic architecture</p>
+<p><span class="math display">\[
+\beta_{g.} \sim N(0, [2p(1-p)^S \sigma^2_g])
+\]</span></p>
+<p>where <span class="math inline">\(p\)</span> is the allele frequency, <span class="math inline">\(S\)</span> is the selection coefficient and <span class="math inline">\(\sigma^2_g\)</span> is a scaling parameter relating to the additive genetic variance. For SNPs that influence <span class="math inline">\(x\)</span> via <span class="math inline">\(u\)</span>, the <span class="math inline">\(\beta_{gx} = \beta_{gu}\beta_{ux}\)</span>. For varying values of <span class="math inline">\(\beta_{ux}\)</span> and <span class="math inline">\(\beta_{uy}\)</span> we can calculate the expected bias in the MR estimate for each SNP as</p>
+<p><span class="math display">\[
+$b_{MR,j} \beta_{g_ju}\frac{\beta_{uy}}{\beta_{ux}}
+\]</span></p>
+<p>As sample size increases, the probability of inclusion of a SNP from GWAS discovery in the exposure <span class="math inline">\(x\)</span> increases. So the overall bias of an MR estimate, <span class="math inline">\(b_{MR}\)</span> will be the inverse variance weighted contribution of a SNP given it’s probability of discovery</p>
+<p><span class="math display">\[
+b_{MR} = \frac{\sum^{M}_{j=1} \beta_{g_ju} w_j z_j}{\sum^{M}_{j=1} w_j z_j}
+\]</span></p>
+<p>where <span class="math inline">\(w_j = 1/2p_j(1-p_j)\)</span> and z_j is the power of detection of the SNP at pval &lt; 5e-8 based on its correlation with the trait <span class="math inline">\(r = 2p(1-p)\beta_{gx}^2\)</span> (assumes variance of x = 1) and for a given sample size.</p>
+<p>Here is an example of how</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>simfn2 <span class="ot">&lt;-</span> <span class="cf">function</span>(nsnpx, nsnpu, bux, buy, nid, h2x, h2u, Sx, Su, <span class="at">bax=</span><span class="dv">1</span>) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    args <span class="ot">&lt;-</span> <span class="fu">environment</span>() <span class="sc">%&gt;%</span> <span class="fu">as.list</span>() <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>()</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    mapx <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">snp=</span><span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span>nsnpx, <span class="st">"x"</span>), <span class="at">af=</span><span class="fu">runif</span>(nsnpx, <span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    mapu <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">snp=</span><span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span>nsnpu, <span class="st">"u"</span>), <span class="at">af=</span><span class="fu">runif</span>(nsnpu, <span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    paramsx <span class="ot">&lt;-</span> <span class="fu">generate_gwas_params</span>(<span class="at">map=</span>mapx, <span class="at">h2=</span>h2x, <span class="at">S=</span>Sx, <span class="at">Pi=</span><span class="dv">1</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    paramsu <span class="ot">&lt;-</span> <span class="fu">generate_gwas_params</span>(<span class="at">map=</span>mapu, <span class="at">h2=</span>h2u, <span class="at">S=</span>Su, <span class="at">Pi=</span><span class="dv">1</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    params <span class="ot">&lt;-</span> <span class="fu">rbind</span>(paramsx <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">beta=</span>beta<span class="sc">*</span>bax), paramsu <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">beta=</span>beta <span class="sc">*</span> bux))</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    o <span class="ot">&lt;-</span> <span class="fu">map</span>(nid, \(i){</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        ssx <span class="ot">&lt;-</span> <span class="fu">generate_gwas_ss</span>(params, i)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        ssx<span class="sc">$</span>beta <span class="ot">&lt;-</span> params<span class="sc">$</span>beta</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        ssx<span class="sc">$</span>w <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>ssx<span class="sc">$</span>se<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        ssx<span class="sc">$</span>bias <span class="ot">&lt;-</span> buy<span class="sc">/</span>bux</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        ssx<span class="sc">$</span>bias[<span class="fu">grepl</span>(<span class="st">"x"</span>, ssx<span class="sc">$</span>snp)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        ssx <span class="ot">&lt;-</span> ssx <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">h2 =</span> beta<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> <span class="dv">2</span> <span class="sc">*</span> af <span class="sc">*</span> (<span class="dv">1</span><span class="sc">-</span>af))</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        ssx <span class="ot">&lt;-</span> ssx <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(pval)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        x <span class="ot">&lt;-</span> ssx <span class="sc">%&gt;%</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>            <span class="fu">mutate</span>(</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>                <span class="at">n=</span>i,</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>                <span class="at">pow =</span> <span class="fu">pwr.r.test</span>(<span class="at">n=</span>i, <span class="at">r=</span><span class="fu">sqrt</span>(ssx<span class="sc">$</span>h2), <span class="at">sig.level=</span><span class="fl">5e-8</span>)<span class="sc">$</span>power,</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>                <span class="at">u_indicator =</span> <span class="fu">as.numeric</span>(<span class="fu">grepl</span>(<span class="st">"u"</span>, snp))</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>            ) <span class="sc">%&gt;%</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>            <span class="fu">summarise</span>(</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>                <span class="at">bias =</span> <span class="fu">sum</span>(bias <span class="sc">*</span> w <span class="sc">*</span> pow) <span class="sc">/</span> <span class="fu">sum</span>(w <span class="sc">*</span> pow),</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>                <span class="at">nsnp =</span> <span class="fu">sum</span>(pow),</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>                <span class="at">proph2 =</span> <span class="fu">sum</span>(h2<span class="sc">/</span><span class="fu">sum</span>(h2) <span class="sc">*</span> pow),</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>                <span class="at">fracu =</span> <span class="fu">sum</span>(pow <span class="sc">*</span> u_indicator) <span class="sc">/</span> <span class="fu">sum</span>(pow)</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(x)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    }) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bind_cols</span>(args, o)</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>r1 <span class="ot">&lt;-</span> <span class="fu">simfn2</span>(</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">nsnpx =</span> <span class="dv">2000</span>,</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">nsnpu =</span> <span class="dv">2000</span>, </span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">bux =</span> <span class="fl">0.1</span>, </span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">buy =</span> <span class="fl">0.1</span>, </span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">nid =</span> <span class="fu">seq</span>(<span class="dv">10000</span>, <span class="dv">10000000</span>, <span class="at">by=</span><span class="dv">10000</span>), </span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">h2x =</span> <span class="fl">0.4</span>,</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">h2u =</span> <span class="fl">0.4</span>, </span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sx =</span> <span class="dv">1</span>,</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">Su =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>So as sample size increases this is the expected bias in the MR estimate</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(r1, <span class="fu">aes</span>(<span class="at">x=</span>nid, <span class="at">y=</span>bias)) <span class="sc">+</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="fl">0.1</span><span class="sc">*</span><span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x=</span><span class="dv">0</span>, <span class="at">y=</span><span class="fl">0.1</span><span class="sc">*</span><span class="fl">0.1</span>, <span class="at">label=</span><span class="st">"OLS bias"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Which is essentially the same the proportion of discovered variants that influence x through u</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(r1, <span class="fu">aes</span>(<span class="at">x=</span>nid, <span class="at">y=</span>fracu)) <span class="sc">+</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The shape is somewhat different when looking at it from the perspective of number of variants discovered</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(r1, <span class="fu">aes</span>(<span class="at">x=</span>nsnp, <span class="at">y=</span>bias)) <span class="sc">+</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="fl">0.1</span><span class="sc">*</span><span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x=</span><span class="dv">0</span>, <span class="at">y=</span><span class="fl">0.1</span><span class="sc">*</span><span class="fl">0.1</span>, <span class="at">label=</span><span class="st">"OLS bias"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>And also in terms of variance x explained by the discovered SNPs</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(r1, <span class="fu">aes</span>(<span class="at">x=</span>proph2, <span class="at">y=</span>bias)) <span class="sc">+</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="fl">0.1</span><span class="sc">*</span><span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x=</span><span class="dv">0</span>, <span class="at">y=</span><span class="fl">0.1</span><span class="sc">*</span><span class="fl">0.1</span>, <span class="at">label=</span><span class="st">"OLS bias"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>So under this model it’s not until you explain quite a large fraction of total heritability does the bias become problematic. This is quite unrealistic because the model assumes that SNPs influencing <span class="math inline">\(x\)</span> <strong>not</strong> through a confounder have larger effects. But perhaps more realistic is that all SNPs influence <span class="math inline">\(x\)</span> through a mediator, but some of those mediators are confounders of the <span class="math inline">\(x-y\)</span> relationship and some are not.</p>
+<p>So if the distribution of instrument effects on x are the same whether going through a confounder or not, the bias is no longer strongly related to sample size</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>r2 <span class="ot">&lt;-</span> <span class="fu">simfn2</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">nsnpx =</span> <span class="dv">2000</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">nsnpu =</span> <span class="dv">2000</span>, </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">bax =</span> <span class="fl">0.1</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">bux =</span> <span class="fl">0.1</span>, </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">buy =</span> <span class="fl">0.1</span>, </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">nid =</span> <span class="fu">seq</span>(<span class="dv">10000</span>, <span class="dv">10000000</span>, <span class="at">by=</span><span class="dv">10000</span>), </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">h2x =</span> <span class="fl">0.4</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">h2u =</span> <span class="fl">0.4</span>, </span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sx =</span> <span class="dv">1</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Su =</span> <span class="dv">1</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(r2, <span class="fu">aes</span>(<span class="at">x=</span>nid, <span class="at">y=</span>bias)) <span class="sc">+</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="fl">0.1</span><span class="sc">*</span><span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x=</span><span class="dv">0</span>, <span class="at">y=</span><span class="fl">0.1</span><span class="sc">*</span><span class="fl">0.1</span>, <span class="at">label=</span><span class="st">"OLS bias"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Try increasing polygenicity of <span class="math inline">\(u\)</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>r3 <span class="ot">&lt;-</span> <span class="fu">simfn2</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">nsnpx =</span> <span class="dv">2000</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">nsnpu =</span> <span class="dv">4000</span>, </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">bax =</span> <span class="dv">1</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">bux =</span> <span class="fl">0.1</span>, </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">buy =</span> <span class="fl">0.1</span>, </span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">nid =</span> <span class="fu">seq</span>(<span class="dv">10000</span>, <span class="dv">10000000</span>, <span class="at">by=</span><span class="dv">10000</span>), </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">h2x =</span> <span class="fl">0.4</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">h2u =</span> <span class="fl">0.4</span>, </span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">Sx =</span> <span class="dv">1</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Su =</span> <span class="dv">1</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(r3, <span class="fu">aes</span>(<span class="at">x=</span>nid, <span class="at">y=</span>bias)) <span class="sc">+</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="fl">0.1</span><span class="sc">*</span><span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">x=</span><span class="dv">0</span>, <span class="at">y=</span><span class="fl">0.1</span><span class="sc">*</span><span class="fl">0.1</span>, <span class="at">label=</span><span class="st">"OLS bias"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The rate at which higher sample size leads MR estimates becomes biased depends on how quickly the GWAS starts to identify instruments acting through <span class="math inline">\(u\)</span>. This will increase under the following conditions</p>
+<ul>
+<li>The effects on <span class="math inline">\(u\)</span> are larger than those not through <span class="math inline">\(u\)</span></li>
+<li>There are many different <span class="math inline">\(u\)</span> variables through which instruments can be detected</li>
+<li>The heritability of <span class="math inline">\(u\)</span> is higher</li>
+<li>The polygenicity of <span class="math inline">\(u\)</span> is lower (i.e.&nbsp;effects are more discoverable)</li>
+</ul>
+</section>
+<section id="ignore-the-rest" class="level2">
+<h2 class="anchored" data-anchor-id="ignore-the-rest">Ignore the rest</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>nsnp <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>mapx <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">snp=</span><span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span>nsnp, <span class="st">"x"</span>), <span class="at">af=</span><span class="fu">runif</span>(nsnp, <span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>mapu <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">snp=</span><span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span>nsnp, <span class="st">"u"</span>), <span class="at">af=</span><span class="fu">runif</span>(nsnp, <span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>paramsx <span class="ot">&lt;-</span> <span class="fu">generate_gwas_params</span>(<span class="at">map=</span>mapx, <span class="at">h2=</span><span class="fl">0.4</span>, <span class="at">S=</span><span class="sc">-</span><span class="fl">0.4</span>, <span class="at">Pi=</span><span class="dv">1</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>paramsu <span class="ot">&lt;-</span> <span class="fu">generate_gwas_params</span>(<span class="at">map=</span>mapu, <span class="at">h2=</span><span class="fl">0.4</span>, <span class="at">S=</span><span class="sc">-</span><span class="fl">0.4</span>, <span class="at">Pi=</span><span class="dv">1</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>bux <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>buy <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>paramsx <span class="ot">&lt;-</span> <span class="fu">rbind</span>(paramsx, paramsu <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">beta=</span>beta <span class="sc">*</span> bux))</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>ssx <span class="ot">&lt;-</span> <span class="fu">generate_gwas_ss</span>(paramsx, <span class="dv">1000000</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>ssx<span class="sc">$</span>w <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>ssx<span class="sc">$</span>se<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>ssx<span class="sc">$</span>bias <span class="ot">&lt;-</span> buy<span class="sc">/</span>bux</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>ssx<span class="sc">$</span>bias[<span class="fu">grepl</span>(<span class="st">"x"</span>, ssx<span class="sc">$</span>snp)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>ssx <span class="ot">&lt;-</span> ssx <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(pval)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>o <span class="ot">&lt;-</span> <span class="fu">map</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(ssx), \(i){</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> ssx[<span class="dv">1</span><span class="sc">:</span>i,]</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">nsnp=</span>i,</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>        <span class="at">bias=</span><span class="fu">sum</span>(x<span class="sc">$</span>bias<span class="sc">*</span>x<span class="sc">$</span>w) <span class="sc">/</span> <span class="fu">sum</span>(x<span class="sc">$</span>w)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>}) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>o</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(o, <span class="fu">aes</span>(<span class="at">x=</span>nsnp, <span class="at">y=</span>bias)) <span class="sc">+</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_hline</span>(<span class="at">yintercept=</span>bux<span class="sc">*</span>buy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>simfn <span class="ot">&lt;-</span> <span class="cf">function</span>(nsnpx, nsnpu, bux, buy, nid, h2x, h2u, Sx, Su, <span class="at">bax=</span><span class="dv">1</span>) {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    args <span class="ot">&lt;-</span> <span class="fu">environment</span>() <span class="sc">%&gt;%</span> <span class="fu">as.list</span>() <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>()</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    mapx <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">snp=</span><span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span>nsnpx, <span class="st">"x"</span>), <span class="at">af=</span><span class="fu">runif</span>(nsnpx, <span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    mapu <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">snp=</span><span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span>nsnpu, <span class="st">"u"</span>), <span class="at">af=</span><span class="fu">runif</span>(nsnpu, <span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    paramsx <span class="ot">&lt;-</span> <span class="fu">generate_gwas_params</span>(<span class="at">map=</span>mapx, <span class="at">h2=</span>h2x, <span class="at">S=</span>Sx, <span class="at">Pi=</span><span class="dv">1</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    paramsu <span class="ot">&lt;-</span> <span class="fu">generate_gwas_params</span>(<span class="at">map=</span>mapu, <span class="at">h2=</span>h2u, <span class="at">S=</span>Su, <span class="at">Pi=</span><span class="dv">1</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    params <span class="ot">&lt;-</span> <span class="fu">rbind</span>(paramsx <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">beta=</span>beta<span class="sc">*</span>bax), paramsu <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">beta=</span>beta <span class="sc">*</span> bux))</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    ssx <span class="ot">&lt;-</span> <span class="fu">generate_gwas_ss</span>(params, nid)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    ssx<span class="sc">$</span>beta <span class="ot">&lt;-</span> params<span class="sc">$</span>beta</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    ssx<span class="sc">$</span>w <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>ssx<span class="sc">$</span>se<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    ssx<span class="sc">$</span>bias <span class="ot">&lt;-</span> buy<span class="sc">/</span>bux</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    ssx<span class="sc">$</span>bias[<span class="fu">grepl</span>(<span class="st">"x"</span>, ssx<span class="sc">$</span>snp)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    ssx <span class="ot">&lt;-</span> ssx <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">h2 =</span> beta<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> <span class="dv">2</span> <span class="sc">*</span> af <span class="sc">*</span> (<span class="dv">1</span><span class="sc">-</span>af))</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    ssx <span class="ot">&lt;-</span> ssx <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(pval)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    o <span class="ot">&lt;-</span> <span class="fu">map</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(ssx), \(i){</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        x <span class="ot">&lt;-</span> ssx[<span class="dv">1</span><span class="sc">:</span>i,]</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">nsnp=</span>i,</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">propsnp=</span>nsnp<span class="sc">/</span><span class="fu">nrow</span>(ssx),</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>            <span class="at">proph2=</span><span class="fu">sum</span>(x<span class="sc">$</span>h2) <span class="sc">/</span> <span class="fu">sum</span>(ssx<span class="sc">$</span>h2),</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>            <span class="at">bias=</span><span class="fu">sum</span>(x<span class="sc">$</span>bias<span class="sc">*</span>x<span class="sc">$</span>w) <span class="sc">/</span> <span class="fu">sum</span>(x<span class="sc">$</span>w)</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    }) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bind_cols</span>(args, o)</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>o <span class="ot">&lt;-</span> <span class="fu">simfn</span>(<span class="dv">1000</span>, <span class="dv">1000</span>, <span class="fl">0.1</span>, <span class="fl">0.4</span>, <span class="dv">10000000</span>, <span class="fl">0.3</span>, <span class="fl">0.3</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(o, <span class="fu">aes</span>(<span class="at">x=</span>nsnp, <span class="at">y=</span>bias)) <span class="sc">+</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_hline</span>(<span class="at">yintercept=</span>o<span class="sc">$</span>bux[<span class="dv">1</span>]<span class="sc">*</span>o<span class="sc">$</span>buy[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">bux =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">by=</span><span class="fl">0.2</span>),</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">buy =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">by=</span><span class="fl">0.2</span>),</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">nsnpx =</span> <span class="fu">c</span>(<span class="dv">2000</span>),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">nsnpu =</span> <span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">4000</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">map</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(params), \(i) {</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">simfn</span>(params<span class="sc">$</span>nsnpx[i], params<span class="sc">$</span>nsnpu[i], params<span class="sc">$</span>bux[i], params<span class="sc">$</span>buy[i], <span class="dv">1000000</span>, <span class="fl">0.4</span>, <span class="fl">0.4</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>}, <span class="at">.progress=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> res <span class="sc">%&gt;%</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(bux, buy, nsnpx, nsnpu) <span class="sc">%&gt;%</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">propsnp=</span>nsnp<span class="sc">/</span><span class="fu">max</span>(nsnp))</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>obsbias <span class="ot">&lt;-</span> res <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(bux, buy) <span class="sc">%&gt;%</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">obsbias=</span>bux[<span class="dv">1</span>] <span class="sc">*</span> buy[<span class="dv">1</span>])</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> res <span class="sc">%&gt;%</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(bux <span class="sc">!=</span> <span class="dv">0</span>, buy <span class="sc">!=</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(., <span class="fu">aes</span>(<span class="at">x=</span>propsnp, <span class="at">y=</span>bias, <span class="at">group=</span><span class="fu">as.factor</span>(nsnpu))) <span class="sc">+</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">colour=</span><span class="fu">as.factor</span>(nsnpu))) <span class="sc">+</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">data=</span>obsbias, <span class="fu">aes</span>(<span class="at">yintercept=</span>obsbias)) <span class="sc">+</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(bux <span class="sc">~</span> buy)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>p1</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(p1, <span class="at">file=</span><span class="st">"res.pdf"</span>, <span class="at">width=</span><span class="dv">15</span>, <span class="at">height=</span><span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">bax =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="dv">1</span>),</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">bux =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="dv">1</span>),</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">buy =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="dv">1</span>),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">nsnpx =</span> <span class="fu">c</span>(<span class="dv">2000</span>),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">nsnpu =</span> <span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">4000</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>res2 <span class="ot">&lt;-</span> <span class="fu">map</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(params), \(i) {</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">simfn</span>(params<span class="sc">$</span>nsnpx[i], params<span class="sc">$</span>nsnpu[i], params<span class="sc">$</span>bux[i], params<span class="sc">$</span>buy[i], <span class="dv">1000000</span>, <span class="fl">0.4</span>, <span class="fl">0.4</span>, <span class="dv">0</span>, <span class="dv">0</span>, params<span class="sc">$</span>bax[i])</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>}, <span class="at">.progress=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>obsbias <span class="ot">&lt;-</span> res2 <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(bax, bux, buy) <span class="sc">%&gt;%</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">obsbias=</span>bux[<span class="dv">1</span>] <span class="sc">*</span> buy[<span class="dv">1</span>])</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> res2 <span class="sc">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(bux <span class="sc">!=</span> <span class="dv">0</span>, buy <span class="sc">!=</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(., <span class="fu">aes</span>(<span class="at">x=</span>proph2, <span class="at">y=</span>bias, <span class="at">group=</span><span class="fu">as.factor</span>(nsnpu))) <span class="sc">+</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">colour=</span><span class="fu">as.factor</span>(nsnpu))) <span class="sc">+</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">data=</span>obsbias, <span class="fu">aes</span>(<span class="at">yintercept=</span>obsbias)) <span class="sc">+</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(bux <span class="sc">~</span> buy <span class="sc">+</span> bax, <span class="at">labeller =</span> label_both)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>p2</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(p2, <span class="at">file=</span><span class="st">"res2.pdf"</span>, <span class="at">width=</span><span class="dv">15</span>, <span class="at">height=</span><span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Use power</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>simfn2 <span class="ot">&lt;-</span> <span class="cf">function</span>(nsnpx, nsnpu, bux, buy, nid, h2x, h2u, Sx, Su, <span class="at">bax=</span><span class="dv">1</span>) {</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    args <span class="ot">&lt;-</span> <span class="fu">environment</span>() <span class="sc">%&gt;%</span> <span class="fu">as.list</span>() <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>()</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    mapx <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">snp=</span><span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span>nsnpx, <span class="st">"x"</span>), <span class="at">af=</span><span class="fu">runif</span>(nsnpx, <span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    mapu <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">snp=</span><span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span>nsnpu, <span class="st">"u"</span>), <span class="at">af=</span><span class="fu">runif</span>(nsnpu, <span class="fl">0.01</span>, <span class="fl">0.99</span>))</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    paramsx <span class="ot">&lt;-</span> <span class="fu">generate_gwas_params</span>(<span class="at">map=</span>mapx, <span class="at">h2=</span>h2x, <span class="at">S=</span>Sx, <span class="at">Pi=</span><span class="dv">1</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    paramsu <span class="ot">&lt;-</span> <span class="fu">generate_gwas_params</span>(<span class="at">map=</span>mapu, <span class="at">h2=</span>h2u, <span class="at">S=</span>Su, <span class="at">Pi=</span><span class="dv">1</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    params <span class="ot">&lt;-</span> <span class="fu">rbind</span>(paramsx <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">beta=</span>beta<span class="sc">*</span>bax), paramsu <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">beta=</span>beta <span class="sc">*</span> bux))</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    o <span class="ot">&lt;-</span> <span class="fu">map</span>(nid, \(i){</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>        ssx <span class="ot">&lt;-</span> <span class="fu">generate_gwas_ss</span>(params, i)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        ssx<span class="sc">$</span>w <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>ssx<span class="sc">$</span>se<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        ssx<span class="sc">$</span>bias <span class="ot">&lt;-</span> buy<span class="sc">/</span>bux</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>        ssx<span class="sc">$</span>bias[<span class="fu">grepl</span>(<span class="st">"x"</span>, ssx<span class="sc">$</span>snp)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        ssx <span class="ot">&lt;-</span> ssx <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">h2 =</span> bhat<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> <span class="dv">2</span> <span class="sc">*</span> af <span class="sc">*</span> (<span class="dv">1</span><span class="sc">-</span>af))</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>        ssx <span class="ot">&lt;-</span> ssx <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(pval)</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>        x <span class="ot">&lt;-</span> ssx <span class="sc">%&gt;%</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>            <span class="fu">mutate</span>(</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>                <span class="at">n=</span>i,</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>                <span class="at">pow =</span> <span class="fu">pwr.r.test</span>(<span class="at">n=</span>i, <span class="at">r=</span><span class="fu">sqrt</span>(ssx<span class="sc">$</span>h2), <span class="at">sig.level=</span><span class="fl">5e-8</span>)<span class="sc">$</span>power,</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>            ) <span class="sc">%&gt;%</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>            <span class="fu">summarise</span>(</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>                <span class="at">bias =</span> <span class="fu">sum</span>(bias <span class="sc">*</span> w <span class="sc">*</span> pow) <span class="sc">/</span> <span class="fu">sum</span>(w <span class="sc">*</span> pow),</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>                <span class="at">nsnp =</span> <span class="fu">sum</span>(pow),</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>                <span class="at">proph2 =</span> <span class="fu">sum</span>(h2<span class="sc">/</span><span class="fu">sum</span>(h2) <span class="sc">*</span> pow),</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(x)</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>    }) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bind_cols</span>(args, o)</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>params <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">bax =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="dv">1</span>),</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">bux =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="dv">1</span>),</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">buy =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="dv">1</span>),</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">nsnpx =</span> <span class="fu">c</span>(<span class="dv">2000</span>),</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">nsnpu =</span> <span class="fu">c</span>(<span class="dv">2000</span>, <span class="dv">4000</span>)</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>res3 <span class="ot">&lt;-</span> <span class="fu">map</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(params), \(i) {</span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">simfn2</span>(params<span class="sc">$</span>nsnpx[i], params<span class="sc">$</span>nsnpu[i], params<span class="sc">$</span>bux[i], params<span class="sc">$</span>buy[i], <span class="fu">seq</span>(<span class="dv">10000</span>,<span class="dv">10000000</span>,<span class="at">by=</span><span class="dv">10000</span>), <span class="fl">0.4</span>, <span class="fl">0.4</span>, <span class="dv">0</span>, <span class="dv">0</span>, params<span class="sc">$</span>bax[i])</span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>}, <span class="at">.progress=</span><span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>obsbias <span class="ot">&lt;-</span> res3 <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(bax, bux, buy) <span class="sc">%&gt;%</span></span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">obsbias=</span>bux[<span class="dv">1</span>] <span class="sc">*</span> buy[<span class="dv">1</span>])</span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a>p3 <span class="ot">&lt;-</span> res3 <span class="sc">%&gt;%</span></span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(bux <span class="sc">!=</span> <span class="dv">0</span>, buy <span class="sc">!=</span> <span class="dv">0</span>, nid <span class="sc">&lt;</span> <span class="dv">1000000</span>, bax<span class="sc">==</span><span class="fl">0.1</span>, nsnp <span class="sc">&gt;=</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(., <span class="fu">aes</span>(<span class="at">x=</span>nid, <span class="at">y=</span>bias, <span class="at">group=</span><span class="fu">as.factor</span>(nsnpu))) <span class="sc">+</span></span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">colour=</span><span class="fu">as.factor</span>(nsnpu))) <span class="sc">+</span></span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">data=</span>obsbias, <span class="fu">aes</span>(<span class="at">yintercept=</span>obsbias)) <span class="sc">+</span></span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(bux <span class="sc">~</span> buy, <span class="at">labeller =</span> label_both)</span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(p3, <span class="at">file=</span><span class="st">"res3.pdf"</span>, <span class="at">width=</span><span class="dv">15</span>, <span class="at">height=</span><span class="dv">15</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1000000</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">scale</span>(<span class="fu">rnorm</span>(<span class="dv">1000000</span>, <span class="at">sd=</span><span class="fl">0.9</span>) <span class="sc">+</span> u <span class="sc">*</span> <span class="fl">0.1</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">scale</span>(<span class="fu">rnorm</span>(<span class="dv">1000000</span>, <span class="at">sd=</span><span class="fl">0.9</span>) <span class="sc">+</span> u <span class="sc">*</span> <span class="fl">0.1</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(u,x)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(u,y)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(y,x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>R version 4.2.3 Patched (2023-03-15 r84020)
+Platform: aarch64-apple-darwin20 (64-bit)
+Running under: macOS Monterey 12.6.2
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/4.2-arm64/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] pwr_1.3-0         purrr_1.0.1       TwoSampleMR_0.5.6 simulateGP_0.1.2 
+[5] ggplot2_3.4.0     dplyr_1.0.10     
+
+loaded via a namespace (and not attached):
+ [1] Rcpp_1.0.9        plyr_1.8.7        pillar_1.8.1      compiler_4.2.3   
+ [5] tools_4.2.3       digest_0.6.31     jsonlite_1.8.4    evaluate_0.19    
+ [9] lifecycle_1.0.3   tibble_3.1.8      gtable_0.3.1      pkgconfig_2.0.3  
+[13] rlang_1.0.6       DBI_1.1.3         cli_3.5.0         yaml_2.3.6       
+[17] xfun_0.36         fastmap_1.1.0     withr_2.5.0       stringr_1.5.0    
+[21] knitr_1.41        generics_0.1.3    vctrs_0.5.1       htmlwidgets_1.5.4
+[25] grid_4.2.3        tidyselect_1.2.0  glue_1.6.2        R6_2.5.1         
+[29] fansi_1.0.3       rmarkdown_2.16    farver_2.1.1      magrittr_2.0.3   
+[33] scales_1.2.1      htmltools_0.5.4   assertthat_0.2.1  colorspace_2.0-3 
+[37] labeling_0.4.2    utf8_1.2.2        stringi_1.7.8     munsell_0.5.0    </code></pre>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
