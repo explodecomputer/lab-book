@@ -219,6 +219,17 @@ The rate at which higher sample size leads MR estimates becomes biased depends o
 - The heritability of $u$ is higher
 - The polygenicity of $u$ is lower (i.e. effects are more discoverable)
 
+## Alternative simulation method
+
+Suppose X has some h2 and polygenicity, but all the instruments are mediated by something.
+
+```{r}
+# TODO
+
+```
+
+
+
 ## Ignore the rest
 
 ```{r, eval=FALSE}

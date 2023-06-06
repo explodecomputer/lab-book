@@ -1,0 +1,54 @@
+---
+title: "Checking PCA projection"
+author: Gibran Hemani
+date: "2023-06-06"
+categories: [Statistics]
+---
+
+## Background
+
+Need to be able to calculate genetic principal components in unrelateds and then project into relateds.
+
+Simulate
+
+```{r}
+library(MASS)
+m <- 20
+A <- matrix(runif(m^2)*2-1, ncol=m)
+sigma <- t(A) %*% A
+gen <- mvrnorm(1000, rep(0, m), sigma)
+```
+
+Generate in full sample
+
+```{r}
+pcafull <- princomp(gen)
+names(pcafull)
+```
+
+
+Generate in 90%
+
+```{r}
+pca90 <- princomp(gen[1:900,])
+```
+
+Project into remaining 10%
+
+```{r}
+pca10 <- gen[901:1000,] %*% pca90$loadings
+```
+
+correlate full with projected
+
+```{r}
+diag(cor(pca10, pcafull$scores[901:1000,]))
+```
+
+This works fine. Looks like GCTA does something similar here: https://yanglab.westlake.edu.cn/software/gcta/#PCloadingandprojection
+
+---
+
+```{r}
+sessionInfo()
+```
