@@ -78,4 +78,45 @@ reg_nonind(x, y, rho, 10)
 summary(lm(y~x))
 ```
 
+From equation 1 in the MTAG paper - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5805593/
+
+```{r}
+
+fn <- function(b, r, s, i) {
+  (t(r[,i]) / r[i,i] * solve(r - (r[,i] %*% t(r[,i])) / r[i,i] + s)) / (t(r[,i]) / r[i,i] * solve(r - (r[,i] %*% t(r[,i])) / r[i,i] + s) * t(r[,i]) / r[i,i])
+}
+```
+
+
+
+```{r}
+
+fixed_effects_meta_analysis <- function(beta_mat, se_mat) {
+  w <- 1 / se_mat^2
+  beta <- rowSums(beta_mat * w) / rowSums(w)
+  se <- sqrt(1 / rowSums(w))
+  pval <- pnorm(abs(beta / se), lower.tail = FALSE)
+  tibble(beta, se, pval) %>% return
+}
+
+library(simulateGP)
+g <- make_geno(1000, 1000, 0.01)
+y1 <- rnorm(1000)
+y2 <- rnorm(1000)
+
+o1 <- gwas(y1, g)
+o2 <- gwas(y2, g)
+
+cor(o1$bhat, o2$bhat)
+summary(lm(o1$bhat ~ o2$bhat))
+
+
+meta <- fixed_effects_meta_analysis(cbind(o1$bhat, o2$bhat), cbind(o1$se, o2$se))
+meta
+table(o1$pval < 0.05)
+table(o2$pval < 0.05)
+table(meta$pval < 0.05)
+
+
+```
 

@@ -2,6 +2,9 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/2023-07-06-2sls-se/index.html",
+      "/posts/2023-07-05-interactions-and-scale/index.html",
+      "/posts/2023-06-07-cross-group-effect-comparison/2023-06-09-interaction-distribution/index.html",
       "/posts/2023-06-07-cross-group-effect-comparison/index.html",
       "/posts/2023-06-06-pca-projection/index.html",
       "/posts/2023-05-13-mr-confounder/index.html",

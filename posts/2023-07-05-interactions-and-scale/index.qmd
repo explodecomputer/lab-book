@@ -1,0 +1,71 @@
+---
+title: "Interactions and scale"
+author: Gibran Hemani
+date: "2023-07-05"
+categories: []
+---
+
+## Background
+
+Absolute and relative risks will change across populations if the baseline risks are different.
+
+For example, suppose BMI increases CHD by 20% per SD. BMI is distributed differently in two populations
+
+
+```{r}
+library(dplyr)
+n <- 10000000
+
+dat <- tibble(
+    bmi_1 = rnorm(n, 25, sd=5),
+    bmi_2 = rnorm(n, 20, sd=5),
+    chdr_1 = 0.2,
+    chdr_2 = 0.2
+)
+
+
+
+dat$chdr_1[dat$bmi_1 > 27] <- 0.2*1.5
+dat$chdr_2[dat$bmi_2 > 27] <- 0.2*1.5
+
+dat$chd_1 <- rbinom(n, 1, dat$chdr_1)
+dat$chd_2 <- rbinom(n, 1, dat$chdr_2)
+
+dat
+mean(dat$chdr_1)
+mean(dat$chdr_2)
+mean(dat$chd_1)
+mean(dat$chd_2)
+
+rr1 <- mean(dat$chd_1[dat$bmi_1 > 27]) / mean(dat$chd_1)
+rr2 <- mean(dat$chd_2[dat$bmi_2 > 27]) / mean(dat$chd_2)
+rr1
+rr2
+
+```
+
+
+```{r}
+glm(chd_1 ~ bmi_1, dat, family="binomial")$coef[2]
+glm(chd_2 ~ bmi_2, dat, family="binomial")$coef[2]
+
+glm(chd_1 ~ bmi_1>27, dat, family="binomial")$coef[2]
+glm(chd_2 ~ bmi_2>27, dat, family="binomial")$coef[2]
+
+```
+
+
+```{r}
+lm(chd_1 ~ bmi_1>27, dat)$coef[2]
+lm(chd_2 ~ bmi_2>27, dat)$coef[2]
+
+lm(chd_1 ~ bmi_1>27, dat)$coef[2]
+lm(chd_2 ~ bmi_2>27, dat)$coef[2]
+
+```
+
+---
+
+```{r}
+sessionInfo()
+```

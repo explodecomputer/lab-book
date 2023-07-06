@@ -1,0 +1,75 @@
+---
+title: "Standard error in two-stage least squares"
+author: Gibran Hemani
+date: "2023-07-06"
+categories: [statistics]
+---
+
+## Background
+
+How to calculate the 2sls SE that is returned by e.g. ivreg
+
+```{r}
+library(ivreg)
+library(dplyr)
+set.seed(1234)
+
+# Simulate
+n <- 1000
+z <- matrix(rnorm(n*2), n)
+u <- rnorm(n)
+x <-  z %*% c(0.1, 0.2) + rnorm(n) + u
+y <- u + x * 0.3 + rnorm(n)
+
+d <- tibble(z[,1], z[,2], x, y)
+names(d) <- c("z1", "z2", "x", "y")
+head(d)
+```
+
+Estimate with ivreg
+
+```{r}
+summary(ivreg(y ~ x | z1 + z2, data=d))
+```
+
+Manual estimation based on https://stats.stackexchange.com/questions/265780/calculation-of-iv-standard-errors-using-r
+
+```{r}
+Pz <- z %*% solve(t(z) %*% z) %*% t(z)
+bhat <- solve(t(x) %*% Pz %*% x) %*% t(x) %*% Pz %*% y
+omega <- diag(n) * drop(var(y))
+v <- solve(t(x) %*% Pz %*% x) %*% t(x) %*% Pz %*% omega %*% Pz %*% x %*% solve(t(x) %*% Pz %*% x)
+```
+
+Result
+
+```{r}
+bhat
+sqrt(v)
+```
+
+bhat matches, standard error seems off
+
+Alternatively try a more standard approach - https://stats.stackexchange.com/questions/472144/how-to-manually-calculate-standard-errors-for-instrumental-variables
+
+```{r}
+xhat <- z %*% solve(t(z) %*% z) %*% t(z) %*% x
+bhat <- solve(t(xhat) %*% xhat) %*% t(xhat) %*% y
+e <- y - x %*% bhat
+C <- sum(e^2) / n * solve(t(xhat) %*% xhat)
+```
+
+Result
+
+```{r}
+bhat
+sqrt(C)
+```
+
+This matches ivreg more closely
+
+---
+
+```{r}
+sessionInfo()
+```

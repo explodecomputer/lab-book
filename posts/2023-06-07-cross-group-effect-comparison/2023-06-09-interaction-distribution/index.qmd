@@ -1,0 +1,62 @@
+---
+title: "Differential susceptibility explained by interactors and mediators with different distributions"
+author: Gibran Hemani
+date: "2023-06-09"
+categories: [interactions, multi-ancestry]
+---
+
+## Background
+
+What leads to different effect estimates in different populations? If the DAG is the same, then different distributions of mediators and interactions could explain different effects
+
+```{r}
+n <- 100000
+
+g1 <- rbinom(n, 2, 0.3)
+g2 <- rbinom(n, 2, 0.3)
+
+# The liability for the mediator 
+# Influenced by g (same effect in both populations)
+# Influenced by some other variable that gives it a different mean in the two populations
+# Now liability of mediator has different means
+ml1 <- plogis(scale(g1) + rnorm(n, 2, 1))
+ml2 <- plogis(scale(g2) + rnorm(n, 0, 1))
+
+hist(ml1)
+hist(ml2)
+```
+
+```{r}
+# Generate mediators - they have different means
+m1 <- rbinom(n, 1, ml1)
+m2 <- rbinom(n, 1, ml2)
+mean(m1)
+mean(m2)
+```
+
+Disease influenced by mediator and noise (same effects)
+
+```{r}
+d1 <- rbinom(n, 1, plogis(m1 + rnorm(n)))
+d2 <- rbinom(n, 1, plogis(m2 + rnorm(n)))
+
+mean(d1)
+mean(d2)
+```
+
+Slightly different prevalence in different populations. 
+
+The genotypic effect is now different in the two populations due to different
+
+```{r}
+glm(d1 ~ g1, family="binomial")
+glm(d2 ~ g2, family="binomial")
+```
+
+
+
+---
+
+```{r}
+sessionInfo()
+```
