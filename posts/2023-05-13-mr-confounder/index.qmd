@@ -229,7 +229,6 @@ Suppose X has some h2 and polygenicity, but all the instruments are mediated by 
 ```
 
 
-
 ## Ignore the rest
 
 ```{r, eval=FALSE}

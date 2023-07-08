@@ -1,0 +1,224 @@
+---
+title: "Confounder instruments via networks"
+author: Gibran Hemani
+date: "2023-07-07"
+categories: [confounding, mr]
+---
+
+## Background
+
+In a previous [post](../2023-05-13-mr-confounder/index.qmd) looked at the rate of bias as GWAS sample size increases. It was predicated on smaller effects more likely acting via confounders.
+
+What is the justification for smaller effects acting via confounders? After all, all effects likely act via mediators. Some of those mediators will confound a X-Y relationship while some will not. Is there any reason to believe that as effects get smaller they're more likely to act via a confounder?
+
+Imagine a large DAG representing the genotype-phenotype map. All nodes that have no parents are genetic variants. All other nodes are traits. If you choose any two traits, one as the exposure and one as the outcome, what is the nature of the instruments for the exposure? Hypothesis: the instruments that are mediated by confounders are likely to be more distal from the exposure, compared to those that act via non-confounding mediators.
+
+These simulations aim to test that.
+
+
+```{r}
+library(dagitty)
+library(dplyr)
+library(furrr)
+library(ggplot2)
+library(tictoc)
+
+simulategraphconf <- function(n, p) {
+	# Generate graph
+	g <- dagitty::randomDAG(n, p)
+
+	# All ancestors
+	anc <- lapply(names(g), \(x) ancestors(g, x))
+	names(anc) <- names(g)
+
+	# Identify genetic factors (no ancestors)
+	temp <- lapply(anc, length)
+	temp <- tibble(node=names(temp), nanc=unlist(temp))
+
+	gen <- subset(temp, nanc==1)$node
+	message("Number of genetic variants: ", length(gen))
+
+	traits <- subset(temp, nanc != 1)$node
+	message("Number of traits: ", length(traits))
+	# Find distance of all genetic variants to 
+
+	# Find all trait pairs
+	tp <- lapply(traits, \(tr) {
+		temp <- ancestors(g, tr)
+		tibble(x=temp, y=tr) %>%
+			filter(! x %in% c(gen, tr))
+	}) %>% bind_rows
+	# tp <- expand.grid(x=traits, y=traits) %>%
+	# 	as_tibble() %>%
+	# 	filter(x != y)
+	message("Number of trait pairs: ", nrow(tp))
+
+	res <- furrr::future_map(1:min(nrow(tp), 500), \(i)
+	{
+		x_ancestors <- ancestors(g, tp$x[i])
+		x_ancestors <- x_ancestors[x_ancestors %in% gen]
+		y_ancestors <- ancestors(g, tp$y[i])
+		y_ancestors <- y_ancestors[y_ancestors %in% gen]
+
+		conf <- c()
+		nonconf <- c()
+		for(a in y_ancestors)
+		{
+			x <- paths(g, a, tp$y[i], dir=T)$paths
+			if(any(!grepl(paste0(" ", tp$x[i], " "), x)))
+			{
+				conf <- c(conf, a)
+			} else {
+				nonconf <- c(nonconf, a)
+			}
+		}
+		bind_rows(
+			lapply(conf, function(co)
+			{
+				pa <- paths(g, co, tp$x[i], directed=TRUE)$paths
+				if(length(pa) != 0)
+				{
+					tibble(
+						x=tp$x[i],
+						y=tp$y[i],
+						gen=co,
+						type="confounder",
+						w=pa %>%
+							sapply(., function(x)
+							{
+								stringr::str_count(x, "->") %>%
+								unlist() %>%
+								{0.2^.}
+							}) %>% sum
+					)
+				} else {
+					NULL
+				}
+			}) %>% bind_rows(),
+			lapply(nonconf, function(co)
+			{
+				pa <- paths(g, co, tp$x[i], directed=TRUE)$paths
+				if(length(pa) != 0)
+				{
+					tibble(
+						x=tp$x[i],
+						y=tp$y[i],
+						gen=co,
+						type="direct",
+						w=pa %>%
+							sapply(., function(x)
+							{
+								stringr::str_count(x, "->") %>%
+								unlist() %>%
+								{0.2^.}
+							}) %>% sum
+					)
+				} else {
+					NULL
+				}
+			}) %>% bind_rows()
+		)
+	}) %>% bind_rows()
+	# res$causal <- paste(res$x, res$y) %in% paste(tpc$x, tpc$y)
+	return(res)
+}
+
+set.seed(1234) # note this doesn't work for dagitty - for seed should use pcalg
+plan(multisession, workers=1)
+tic()
+res <- simulategraphconf(50, 0.1)
+toc()
+res %>% group_by(type) %>% summarise(
+	n=n(),
+	w=mean(w)
+)
+```
+
+Run the simulations (note, ran this externally on epifranklin)
+
+```{r, eval=FALSE}
+param <- expand.grid(
+	n=seq(75, 150, by=25),
+	p=seq(0.01, 0.1, by=0.01),
+	rep=c(1:10)
+)
+
+res <- lapply(1:nrow(param), \(i) {
+	message(i)
+	res <- simulategraphconf(param$n[i], param$p[i])
+	res %>% group_by(type) %>% summarise(
+		ntype=n(),
+		w=mean(w)
+	) %>% mutate(
+		n=param$n[i],
+		p=param$p[i],
+		rep=param$rep[i]
+	)
+}) %>% bind_rows(res)
+```
+
+```{r}
+res <- readRDS("mrnetworkconf.rds")
+res %>%
+ggplot(., aes(x=p, y=w)) +
+geom_jitter(aes(colour=type, size=n), alpha=0.4, width=0.001) +
+geom_smooth(aes(colour=type), se=F) +
+labs(size="Graph size", x="Graph density", y="Mean effect size (arbitrary units)", colour="Mediating traits")
+```
+
+So the effect sizes for instruments acting via non-confounders tend to be substantially larger than those acting via confounders.
+
+```{r}
+ggsave("mrnetworkconf.pdf")
+```
+
+## Alternative graph generating method
+
+Phenomic layers. But it's not clear how to generate this realistically. Not implemented in sims yet.
+
+```{r}
+
+sim_graph <- function(ng, ne, np, nm, nd, nge, nep, npm, nmd) {
+	links <- bind_rows(
+		tibble(
+			x=sample(paste0("g", 1:ng), nge, replace=TRUE),
+			y=sample(paste0("e", 1:ne), nge, replace=TRUE)
+		),
+		tibble(
+			x=sample(paste0("e", 1:ne), nep, replace=TRUE),
+			y=sample(paste0("p", 1:np), nep, replace=TRUE)
+		),
+		tibble(
+			x=sample(paste0("p", 1:np), npm, replace=TRUE),
+			y=sample(paste0("m", 1:nm), npm, replace=TRUE)
+		),
+		tibble(
+			x=sample(paste0("m", 1:nm), nmd, replace=TRUE),
+			y=sample(paste0("d", 1:nd), nmd, replace=TRUE)
+		)
+	) %>% mutate(
+		rel=paste0(x, " -> ", y)
+	)
+	g <- dagitty(paste("dag{",
+		paste(links$rel, collapse="\n"),
+	"}"))
+	return(g)
+}
+
+g <- sim_graph(400, 200, 300, 400, 20, 600, 200, 200, 300)
+plot(g)
+
+ancestors(g, "d1") %>% {grep("g", ., value=TRUE)}
+
+paths(g, "g79", "d1", dir=T)
+paths(g, "g79", "d3", dir=T)
+
+```
+
+
+
+---
+
+```{r}
+sessionInfo()
+```
