@@ -1,0 +1,125 @@
+---
+title: "Meta regression using exposure effect size"
+author: Gibran Hemani
+date: "2023-07-09"
+categories: []
+---
+
+
+## Background
+
+1. Simulate individual level data in system in which u causes x and y, and both x and u have independent instruments
+2. Identify instruments (should include many gx and some gu)
+3. Estimate heterogeneity contribution from each instrument
+4. Meta regression of instrument strength against heterogeneity
+
+
+
+```{r}
+library(simulateGP)
+library(TwoSampleMR)
+
+# 1. simulate system
+nid <- 100000
+nsnp <- 1000
+gx <- make_geno(nid, nsnp, 0.4)
+gu <- make_geno(nid, nsnp, 0.4)
+bx <- choose_effects(nsnp, sqrt(0.4))
+bu <- choose_effects(nsnp, sqrt(0.4))
+u <- make_phen(bu, gu)
+x <- make_phen(c(bx, 0.4), cbind(gx, u))
+y <- make_phen(c(0.4, 0.4), cbind(x, u))
+```
+
+```{r}
+# 2. Identify instruments
+dat <- get_effs(x, y, cbind(gx, gu))
+dats <- subset(dat, pval.exposure < (0.05/2000))
+str(dat)
+```
+
+```{r}
+table(dats$SNP > 1000)
+```
+
+```{r}
+dats$strength <- cut(-log10(dats$pval.exposure), breaks=quantile(-log10(dats$pval.exposure), probs=seq(0, 1, 0.1)))
+table(dats$strength)
+```
+
+```{r}
+# Overall MR estimate
+res <- mr(dats, method="mr_ivw")
+res
+```
+
+
+Stratify by instrument strength
+
+
+```{r}
+dats %>% group_by(strength) %>% do({mr(., method="mr_ivw")}) %>% 
+    ggplot(., aes(x=strength, y=b)) +
+    geom_point() +
+    geom_errorbar(aes(ymin=b-se*1.96, ymax=b+se*1.96), width=0) +
+    geom_hline(yintercept=0.4) +
+    labs(x="Instrument strength", y="MR effect estimate")
+```
+
+```{r}
+# 3. Estimate heterogeneity
+ss <- mr_singlesnp(dats) %>% filter(!grepl("All", SNP)) %>% mutate(SNP = as.numeric(SNP))
+ss$qj <- (1/ss$se^2) * (res$b - ss$b)^2
+ss$str <- (dats$beta.exposure/dats$se.exposure)^2
+ss$str2 <- -log10(dats$pval.exposure)
+mr_heterogeneity(dats, method="mr_ivw")$Q == sum(ss$qj)
+```
+
+
+4. Meta regression
+
+
+```{r}
+# All SNPs
+summary(lm(qj ~ str, data=ss))
+```
+
+
+Higher strength means lower heterogeneity
+
+
+```{r}
+# Only x snps
+summary(lm(qj ~ str, data=subset(ss, SNP <= 1000)))
+```
+
+
+Wouldn't expect this - weaker SNPs should contribute more heterogeneity due to weak instrument bias
+
+
+```{r}
+# Only u snps
+summary(lm(qj ~ str, data=subset(ss, SNP > 1000)))
+```
+
+```{r}
+plot(qj ~ str, ss)
+```
+
+```{r}
+plot(qj ~ str, ss %>% filter(SNP > 1000))
+```
+
+```{r}
+plot(qj ~ str, ss %>% filter(SNP <= 1000))
+```
+
+
+
+---
+
+
+```{r}
+sessionInfo()
+```
+

@@ -1,0 +1,196 @@
+---
+title: "Meta regression using exposure effect size"
+author: Gibran Hemani
+date: "2023-07-09"
+categories: []
+---
+
+## Background
+
+1. Simulate individual level data in system in which u causes x and y, and both x and u have independent instruments
+2. Identify instruments (should include many gx and some gu)
+3. Estimate heterogeneity contribution from each instrument
+4. Meta regression of instrument strength against heterogeneity
+
+
+```{r}
+library(simulateGP)
+library(TwoSampleMR)
+
+# 1. simulate system
+nid <- 100000
+nsnp <- 1000
+gx <- make_geno(nid, nsnp, 0.4)
+gu <- make_geno(nid, nsnp, 0.4)
+bx <- choose_effects(nsnp, sqrt(0.4))
+bu <- choose_effects(nsnp, sqrt(0.4))
+u <- make_phen(bu, gu)
+x <- make_phen(c(bx, 0.4), cbind(gx, u))
+y <- make_phen(c(0.4, 0.4), cbind(x, u))
+```
+
+```{r}
+# 2. Identify instruments
+dat <- get_effs(x, y, cbind(gx, gu))
+dats <- subset(dat, pval.exposure < (0.05/2000))
+str(dat)
+```
+
+```{r}
+table(dats$SNP > 1000)
+```
+
+```{r}
+dats$strength <- cut(-log10(dats$pval.exposure), breaks=quantile(-log10(dats$pval.exposure), probs=seq(0, 1, 0.1)))
+table(dats$strength)
+```
+
+```{r}
+# Overall MR estimate
+res <- mr(dats, method="mr_ivw")
+res
+```
+
+Stratify by instrument strength
+
+```{r}
+dats %>% group_by(strength) %>% do({mr(., method="mr_ivw")}) %>% 
+    ggplot(., aes(x=strength, y=b)) +
+    geom_point() +
+    geom_errorbar(aes(ymin=b-se*1.96, ymax=b+se*1.96), width=0) +
+    geom_hline(yintercept=0.4) +
+    labs(x="Instrument strength", y="MR effect estimate")
+```
+
+```{r}
+# 3. Estimate heterogeneity
+ss <- mr_singlesnp(dats) %>% filter(!grepl("All", SNP)) %>% mutate(SNP = as.numeric(SNP))
+ss$qj <- (1/ss$se^2) * (res$b - ss$b)^2
+ss$str <- (dats$beta.exposure/dats$se.exposure)^2
+ss$str2 <- -log10(dats$pval.exposure)
+mr_heterogeneity(dats, method="mr_ivw")$Q == sum(ss$qj)
+```
+
+4. Meta regression
+
+```{r}
+# All SNPs
+summary(lm(qj ~ str, data=ss))
+```
+
+Higher strength means lower heterogeneity
+
+```{r}
+# Only x snps
+summary(lm(qj ~ str, data=subset(ss, SNP <= 1000)))
+```
+
+Wouldn't expect this - weaker SNPs should contribute more heterogeneity due to weak instrument bias
+
+```{r}
+# Only u snps
+summary(lm(qj ~ str, data=subset(ss, SNP > 1000)))
+```
+
+
+```{r}
+plot(qj ~ str, ss)
+```
+
+
+```{r}
+plot(qj ~ str, ss %>% filter(SNP > 1000))
+```
+
+
+
+```{r}
+plot(qj ~ str, ss %>% filter(SNP <= 1000))
+```
+
+Use all SNPs in X only to look at heterogeneity wrt instrument strength
+
+```{r}
+ssx <- mr_singlesnp(dat[1:1000,]) %>% filter(!grepl("All", SNP)) 
+ssx$qj <- (1/ssx$se^2) * (res$b - ssx$b)^2
+ssx$str <- (dat[1:1000,]$beta.exposure/dat[1:1000,]$se.exposure)^2
+
+summary(lm(qj ~ str, ssx))
+
+ggplot(ssx, aes(x=str, y=qj)) +
+geom_point() +
+geom_smooth()
+```
+
+```{r}
+datx <- subset(dat, SNP %in% (1:1000))
+datx$strength <- cut(-log10(datx$pval.exposure), breaks=quantile(-log10(datx$pval.exposure), probs=seq(0, 1, 0.1)))
+table(datx$strength)
+datx %>% group_by(strength) %>% do({mr(., method="mr_ivw")}) %>% 
+    ggplot(., aes(x=strength, y=b)) +
+    geom_point() +
+    geom_errorbar(aes(ymin=b-se*1.96, ymax=b+se*1.96), width=0) +
+    geom_hline(yintercept=0.4) +
+    labs(x="Instrument strength", y="MR effect estimate")
+```
+
+No impact of weak instrument bias on heterogeneity...?
+
+## Empirical example
+
+```{r}
+meta_reg_dat <- function(d){
+    d <- subset(d, mr_keep)
+    res <- mr(d, method="mr_ivw")
+    bivw <- subset(res, method == "Inverse variance weighted")$b
+
+    ss <- mr_singlesnp(d) %>% filter(!grepl("All", SNP))
+    ss$qj <- (1/ss$se^2) * (bivw - ss$b)^2
+    ss$str <-  (d$beta.exposure/d$se.exposure)^2
+    return(ss)
+}
+
+strat_inst_mr <- function(d){
+    d$fval <- (d$beta.exposure/d$se.exposure)^2
+    d$strength <- cut(d$fval, breaks=quantile(d$fval, probs=seq(0, 1, 0.1)))
+    d %>% group_by(strength) %>% do({mr(., method="mr_ivw")}) %>% 
+        ggplot(., aes(x=strength, y=b)) +
+        geom_point() +
+        geom_errorbar(aes(ymin=b-se*1.96, ymax=b+se*1.96), width=0) +
+        geom_hline(yintercept=0.4) +
+        labs(x="Instrument strength", y="MR effect estimate")
+
+}
+
+d <- make_dat("ukb-b-10787", "ebi-a-GCST007431")
+dfev <- make_dat("ukb-b-10787", "ukb-b-19657", prox=F)
+
+ssrat <- meta_reg_dat(d)
+head(ssrat)
+summary(lm(qj ~ str, ssrat))
+```
+
+```{r}
+strat_inst_mr(dfev)
+```
+
+```{r}
+ggplot(ssrat, aes(x=log(str), y=qj)) +
+geom_point() +
+geom_smooth()
+```
+
+
+
+
+## Summary
+
+- U instruments do contribute more to heterogeneity
+- However, there is quite a strong relationship between instrument strength and heterogeneity. I would have expected lower strength to have more weak instrument bias and therefore more heterogeneity, however it is actually the opposite - higher instrument strength has higher heterogeneity amongst X SNPs
+- There is a very strong relationship between instrument strength and heterogeneity amongst U SNPs, this makes sense as the average effect is more weighted towards X SNPs and so stronger U SNPs create a larger departure
+
+---
+
+```{r}
+sessionInfo()
+```

@@ -342,17 +342,17 @@ Attaching package: 'dplyr'</code></pre>
 <span id="cb7-106"><a href="#cb7-106" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
 <span id="cb7-107"><a href="#cb7-107" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">simulategraphconf</span>(<span class="dv">50</span>, <span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Number of genetic variants: 8</code></pre>
+<pre><code>Number of genetic variants: 13</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Number of traits: 42</code></pre>
+<pre><code>Number of traits: 37</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Number of trait pairs: 278</code></pre>
+<pre><code>Number of trait pairs: 191</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>17.931 sec elapsed</code></pre>
+<pre><code>16.505 sec elapsed</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>res <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(type) <span class="sc">%&gt;%</span> <span class="fu">summarise</span>(</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">n=</span><span class="fu">n</span>(),</span>
@@ -362,8 +362,8 @@ Attaching package: 'dplyr'</code></pre>
 <pre><code># A tibble: 2 × 3
   type           n      w
   &lt;chr&gt;      &lt;int&gt;  &lt;dbl&gt;
-1 confounder   437 0.0928
-2 direct       108 0.126 </code></pre>
+1 confounder   310 0.0882
+2 direct       190 0.120 </code></pre>
 </div>
 </div>
 <p>Run the simulations (note, ran this externally on epifranklin)</p>
@@ -460,9 +460,6 @@ Attaching package: 'dplyr'</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in arrows(ax1[directed], -ay1[directed], ax2[directed], -ay2[directed],
-: zero-length arrow is of indeterminate angle and so skipped
-
-Warning in arrows(ax1[directed], -ay1[directed], ax2[directed], -ay2[directed],
 : zero-length arrow is of indeterminate angle and so skipped</code></pre>
 </div>
 <div class="cell-output-display">
@@ -489,9 +486,243 @@ $open
 list()</code></pre>
 </div>
 </div>
+</section>
+<section id="meta-regression-using-exposure-effect-size" class="level2">
+<h2 class="anchored" data-anchor-id="meta-regression-using-exposure-effect-size">Meta regression using exposure effect size</h2>
+<ol type="1">
+<li>Simulate individual level data in system in which u causes x and y, and both x and u have independent instruments</li>
+<li>Identify instruments (should include many gx and some gu)</li>
+<li>Estimate heterogeneity contribution from each instrument</li>
+<li>Meta regression of instrument strength against heterogeneity</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(simulateGP)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(TwoSampleMR)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>TwoSampleMR version 0.5.7 
+[&gt;] New: Option to use non-European LD reference panels for clumping etc
+[&gt;] Some studies temporarily quarantined to verify effect allele
+[&gt;] See news(package='TwoSampleMR') and https://gwas.mrcieu.ac.uk for further details</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'TwoSampleMR'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:simulateGP':
+
+    allele_frequency, contingency, get_population_allele_frequency</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. simulate system</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>nid <span class="ot">&lt;-</span> <span class="dv">100000</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>nsnp <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>gx <span class="ot">&lt;-</span> <span class="fu">make_geno</span>(nid, nsnp, <span class="fl">0.4</span>)</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>gu <span class="ot">&lt;-</span> <span class="fu">make_geno</span>(nid, nsnp, <span class="fl">0.4</span>)</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>bx <span class="ot">&lt;-</span> <span class="fu">choose_effects</span>(nsnp, <span class="fu">sqrt</span>(<span class="fl">0.4</span>))</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>bu <span class="ot">&lt;-</span> <span class="fu">choose_effects</span>(nsnp, <span class="fu">sqrt</span>(<span class="fl">0.4</span>))</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>u <span class="ot">&lt;-</span> <span class="fu">make_phen</span>(bu, gu)</span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">make_phen</span>(<span class="fu">c</span>(bx, <span class="fl">0.4</span>), <span class="fu">cbind</span>(gx, u))</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">make_phen</span>(<span class="fu">c</span>(<span class="fl">0.4</span>, <span class="fl">0.4</span>), <span class="fu">cbind</span>(x, u))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Identify instruments</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">get_effs</span>(x, y, <span class="fu">cbind</span>(gx, gu))</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>dats <span class="ot">&lt;-</span> <span class="fu">subset</span>(dat, pval.exposure <span class="sc">&lt;</span> (<span class="fl">0.05</span><span class="sc">/</span><span class="dv">2000</span>))</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(dat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tibble [2,000 × 18] (S3: tbl_df/tbl/data.frame)
+ $ SNP                : int [1:2000] 1 2 3 4 5 6 7 8 9 10 ...
+ $ exposure           : chr [1:2000] "X" "X" "X" "X" ...
+ $ id.exposure        : chr [1:2000] "X" "X" "X" "X" ...
+ $ outcome            : chr [1:2000] "Y" "Y" "Y" "Y" ...
+ $ id.outcome         : chr [1:2000] "Y" "Y" "Y" "Y" ...
+ $ beta.exposure      : num [1:2000] -0.0368 0.0252 0.0335 -0.0272 0.0328 ...
+ $ beta.outcome       : num [1:2000] -0.0185 0.00598 0.01851 -0.00805 0.00889 ...
+ $ se.exposure        : num [1:2000] 0.00456 0.00457 0.00456 0.00457 0.00455 ...
+ $ se.outcome         : num [1:2000] 0.00456 0.00457 0.00456 0.00457 0.00455 ...
+ $ pval.exposure      : num [1:2000] 6.98e-16 3.51e-08 2.07e-13 2.48e-09 5.95e-13 ...
+ $ pval.outcome       : num [1:2000] 5.03e-05 1.91e-01 5.01e-05 7.81e-02 5.09e-02 ...
+ $ samplesize.exposure: num [1:2000] 1e+05 1e+05 1e+05 1e+05 1e+05 1e+05 1e+05 1e+05 1e+05 1e+05 ...
+ $ samplesize.outcome : num [1:2000] 1e+05 1e+05 1e+05 1e+05 1e+05 1e+05 1e+05 1e+05 1e+05 1e+05 ...
+ $ units.exposure     : chr [1:2000] "SD" "SD" "SD" "SD" ...
+ $ units.outcome      : chr [1:2000] "SD" "SD" "SD" "SD" ...
+ $ rsq.exposure       : num [1:2000] 0.000651 0.000304 0.000539 0.000355 0.000519 ...
+ $ rsq.outcome        : num [1:2000] 1.64e-04 1.71e-05 1.64e-04 3.10e-05 3.81e-05 ...
+ $ mr_keep            : logi [1:2000] TRUE TRUE TRUE TRUE TRUE TRUE ...</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dats<span class="sc">$</span>SNP <span class="sc">&gt;</span> <span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+FALSE  TRUE 
+  592   203 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>dats<span class="sc">$</span>strength <span class="ot">&lt;-</span> <span class="fu">cut</span>(<span class="sc">-</span><span class="fu">log10</span>(dats<span class="sc">$</span>pval.exposure), <span class="at">breaks=</span><span class="fu">quantile</span>(<span class="sc">-</span><span class="fu">log10</span>(dats<span class="sc">$</span>pval.exposure), <span class="at">probs=</span><span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="fl">0.1</span>)))</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dats<span class="sc">$</span>strength)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+(4.63,5.55] (5.55,6.55] (6.55,7.89] (7.89,9.76] (9.76,11.9] (11.9,14.9] 
+         79          79          80          79          80          79 
+(14.9,20.8] (20.8,28.6] (28.6,44.3]  (44.3,283] 
+         79          80          79          80 </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Overall MR estimate</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">mr</span>(dats, <span class="at">method=</span><span class="st">"mr_ivw"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Analysing 'X' on 'Y'</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>res</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  id.exposure id.outcome outcome exposure                    method nsnp
+1           X          Y       Y        X Inverse variance weighted  795
+          b        se pval
+1 0.4757469 0.0102651    0</code></pre>
+</div>
+</div>
+<p>Stratify by instrument strength</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>dats <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(strength) <span class="sc">%&gt;%</span> <span class="fu">do</span>({<span class="fu">mr</span>(., <span class="at">method=</span><span class="st">"mr_ivw"</span>)}) <span class="sc">%&gt;%</span> </span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(., <span class="fu">aes</span>(<span class="at">x=</span>strength, <span class="at">y=</span>b)) <span class="sc">+</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin=</span>b<span class="sc">-</span>se<span class="sc">*</span><span class="fl">1.96</span>, <span class="at">ymax=</span>b<span class="sc">+</span>se<span class="sc">*</span><span class="fl">1.96</span>), <span class="at">width=</span><span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x=</span><span class="st">"Instrument strength"</span>, <span class="at">y=</span><span class="st">"MR effect estimate"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Analysing 'X' on 'Y'
+Analysing 'X' on 'Y'
+Analysing 'X' on 'Y'
+Analysing 'X' on 'Y'
+Analysing 'X' on 'Y'
+Analysing 'X' on 'Y'
+Analysing 'X' on 'Y'
+Analysing 'X' on 'Y'
+Analysing 'X' on 'Y'
+Analysing 'X' on 'Y'
+Analysing 'X' on 'Y'</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Estimate heterogeneity</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>ss <span class="ot">&lt;-</span> <span class="fu">mr_singlesnp</span>(dats) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"All"</span>, SNP)) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">SNP =</span> <span class="fu">as.numeric</span>(SNP))</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>ss<span class="sc">$</span>qj <span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">/</span>ss<span class="sc">$</span>se<span class="sc">^</span><span class="dv">2</span>) <span class="sc">*</span> (res<span class="sc">$</span>b <span class="sc">-</span> ss<span class="sc">$</span>b)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>ss<span class="sc">$</span>str <span class="ot">&lt;-</span> (dats<span class="sc">$</span>beta.exposure<span class="sc">/</span>dats<span class="sc">$</span>se.exposure)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>ss<span class="sc">$</span>str2 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">log10</span>(dats<span class="sc">$</span>pval.exposure)</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mr_heterogeneity</span>(dats, <span class="at">method=</span><span class="st">"mr_ivw"</span>)<span class="sc">$</span>Q <span class="sc">==</span> <span class="fu">sum</span>(ss<span class="sc">$</span>qj)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+<ol start="4" type="1">
+<li>Meta regression</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># All SNPs</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(qj <span class="sc">~</span> str, <span class="at">data=</span>ss))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = qj ~ str, data = ss)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+ -8.171  -7.145  -5.373   1.080 129.726 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  8.416813   0.626477  13.435  &lt; 2e-16 ***
+str         -0.013380   0.004787  -2.795  0.00531 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 13.21 on 793 degrees of freedom
+Multiple R-squared:  0.009757,  Adjusted R-squared:  0.008508 
+F-statistic: 7.813 on 1 and 793 DF,  p-value: 0.005312</code></pre>
+</div>
+</div>
+<p>Higher strength means lower heterogeneity</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Only x snps</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(qj <span class="sc">~</span> str, <span class="at">data=</span><span class="fu">subset</span>(ss, SNP <span class="sc">&lt;=</span> <span class="dv">1000</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = qj ~ str, data = subset(ss, SNP &lt;= 1000))
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-4.8033 -0.8923 -0.4404  0.6002 13.0460 
+
+Coefficients:
+             Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 0.4515093  0.1019608   4.428 1.13e-05 ***
+str         0.0109704  0.0006811  16.106  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 1.784 on 590 degrees of freedom
+Multiple R-squared:  0.3054,    Adjusted R-squared:  0.3042 
+F-statistic: 259.4 on 1 and 590 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p>Wouldn’t expect this - weaker SNPs should contribute more heterogeneity due to weak instrument bias</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>summary</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>function (object, ...) 
+UseMethod("summary")
+&lt;bytecode: 0x12d4ab510&gt;
+&lt;environment: namespace:base&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Only u snps</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(qj <span class="sc">~</span> str, <span class="at">data=</span><span class="fu">subset</span>(ss, SNP <span class="sc">&gt;</span> <span class="dv">1000</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = qj ~ str, data = subset(ss, SNP &gt; 1000))
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-41.201  -8.024  -0.785   7.060  44.492 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  0.99448    1.89762   0.524    0.601    
+str          0.62044    0.04559  13.609   &lt;2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 12.75 on 201 degrees of freedom
+Multiple R-squared:  0.4796,    Adjusted R-squared:  0.477 
+F-statistic: 185.2 on 1 and 201 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qj <span class="sc">~</span> str, ss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qj <span class="sc">~</span> str, ss <span class="sc">%&gt;%</span> <span class="fu">filter</span>(SNP <span class="sc">&gt;</span> <span class="dv">1000</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-17-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(qj <span class="sc">~</span> str, ss <span class="sc">%&gt;%</span> <span class="fu">filter</span>(SNP <span class="sc">&lt;=</span> <span class="dv">1000</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-17-3.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 <hr>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>R version 4.3.0 (2023-04-21)
 Platform: aarch64-apple-darwin20 (64-bit)
@@ -511,24 +742,25 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] purrr_1.0.1   tictoc_1.2    ggplot2_3.4.2 furrr_0.3.1   future_1.33.0
-[6] dplyr_1.1.2   dagitty_0.3-1
+[1] TwoSampleMR_0.5.7 simulateGP_0.1.2  purrr_1.0.1       tictoc_1.2       
+[5] ggplot2_3.4.2     furrr_0.3.1       future_1.33.0     dplyr_1.1.2      
+[9] dagitty_0.3-1    
 
 loaded via a namespace (and not attached):
  [1] utf8_1.2.3        generics_0.1.3    stringi_1.7.12    lattice_0.21-8   
  [5] listenv_0.9.0     digest_0.6.31     magrittr_2.0.3    evaluate_0.21    
- [9] grid_4.3.0        fastmap_1.1.1     Matrix_1.5-4      jsonlite_1.8.5   
-[13] mgcv_1.8-42       fansi_1.0.4       scales_1.2.1      textshaping_0.3.6
-[17] codetools_0.2-19  cli_3.6.1         rlang_1.1.1       parallelly_1.36.0
-[21] munsell_0.5.0     splines_4.3.0     withr_2.5.0       yaml_2.3.7       
-[25] tools_4.3.0       parallel_4.3.0    colorspace_2.1-0  boot_1.3-28.1    
-[29] globals_0.16.2    curl_5.0.0        vctrs_0.6.2       R6_2.5.1         
-[33] lifecycle_1.0.3   stringr_1.5.0     V8_4.3.2          htmlwidgets_1.6.2
-[37] MASS_7.3-58.4     ragg_1.2.5        pkgconfig_2.0.3   pillar_1.9.0     
-[41] gtable_0.3.3      glue_1.6.2        Rcpp_1.0.10       systemfonts_1.0.4
-[45] xfun_0.39         tibble_3.2.1      tidyselect_1.2.0  rstudioapi_0.14  
-[49] knitr_1.43        farver_2.1.1      htmltools_0.5.5   nlme_3.1-162     
-[53] labeling_0.4.2    rmarkdown_2.22    compiler_4.3.0   </code></pre>
+ [9] grid_4.3.0        fastmap_1.1.1     plyr_1.8.8        Matrix_1.5-4     
+[13] jsonlite_1.8.5    mgcv_1.8-42       fansi_1.0.4       scales_1.2.1     
+[17] textshaping_0.3.6 codetools_0.2-19  cli_3.6.1         rlang_1.1.1      
+[21] parallelly_1.36.0 munsell_0.5.0     splines_4.3.0     withr_2.5.0      
+[25] yaml_2.3.7        tools_4.3.0       parallel_4.3.0    colorspace_2.1-0 
+[29] boot_1.3-28.1     globals_0.16.2    curl_5.0.0        vctrs_0.6.2      
+[33] R6_2.5.1          lifecycle_1.0.3   stringr_1.5.0     V8_4.3.2         
+[37] htmlwidgets_1.6.2 MASS_7.3-58.4     ragg_1.2.5        pkgconfig_2.0.3  
+[41] pillar_1.9.0      gtable_0.3.3      glue_1.6.2        Rcpp_1.0.10      
+[45] systemfonts_1.0.4 xfun_0.39         tibble_3.2.1      tidyselect_1.2.0 
+[49] rstudioapi_0.14   knitr_1.43        farver_2.1.1      htmltools_0.5.5  
+[53] nlme_3.1-162      labeling_0.4.2    rmarkdown_2.22    compiler_4.3.0   </code></pre>
 </div>
 </div>
 

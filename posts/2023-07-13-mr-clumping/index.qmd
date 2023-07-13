@@ -1,0 +1,126 @@
+---
+title: "MR and imperfect clumping"
+author: Gibran Hemani
+date: "2023-07-13"
+categories: []
+---
+
+## Background
+
+4000 instruments for educational attainment using clumping r2 = 0.1, and se doubles when using r2 = 0.001.
+
+That smaller standard error is either due to the R2 in the exposure being higher or the non-independence of effects artificially increasing precision, or a mixture of both.
+
+So the question is the impact of the latter – if we have some true correlation structure with realistic F stats at a specific locus, and then we try to clump at r2 = 0.001 vs 0.1, how many instruments do we retain (it should be 1) and if more than 1, what is that impact on the standard error
+
+
+```{r}
+library(dplyr)
+library(simulateGP)
+library(TwoSampleMR)
+library(purrr)
+library(ggplot2)
+```
+
+Simulate causal snp g + another that is correlated with it
+
+```{r}
+n <- 100000
+g <- correlated_binomial(n, p1=0.5, p2=0.5, rho=sqrt(0.1))
+# x caused by just snp 1
+x <- g[,1] * 0.5 + rnorm(n)
+y <- x * 0.5 + rnorm(n)
+
+# MR using both SNPs, treating as if they are independent
+get_effs(x, y, g) %>% mr(method="mr_ivw") %>% str
+```
+
+```{r}
+# MR using just the causal SNP
+get_effs(x, y, g[,1, drop=F]) %>% mr(method=c("mr_ivw", "mr_wald_ratio")) %>% str
+```
+
+There's hardly any difference in the SE here. Try over a range of scenarios
+
+```{r}
+param <- expand.grid(
+    r2=seq(0, 1, by=0.02),
+    bgx=seq(0,1, by=0.2),
+    bxy=seq(0,1, by=0.2),
+    n=100000
+)
+param$sim <- 1:nrow(param)
+dim(param)
+
+res <- map(1:nrow(param), \(i){
+    g <- correlated_binomial(param$n[i], p1=0.5, p2=0.5, rho=sqrt(param$r2[i]))
+    # x caused by just snp 1
+    x <- g[,1] * param$bgx[i] + rnorm(n)
+    y <- x * param$bxy[i] + rnorm(n)
+
+    bind_rows(
+        get_effs(x, y, g) %>% {suppressMessages(mr(., method="mr_ivw"))},
+        get_effs(x, y, g[,1, drop=F]) %>% {suppressMessages(mr(., method="mr_wald_ratio"))}
+    ) %>% mutate(sim=param$sim[i]) %>% return()
+}) %>% bind_rows %>% inner_join(param, ., by="sim")
+```
+
+Standard errors across all scenarios
+
+```{r}
+
+ggplot(res, aes(x=r2, y=se)) +
+geom_point(aes(colour=as.factor(nsnp))) +
+geom_line(aes(colour=as.factor(nsnp))) +
+facet_grid(bgx ~ bxy, labeller=label_both, scale="free_y")
+```
+
+Bias across all scenarios:
+
+```{r}
+ggplot(res, aes(x=r2, y=b)) +
+geom_point(aes(colour=as.factor(nsnp))) +
+geom_line(aes(colour=as.factor(nsnp))) +
+facet_grid(bgx ~ bxy, labeller=label_both)
+```
+
+Look at just one
+
+```{r}
+ggplot(res %>% filter(bgx == 0.2, bxy == 0.2), aes(x=r2, y=se)) +
+geom_point(aes(colour=as.factor(nsnp))) +
+geom_line(aes(colour=as.factor(nsnp))) +
+facet_grid(bgx ~ bxy, labeller=label_both, scale="free_y")
+```
+
+
+How much does SE reduce if you increase the number of instruments
+
+```{r}
+n <- 100000
+g <- correlated_binomial(n, p1=0.5, p2=0.5, rho=sqrt(0.1))
+# x caused by just snp 1
+x <- g %*% c(0.5, 0.5) + rnorm(n)
+y <- x * 0.5 + rnorm(n)
+
+# MR using both SNPs, treating as if they are independent
+get_effs(x, y, g) %>% mr(method="mr_ivw") %>% str
+```
+
+```{r}
+get_effs(x, y, g[,1, drop=F]) %>% mr(method=c("mr_ivw", "mr_wald_ratio")) %>% str
+```
+
+## Summary
+
+- Relaxed r2 e.g. from 0 to 0.1 doesn't seem to have a huge impact on standard errors
+- In the one SNP situation relaxed r2 has no impact on bias, and could only plausibly change things under substantial heterogeneity which correlates with overrepresentation.
+- More realistic simulations would look at whether this changes when the p-value at the second locus is very large, and would also look at the probability of erroneously keeping multiple loci for a single causal variant
+- Some instability in SEs when correlated SNPs used
+- Increasing SNPs will reduce SE but need to know change in r2 to examine this properly
+
+---
+
+```{r}
+sessionInfo()
+```

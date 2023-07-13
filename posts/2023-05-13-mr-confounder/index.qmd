@@ -431,6 +431,39 @@ cor(y,x)
 
 
 
+## Does variance matter
+
+```{r}
+n <- 100000
+g <- make_geno(n, 10, 0.5)
+u <- rnorm(n) + g %*% rnorm(10)
+x <- u * 0.1 + rnorm(n)
+y <- u * 10 + rnorm(n)
+
+dat <- get_effs(x, y, g)
+mr(dat, method_list="mr_ivw")
+
+summary(lm(y ~ x))
+
+
+x <- x * 20
+y <- y * 10
+
+dat <- get_effs(x, y, g)
+mr(dat, method_list="mr_ivw")
+
+summary(lm(y ~ x))
+
+x <- x / 200
+y <- y / 100
+cor(x, y)
+
+dat <- get_effs(x, y, g)
+mr(dat, method_list="mr_ivw")
+
+summary(lm(y ~ x))
+```
+
 ---
 
 ```{r}

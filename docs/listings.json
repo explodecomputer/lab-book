@@ -2,6 +2,9 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/2023-07-13-mr-clumping/index.html",
+      "/posts/2023-07-09-meta-regression-instrument-strength/index.html",
+      "/posts/2023-07-09-meta-regression-instrument-strength/index.html",
       "/posts/2023-07-07-mr-network-confounding/index.html",
       "/posts/2023-07-06-2sls-se/index.html",
       "/posts/2023-07-05-interactions-and-scale/index.html",
