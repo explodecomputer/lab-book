@@ -1,0 +1,209 @@
+---
+title: "2023-07-24-summary-stat-storage"
+author: Gibran Hemani
+date: "`r Sys.Date()`"
+categories: []
+---
+
+## Background
+
+Summary statistics typically have a lot of redundant information due to LD. Can we improve storage space by converting to a sparse format using an external LD reference panel?
+
+- Download some LD reference data e.g. from here: http://fileserve.mrcieu.ac.uk/ld/1kg.v3.tgz
+- Download some GWAS summary statistics: https://gwas.mrcieu.ac.uk/files/ukb-b-19953/ukb-b-19953.vcf.gz
+- Have bcftools on path
+- Have plink on path
+
+```
+# Download example summary statistics (UKBB GWAS of BMI)
+wget https://gwas.mrcieu.ac.uk/files/ukb-b-19953/ukb-b-19953.vcf.gz
+wget https://gwas.mrcieu.ac.uk/files/ukb-b-19953/ukb-b-19953.vcf.gz.tbi
+
+# Convert vcf to txt file, just keep chr 22
+bcftools query \
+-r 22 \
+-e 'ID == "."' \
+-f '%ID\t[%LP]\t%CHROM\t%POS\t%ALT\t%REF\t%AF\t[%ES\t%SE]\n' \
+ukb-b-19953.vcf.gz | \
+awk 'BEGIN {print "variant_id\tp_value\tchromosome\tbase_pair_location\teffect_allele\tother_allele\teffect_allele_frequency\tbeta\tstandard_error"}; {OFS="\t"; if ($2==0) $2=1; else if ($2==999) $2=0; else $2=10^-$2; print}' > gwas.tsv
+
+# Download and extract the LD reference panel - 1000 genomes
+wget http://fileserve.mrcieu.ac.uk/ld/1kg.v3.tgz
+tar xvf 1kg.v3.tgz
+
+# Get allele frequencies
+plink --bfile EUR --freq --out EUR --chr 22
+/Users/gh13047/Downloads/plink_mac_20230116/plink --bfile /Users/gh13047/repo/opengwas-api-internal/opengwas-api/app/ld_files/EUR --freq --out EUR --chr 22
+```
+
+Read in GWAS sum stats
+
+```{r}
+library(ieugwasr)
+library(data.table)
+library(dplyr)
+library(tidyr)
+libary(glue)
+gwas <- fread("gwas.tsv")
+```
+
+Just keep 1 Mb and get LD matrix
+
+```{r}
+gwas <- subset(gwas, base_pair_location < (min(base_pair_location)+1000000))
+ld <- ld_matrix(gwas$variant_id, bfile="/Users/gh13047/repo/opengwas-api-internal/opengwas-api/app/ld_files/EUR", plink_bin="/Users/gh13047/Downloads/plink_mac_20230116/plink")
+dim(ld)
+```
+
+Harmonise gwas and ld
+
+```{r}
+standardise <- function(d, ea="ea", oa="oa", beta="beta", chr="chr", pos="pos") {
+    toflip <- d[[ea]] > d[[oa]]
+    d[[beta]][toflip] <- d[[beta]][toflip] * -1
+    temp <- d[[oa]][toflip]
+    d[[oa]][toflip] <- d[[ea]][toflip]
+    d[[ea]][toflip] <- temp
+    d[["snpid"]] <- paste0(d[[chr]], ":", d[[pos]], "_", toupper(d[[ea]]), "_", toupper(d[[oa]]))
+    d
+}
+
+greedy_remove <- function(r, maxr=0.99) {
+    diag(r) <- 0
+    flag <- 1
+    rem <- c()
+    nom <- colnames(r)
+    while(flag == 1)
+    {
+        message("iteration")
+        count <- apply(r, 2, function(x) sum(x >= maxr))
+        if(any(count > 0))
+        {
+            worst <- which.max(count)[1]
+            rem <- c(rem, names(worst))
+            r <- r[-worst,-worst]
+        } else {
+            flag <- 0
+        }
+    }
+    return(which(nom %in% rem))
+}
+
+map <- gwas %>% dplyr::select(rsid=variant_id, chr=chromosome, pos=base_pair_location)
+ldmap <- tibble(vid=rownames(ld), beta=1) %>%
+    tidyr::separate(vid, sep="_", into=c("rsid", "ea", "oa"), remove=FALSE) %>%
+    left_join(., map, by="rsid") %>%
+    standardise()
+gwas <- subset(gwas, variant_id %in% ldmap$rsid) %>%
+    standardise(ea="effect_allele", oa="other_allele", chr="chromosome", pos="base_pair_location")
+gwas <- subset(gwas, snpid %in% ldmap$snpid)
+ldmap <- subset(ldmap, snpid %in% gwas$snpid)
+stopifnot(all(gwas$snpid == ldmap$snpid))
+stopifnot(all(ldmap$vid == rownames(ld)))
+
+# Flip LD based on harmonisation with gwas
+m <- ldmap$beta %*% t(ldmap$beta)
+ldh <- ld * m
+```
+
+Get allele frequency, need the standard deviation of each SNP (xvar)
+
+```{r}
+frq <- fread("EUR.frq") %>%
+    inner_join(., map, by=c("SNP"="rsid")) %>%
+    mutate(beta=1) %>%
+    standardise(., ea="A1", oa="A2")
+stopifnot(all(frq$snpid == gwas$snpid))
+xvar <- sqrt(2 * frq$MAF * (1-frq$MAF))
+```
+
+gwas stats = `gwas`
+ld matrix = `ldh`
+
+https://explodecomputer.github.io/simulateGP/articles/gwas_summary_data_ld.html
+
+Try to solve ld
+
+```{r}
+try(solve(ldh))
+```
+
+This doesn't work - the matrix is singular. How to avoid? e.g. remove SNPs in high LD
+
+```{r}
+g <- greedy_remove(ldh, 0.99)
+gwas <- gwas[-g,]
+ldh <- ldh[-g, -g]
+ldmap <- ldmap[-g,]
+xvar <- xvar[-g]
+stopifnot(all(gwas$snpid == ldmap$snpid))
+try(solve(ldh))
+```
+
+
+Ok this is a problem. How to select SNPs to include that will involve a non-singular matrix?
+
+- Make sparse
+
+```{r}
+conv <- function(b, se, ld, xvar) {
+    # make sparse
+    bs <- (b %*% diag(xvar) %*% solve(ld) %*% diag(1/xvar)) %>% drop()
+    # make dense again
+    bhat <- (diag(1/xvar) %*% ld %*% diag(xvar) %*% bs) %>% drop()
+    # create sparse version of bs
+    tibble(b, bs, bhat)
+}
+
+#o <- conv(gwas$beta, gwas$standard_error, ldh, xvar)
+```
+
+
+
+- Make dense again
+- Compare sparse and dense 
+
+
+Simulations
+
+```{r}
+library(mvtnorm)
+library(simulateGP)
+
+# Provide matrix of SNPs, phenotype y, true effects of SNPs on y
+calcs <- function(x, y, b) {
+    xpx <- t(x) %*% x
+    D <- matrix(0, ncol(x), ncol(x))
+    diag(D) <- diag(xpx)
+    # Estimate effects (these will have LD influence)
+    betahat <- gwas(y, x)$bhat
+    # Convert back to marginal effects - this is approx, doesn't use AF
+    bhat <- drop(solve(xpx) %*% D %*% betahat)
+    # Determine betas with LD
+    betahatc <- b %*% xpx %*% solve(D) %>% drop
+    rho <- cor(x)
+    xvar <- apply(x, 2, sd)
+    # Another way to determine betas with LD using just sum stats
+    betahatrho <- (diag(1/xvar) %*% rho %*% diag(xvar) %*% b) %>% drop
+    # Go back to true betas
+    betaback <- (betahatrho %*% diag(xvar) %*% solve(rho) %*% diag(1/xvar)) %>% drop()
+    tibble(b, bhat, betahat, betahatc, betahatrho, betaback)
+}
+
+n <- 10000
+nsnp <- 20
+sigma <- matrix(0.7, nsnp, nsnp)
+diag(sigma) <- 1
+x <- rmvnorm(n, rep(0, nsnp), sigma)
+
+b <- rnorm(nsnp) * 100
+y <- x %*% b + rnorm(n)
+res <- calcs(x, y, b)
+res
+```
+
+---
+
+```{r}
+sessionInfo()
+```
