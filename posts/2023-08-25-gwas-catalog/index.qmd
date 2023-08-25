@@ -1,0 +1,14 @@
+---
+title: "2023-08-25-gwas-catalog"
+author: Gibran Hemani
+date: "`r Sys.Date()`"
+categories: []
+---
+
+## Background
+
+---
+
+```{r}
+sessionInfo()
+```
