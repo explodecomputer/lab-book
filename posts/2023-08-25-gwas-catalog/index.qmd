@@ -1,11 +1,97 @@
 ---
-title: "2023-08-25-gwas-catalog"
+title: "GWAS catalog traits"
 author: Gibran Hemani
-date: "`r Sys.Date()`"
+date: "2023-08-25"
 categories: []
 ---
 
 ## Background
+
+Identify GWAS catalog traits to import to OpenGWAS
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(data.table)
+library(ieugwasr)
+library(ggplot2)
+```
+
+Get list of harmonised studies in GWAS catalog
+
+```{r}
+download.file("ftp://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/harmonised_list.txt", "harmonised_list.txt")
+a <- scan("harmonised_list.txt", what=character())
+head(a)
+```
+
+Get EBI IDs already in OpenGWAS
+
+```{r}
+ao <- ieugwasr::gwasinfo()
+gotebi <- grep("ebi-a", ao$id, value=TRUE) %>% gsub("ebi-a-", "", .)
+```
+
+Identify datasets not available
+
+```{r}
+a <- tibble(path=a) %>%
+    tidyr::separate(path, sep="/", into=c("dot", "range", "id", "harmonised", "fn"), remove=FALSE) %>% 
+    as_tibble %>%
+    tidyr::separate(fn, sep="-", into=c("pmid", "id2", "efo"), remove=FALSE) %>%
+    filter(!is.na(id2)) %>%
+    filter(!id %in% gotebi) %>%
+    dplyr::select(-c(id2, dot)) %>%
+    mutate(path=gsub("^./", "", path))
+a
+```
+
+There are 4427 that have no pmid, remove for now.
+
+Summarise how many studies by pmid:
+
+```{r}
+as <- a %>% group_by(pmid) %>% summarise(n=n()) %>% arrange(desc(n))
+as %>% head(n=20)
+```
+
+How many traits per study?
+
+```{r}
+qplot(y=as$n, x=1:nrow(as)) +
+scale_y_log10() +
+labs(y="Number of traits in study", x="Study")
+```
+
+How many traits to import if we only keep studies with fewer than 1000 traits
+
+```{r}
+subset(as, n <= 1000) %>% {sum(.$n)}
+```
+
+How many traits to import if we only keep studies with fewer than 200 traits
+
+```{r}
+subset(as, n <= 200) %>% {sum(.$n)}
+```
+
+Studies to ignore (for now at least)
+
+```{r}
+pmid_ignore <- c(
+    34662886, # rare variant aggregate enrichment of ukb exome data
+    35078996, # pqtl
+    34737426, # ukb analysis (duplication of existing work)
+    35668104, # lipids superseded by others
+    33983923  # facial variation - 1k traits
+)
+```
+
+
+```{r}
+a_keep <- subset(a, !pmid %in% pmid_ignore)
+write.table(a_keep$path, file="gwascat_keeplist.txt", row=F, col=F, qu=F)
+```
 
 ---
 
