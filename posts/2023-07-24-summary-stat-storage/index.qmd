@@ -1,13 +1,47 @@
 ---
-title: "2023-07-24-summary-stat-storage"
+title: "Summary stat storage"
 author: Gibran Hemani
-date: "`r Sys.Date()`"
+date: "2023-07-24"
 categories: []
 ---
 
 ## Background
 
 Summary statistics typically have a lot of redundant information due to LD. Can we improve storage space by converting to a sparse format using an external LD reference panel?
+
+### Overall strategy
+
+Two types of compression - lossless and lossy. Lossless preserves the inforation perfectly. Lossy allows some loss of information to achieve computational / storage improvement.
+
+- Lossless compression:
+    - 1mb regions with suggestive association e.g. p-value < 1e-5
+    - cis regions of molecular traits
+- Lossy compression
+    - all other regions
+
+### Strategies for lossy compression
+
+- Use external LD reference panel, chunk up genome into areas of distinct LD, decompose summary statistics into eigenvectors and retain only the first X eigenvectors that explain sufficient variation
+- Retain only the sign of the effect estimate
+- Remove entirely and assume beta = 0
+
+### Determining the effectiveness of compression
+
+- data storage saving
+- time cost
+- loss of precision
+- bias?
+- sensitivity to ld reference panel
+
+Impact on different types of analyses e.g.
+
+- colocalisation
+- mr
+- ld score regression
+- bias of effects
+
+
+## Example of lossy LD compression of betas
 
 - Download some LD reference data e.g. from here: http://fileserve.mrcieu.ac.uk/ld/1kg.v3.tgz
 - Download some GWAS summary statistics: https://gwas.mrcieu.ac.uk/files/ukb-b-19953/ukb-b-19953.vcf.gz
@@ -43,14 +77,14 @@ library(ieugwasr)
 library(data.table)
 library(dplyr)
 library(tidyr)
-libary(glue)
+library(glue)
 gwas <- fread("gwas.tsv")
 ```
 
-Just keep 1 Mb and get LD matrix
+Just keep 2 Mb and get LD matrix
 
 ```{r}
-gwas <- subset(gwas, base_pair_location < (min(base_pair_location)+1000000))
+gwas <- subset(gwas, base_pair_location < (min(base_pair_location)+2000000))
 ld <- ld_matrix(gwas$variant_id, bfile="/Users/gh13047/repo/opengwas-api-internal/opengwas-api/app/ld_files/EUR", plink_bin="/Users/gh13047/Downloads/plink_mac_20230116/plink")
 dim(ld)
 ```
@@ -89,7 +123,7 @@ greedy_remove <- function(r, maxr=0.99) {
     return(which(nom %in% rem))
 }
 
-map <- gwas %>% dplyr::select(rsid=variant_id, chr=chromosome, pos=base_pair_location)
+map <- gwas %>% dplyr::select(rsid=variant_id, chr=chromosome, pos=base_pair_location) %>% filter(!duplicated(rsid))
 ldmap <- tibble(vid=rownames(ld), beta=1) %>%
     tidyr::separate(vid, sep="_", into=c("rsid", "ea", "oa"), remove=FALSE) %>%
     left_join(., map, by="rsid") %>%
@@ -98,6 +132,7 @@ gwas <- subset(gwas, variant_id %in% ldmap$rsid) %>%
     standardise(ea="effect_allele", oa="other_allele", chr="chromosome", pos="base_pair_location")
 gwas <- subset(gwas, snpid %in% ldmap$snpid)
 ldmap <- subset(ldmap, snpid %in% gwas$snpid)
+ld <- ld[rownames(ld) %in% ldmap$vid, colnames(ld) %in% ldmap$vid]
 stopifnot(all(gwas$snpid == ldmap$snpid))
 stopifnot(all(ldmap$vid == rownames(ld)))
 
@@ -112,10 +147,105 @@ Get allele frequency, need the standard deviation of each SNP (xvar)
 frq <- fread("EUR.frq") %>%
     inner_join(., map, by=c("SNP"="rsid")) %>%
     mutate(beta=1) %>%
-    standardise(., ea="A1", oa="A2")
+    standardise(., ea="A1", oa="A2") %>%
+    filter(snpid %in% gwas$snpid)
+
 stopifnot(all(frq$snpid == gwas$snpid))
 xvar <- sqrt(2 * frq$MAF * (1-frq$MAF))
 ```
+
+
+### Compression
+
+Inverting LD matrices is sometimes difficult because of singularity issues. If at least one of the variants is a linear combination of the other variants in the region then the matrix will be singular. If sample sizes are very large then this is less likely to happen but matrices will still be near singular with occasional hugely inflated values.
+
+To avoid these issues we could just estimate PCs on the LD matrix, and then perform a lossy compression by selecting the PCs that explain the top x% variation, and then only storing the $\beta \Lambda$ matrix.
+
+```{r}
+# Get principal components of the LD matrix
+ldpc <- eigen(ldh)
+# This is the sd of each PC
+plot(ldpc$values)
+```
+
+Most variation explained by rather few SNPs - how many needed to explain 80% of LD info?
+
+```{r}
+i <- which(cumsum(ldpc$values) / sum(ldpc$values) >= 0.8)[1]
+i
+```
+
+So `r round(i/length(ldpc$values)*100)`% of the original data size required to capture 80% of the variation?
+
+```{r}
+# Compress using only 80% of PC variation
+comp <- (gwas$beta) %*% ldpc$vectors[,1:i]
+# Uncompress back to betas
+uncomp <- comp %*% t(ldpc$vectors[,1:i])
+```
+
+Plot compressed betas against original betas
+
+```{r}
+plot(uncomp, gwas$beta)
+```
+
+How much info is lost?
+
+```{r}
+cor(drop(uncomp), gwas$beta)
+```
+
+Is there bias? e.g. is coefficient different from 1?
+
+```{r}
+summary(lm(gwas$beta ~ drop(uncomp)))
+```
+
+Doesn't seem too bad. How consistent is the sign in the compressed vs original?
+
+```{r}
+table(sign(gwas$beta) == sign(uncomp))
+```
+
+## Summary
+
+- Overall small amount of the data seems to capture a reasonable amount of information.
+- We could compress more by using fewer eignevectors, or compress less by using more eigenvectors. How much does performance of different methods (e.g. MR, coloc, etc) change with different amounts of compression loss?
+
+### Standard errors
+
+The above does it for betas, but standard errors are a bit more complicated. Could just use the approx marginal $se = 1/2pq$, but this will ignore correlation structure
+
+## Unfinished (ignore)
+
+SE for each SNP will be
+
+$$
+s \rho s
+$$
+
+where s is diagonal matrix of standard errors. Represent $\rho = QA^{-1}Q^T$ where A is diagonal matrix of eigenvalues and Q is matrix of eigenvectors / loadings
+
+```{r, eval=FALSE}
+temp <- as.matrix(ldpc$loadings) %*% diag(1/ldpc$sdev) %*% t(as.matrix(ldpc$loadings))
+temp[1:10,1:10]
+cor(temp, ldh)
+```
+
+```{r, eval=FALSE}
+
+x <- prcomp(ldh)
+names(x)
+str(x)
+str(ldpc)
+
+temp <- x$vectors %*% diag(1/x$values) %*% t(x$vectors)
+for(i in 1:nrow(temp)) { temp[,i] <- temp[,i] / temp[i,i]}
+temp[1:10,1:10]
+plot(c(ldh), c(temp))
+```
+
 
 gwas stats = `gwas`
 ld matrix = `ldh`
@@ -124,13 +254,13 @@ https://explodecomputer.github.io/simulateGP/articles/gwas_summary_data_ld.html
 
 Try to solve ld
 
-```{r}
+```{r, eval=FALSE}
 try(solve(ldh))
 ```
 
 This doesn't work - the matrix is singular. How to avoid? e.g. remove SNPs in high LD
 
-```{r}
+```{r, eval=FALSE}
 g <- greedy_remove(ldh, 0.99)
 gwas <- gwas[-g,]
 ldh <- ldh[-g, -g]
@@ -145,7 +275,7 @@ Ok this is a problem. How to select SNPs to include that will involve a non-sing
 
 - Make sparse
 
-```{r}
+```{r, eval=FALSE}
 conv <- function(b, se, ld, xvar) {
     # make sparse
     bs <- (b %*% diag(xvar) %*% solve(ld) %*% diag(1/xvar)) %>% drop()
@@ -166,7 +296,7 @@ conv <- function(b, se, ld, xvar) {
 
 Simulations
 
-```{r}
+```{r, eval=FALSE}
 library(mvtnorm)
 library(simulateGP)
 
@@ -201,6 +331,9 @@ y <- x %*% b + rnorm(n)
 res <- calcs(x, y, b)
 res
 ```
+
+
+
 
 ---
 

@@ -1,0 +1,107 @@
+---
+title: "Logistic regression residuals"
+author: Gibran Hemani
+date: "2023-08-07"
+categories: []
+---
+
+## Background
+
+Using REML to adjust for pedigree and then taking residuals to estimate PRS association. However the original trait is binary and the residuals are continuous, how to interpret the effect size?
+
+## Analysis
+
+Simulate data - a confounder influences x and y, x influences y, and y is binary.
+
+```{r}
+set.seed(1234)
+n <- 10000
+u <- rnorm(n)
+x <- rnorm(n) + u
+a <- rnorm(n) + x + u - 1
+y <- rbinom(n, 1, plogis(a))
+table(y)
+```
+
+Estimate using glm
+
+```{r}
+summary(glm(y ~ x + u, family="binomial"))$coef
+```
+
+Transformation term
+
+```{r}
+mu <- sum(y) / length(y)
+tr <- mu * (1-mu)
+```
+
+Get residuals (raw)
+
+```{r}
+yres_raw <- residuals(glm(y ~ u, family="binomial"), type="response")
+summary(lm(yres_raw ~ x))$coef
+```
+
+After transformation
+
+```{r}
+lm(yres_raw ~ x)$coef[2] / tr
+```
+
+Get residuals (deviance)
+
+```{r}
+yres_dev <- residuals(glm(y ~ u, family="binomial"))
+summary(lm(yres_dev ~ x))$coef
+```
+
+After transformation
+
+```{r}
+lm(yres_dev ~ x)$coef[2] / tr
+```
+
+
+Range
+
+```{r}
+library(dplyr)
+param <- expand.grid(
+    b=seq(-1, 1, by=0.1),
+    int=seq(-2,0, by=0.2)
+)
+
+o <- lapply(1:nrow(param), \(i) {
+    u <- rnorm(n)
+    x <- rnorm(n) + u
+    a <- rnorm(n) + x * param$b[i] + u + param$int[i]
+    y <- rbinom(n, 1, plogis(a))
+    mu <- sum(y) / length(y)
+    tr <- mu * (1-mu)
+    bhat <- glm(y ~ x + u, family="binomial")$coef[2]
+    yres_raw <- residuals(glm(y ~ u, family="binomial"), type="response")
+    bhat_raw <- lm(yres_raw ~ x)$coef[2]
+    yres_dev <- residuals(glm(y ~ u, family="binomial"))
+    bhat_dev <- lm(yres_dev ~ x)$coef[2]
+    tibble(bhat, bhat_raw, bhat_dev, bhat_raw_tr = bhat_raw / tr, bhat_dev_tr=bhat_dev / tr, tr=tr)
+}) %>% bind_rows() %>% bind_cols(param, .)
+```
+
+plot
+
+```{r}
+pairs(o %>% select(-c(int, tr)))
+dim(o)
+```
+
+Looks like the deviance residuals are on the same scale after transformation, but will need a bit of work to translate between deviance and raw
+
+https://data.library.virginia.edu/understanding-deviance-residuals/
+
+
+---
+
+```{r}
+sessionInfo()
+```

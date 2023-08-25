@@ -1,0 +1,185 @@
+---
+title: "IV confounding with changing variances"
+author: Gibran Hemani
+date: "2023-07-20"
+categories: []
+---
+
+## Background
+
+When instruments arise through U the bias is buy/bux, whereas ols bias is buy*bux. If buy is larger than bux then the iv bias will be smaller than ols bias, but otherwise likely to be larger than ols bias.
+
+What happens if you just rescale the values of x and y?
+
+
+bias_ols = buy * bux
+
+When the SNP goes through U
+bias_iv = buy/bux
+
+
+buy = 0.1
+bux = 0.1
+
+bias_iv = 1
+bias_ols = 0.01
+
+---
+
+change sd of y and x to be from 1 to 10
+
+buy = 1
+bux = 1
+
+bias_iv = 1
+bias_ols = 1
+
+---
+
+buy = 0.1
+bux = 1
+
+bias_iv = 0.1
+bias_ols = 0.1
+
+
+y = buy * u + e
+x = bux * u + e
+
+b_ols = cov(buy*u, bux*u)
+= buy * bux * var(u)
+
+
+```{r}
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(TwoSampleMR)
+library(simulateGP)
+
+iv_bias <- function(g, x, y) {
+    bgx = cov(g, x) / var(g)
+    bgy = cov(g, y) / var(g)
+    return(bgy/bgx)
+}
+
+ols_bias <- function(x, y) {
+    return(cov(x,y)/var(x))
+}
+
+n <- 100000
+g <- rbinom(n, 2, 0.4)
+u <- g + rnorm(n, 0, sqrt(1 - var(g)))
+
+bux <- 0.5
+buy <- 0.5
+y <- u * buy + rnorm(n, sd=sqrt(1-buy^2))
+x <- u * bux + rnorm(n, sd=sqrt(1-bux^2))
+
+
+iv_bias(g, x, y)
+
+
+ols_bias(x,y)
+```
+
+```{r}
+param1 <- expand.grid(
+    bux=seq(-1, 1, by=0.1),
+    buy=seq(-1, 1, by=0.1)
+)
+
+for(i in 1:nrow(param1)) {
+    y <- u * param1$buy[i] + rnorm(n, sd=sqrt(1-param1$buy[i]^2))
+    x <- u * param1$bux[i] + rnorm(n, sd=sqrt(1-param1$bux[i]^2))
+    param1$ols_bias[i] <- ols_bias(x, y)
+    param1$iv_bias[i] <- iv_bias(g, x, y)
+    param1$ols_bias_e[i] <- param1$buy[i] * param1$bux[i]
+    param1$iv_bias_e[i] <- param1$buy[i] / param1$bux[i]
+}
+
+param1 %>% filter(bux != 0) %>%
+gather(key="key", value="value", c(ols_bias, iv_bias)) %>% 
+ggplot(., aes(x=bux, y=value)) +
+geom_point(aes(colour=key)) +
+facet_wrap(~ buy)
+```
+
+Is expected bias correct
+
+```{r}
+plot(ols_bias ~ ols_bias_e, param1)
+```
+
+```{r}
+plot(iv_bias ~ iv_bias_e, param1 %>% filter(bux!=0))
+```
+
+now change the variances
+
+```{r}
+param2 <- expand.grid(
+    bux=seq(-1, 1, by=0.1),
+    buy=0.5,
+    varx=c(1, 0.1, 10),
+    vary=c(1, 0.1, 10)
+)
+
+for(i in 1:nrow(param2)) {
+    y <- u * param2$buy[i] + rnorm(n, sd=sqrt(1-param2$buy[i]^2))
+    x <- u * param2$bux[i] + rnorm(n, sd=sqrt(1-param2$bux[i]^2))
+    y <- y * sqrt(param2$vary[i])
+    x <- x * sqrt(param2$varx[i])
+    param2$ols_bias[i] <- ols_bias(x, y)
+    param2$iv_bias[i] <- iv_bias(g, x, y)
+    param2$ols_bias_e[i] <- param2$buy[i] * param2$bux[i]
+    param2$iv_bias_e[i] <- param2$buy[i] / param2$bux[i]
+}
+
+param2 <- param2 %>% filter(bux != 0)
+param2 <- bind_rows(
+    param2 %>% select(-c(ols_bias_e, iv_bias_e)) %>% gather(key="key", value="value", c(ols_bias, iv_bias)) %>% mutate(what="obs"),
+    param2 %>% select(-c(ols_bias, iv_bias)) %>% gather(key="key", value="value", c(ols_bias_e, iv_bias_e)) %>% mutate(what="exp") 
+)
+ggplot(param2, aes(x=bux, y=value)) +
+geom_point(aes(colour=key)) +
+facet_grid(varx ~ vary, labeller=label_both, scale="free_y")
+```
+
+change the variance only, see if it changes test statistic
+
+```{r}
+param3 <- expand.grid(
+    bux=seq(-1, 1, by=0.25),
+    buy=seq(-1, 1, by=0.25),
+    varx=c(0.1, 1, 10),
+    vary=c(0.1, 1, 10)
+) %>% mutate(sim=1:n())
+
+param3 <- lapply(1:nrow(param3), function(i) {
+    y <- u * param2$buy[i] + rnorm(n, sd=sqrt(1-param2$buy[i]^2))
+    x <- u * param2$bux[i] + rnorm(n, sd=sqrt(1-param2$bux[i]^2))
+    y <- y * sqrt(param2$vary[i])
+    x <- x * sqrt(param2$varx[i])
+    get_effs(x, y, as.matrix(g)) %>% mr %>% suppressMessages %>% mutate(sim=i)
+}) %>% bind_rows() %>% inner_join(., param3, by="sim")
+
+param3$tval <- param3$b/param3$se
+
+param3 %>% group_by(bux, buy) %>%
+    summarise(m=mean(tval), s=sd(tval))
+```
+
+
+```{r}
+param3 %>% ggplot(., aes(x=as.factor(bux), y=abs(tval))) +
+geom_point(aes(colour=as.factor(varx), shape=as.factor(vary))) +
+facet_wrap(~ buy)
+```
+
+
+---
+
+```{r}
+sessionInfo()
+```
