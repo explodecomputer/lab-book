@@ -24,6 +24,7 @@ Two types of compression - lossless and lossy. Lossless preserves the inforation
 - Use external LD reference panel, chunk up genome into areas of distinct LD, decompose summary statistics into eigenvectors and retain only the first X eigenvectors that explain sufficient variation
 - Retain only the sign of the effect estimate
 - Remove entirely and assume beta = 0
+- Use summary based imputation (e.g. retain only 500k imputation backbone SNPs and impute missing SNPs with LD matrix on the fly, https://www.liebertpub.com/doi/10.1089/cmb.2019.0449, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6129295/, https://wp.unil.ch/sgg/program/summary-statistic-imputation-software/)
 
 ### Determining the effectiveness of compression
 
