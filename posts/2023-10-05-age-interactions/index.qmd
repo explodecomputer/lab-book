@@ -1,0 +1,169 @@
+---
+title: "Age interactions"
+author: Gibran Hemani
+date: "2023-10-05"
+categories: ["GxE"]
+---
+
+## Background
+
+We can infer the age-specific effect of trait-variant association in various ways. How do they relate? e.g.
+
+- Stratify individuals by age group and get the main effect
+- Fit age as an interaction term
+- 2-step linear model - get per-individual age slopes and intercepts, estimate genetic effects on slopes and parameters
+
+Age isn't a collider so stratifying shouldn't introduce problems. 
+
+Approach - each individual has a growth curve with parameters that are genetically influenced. What happens when we age stratify using different methods?
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(lme4)
+
+set.seed(1234)
+```
+
+Simulate data
+
+```{r}
+growth_curve2 <- function(x, phi1=20, phi2=-2.4, phi3=0.3) {
+    g <- phi1 / (1 + exp(-(phi2 + phi3 * x)))
+    g + rnorm(length(g), sd=g/(max(g)*10))
+}
+
+nid <- 50000
+
+bg1 <- 5/2
+bg2 <- 0.1/2
+pg1 <- 0.3
+pg2 <- 0.3
+
+bmi <- lapply(1:nid, function(i) {
+    tibble(
+        id=i,
+        g1 = rbinom(1, 2, pg1),
+        g2 = rbinom(1, 2, pg2),
+        age=sample(0:50, 20, replace=FALSE),
+        value=growth_curve2(age, g1 * bg1 + rnorm(1, mean=23, sd=5), -2.4, g2 * bg2 + rnorm(1, mean=0.3, sd=0.1))
+    ) %>% arrange(age)
+}) %>% bind_rows()
+
+str(bmi)
+```
+
+Example of what simulated data looks like
+
+```{r}
+ggplot(bmi %>% filter(id < 11), aes(x=age, y=value)) +
+geom_point(aes(colour=as.factor(id))) +
+geom_smooth(aes(colour=as.factor(id)), se=FALSE)
+```
+
+Stratifying by age, and getting main effect in each stratum
+
+```{r}
+o <- lapply(unique(bmi$age), function(a) {
+  x <- subset(bmi, age == a) %>% slice_sample(n=1000)
+  print(dim(x))
+  r <- bind_rows(
+    summary(lm(value ~ g1, x))$coef %>% as_tibble() %>% mutate(g=1) %>% slice_tail(n=1),
+    summary(lm(value ~ g2, x))$coef %>% as_tibble() %>% mutate(g=2) %>% slice_tail(n=1)
+  )
+  names(r) <- c("beta", "se", "tval", "pval", "g")
+  r$age <- a
+  return(r)
+}) %>% bind_rows()
+o
+```
+
+
+```{r}
+ggplot(o, aes(y=beta, x= age)) +
+  geom_point(aes(colour=g))
+```
+
+Makes sense because g1 influences the asymptote, and g2 influences the rate of growth.
+
+Interaction with main effect - does it give the same thing?
+
+```{r}
+oi1 <- bmi %>% group_by(id) %>%
+  slice_sample(n=1) %>%
+  {summary(lm(value ~ g1 * as.factor(age), .))$coef}
+oi2 <- bmi %>% group_by(id) %>%
+  slice_sample(n=1) %>%
+  {summary(lm(value ~ g2 * as.factor(age), .))$coef}
+oi1 <- bind_cols(p = rownames(oi1), oi1) %>% as_tibble %>% filter(grepl("g1:", p)) %>% mutate(age=gsub("g1\\:as.factor\\(age\\)", "", p) %>% as.numeric(), g=1)
+oi2 <- bind_cols(p = rownames(oi2), oi2) %>% as_tibble %>% filter(grepl("g2:", p)) %>% mutate(age=gsub("g2\\:as.factor\\(age\\)", "", p) %>% as.numeric(), g=2)
+
+ggplot(bind_rows(oi1, oi2), aes(y=Estimate, x=age)) +
+  geom_point(aes(colour=g))
+```
+
+Linear model for each individual
+
+```{r}
+temp <- bmi %>% filter(id %in% 1:1000)
+a <- lmer(value ~ age + (1+age|id), data=temp)
+b <- ranef(a)
+head(b$id)
+rbind(
+    summary(lm(b$id[,1] ~ temp$g1[!duplicated(temp$id)]))$coef[2,],
+    summary(lm(b$id[,2] ~ temp$g1[!duplicated(temp$id)]))$coef[2,],
+    summary(lm(b$id[,1] ~ temp$g2[!duplicated(temp$id)]))$coef[2,],
+    summary(lm(b$id[,2] ~ temp$g2[!duplicated(temp$id)]))$coef[2,]
+)
+```
+
+### Summary
+
+- Stratifying by age gives same result as fitting age as an interaction - provided that interaction includes main effects for snp and age
+- Linear model still picks things up
+
+
+## Experiment - interactions with a collider
+
+If there is a binary variable that is a collider, does it make a difference if it is tested stratified or as an interaction term
+
+note this isn't an issue for age which can't be a collider
+
+```{r}
+n <- 10000
+x <- rnorm(n)
+y <- rnorm(n)
+u <- x + y + rnorm(n)
+C <- rbinom(n, 1, plogis(u))
+summary(lm(y ~ x, subset=C==1))$coef[2,1]
+summary(lm(y ~ x, subset=C==0))$coef[2,1]
+summary(lm(y ~ x))$coef[2,1]
+```
+
+
+```{r}
+summary(lm(y ~ x * as.factor(C)))
+summary(lm(y ~ x : as.factor(C)))
+```
+
+## Summary
+
+- interaction with a collider is a problem as expected
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+
+```{r}
+sessionInfo()
+```

@@ -1,0 +1,30 @@
+---
+title: "datatables"
+author: Gibran Hemani
+date: "2023-09-08"
+categories: [coding]
+draft: true
+---
+
+## Background
+
+```{r}
+1+1
+```
+
+```{r}
+# library(DT)
+# library(dplyr)
+# penguins = read.csv("https://raw.githubusercontent.com/allisonhorst/palmerpenguins/master/inst/extdata/penguins.csv") %>%
+#   mutate(species = as.factor(species),
+#          island = as.factor(island),
+#          sex = as.factor(sex))
+# datatable(penguins, filter = "top")
+```
+
+
+---
+
+```{r}
+sessionInfo()
+```
