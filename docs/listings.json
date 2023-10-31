@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/2023-10-31-drug-matrices/index.html",
       "/posts/2023-10-05-age-interactions/index.html",
       "/posts/2023-08-25-gwas-catalog/index.html",
       "/posts/2023-08-07-logistic-residuals/index.html",

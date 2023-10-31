@@ -1,0 +1,113 @@
+---
+title: "Decomposing drug X side effect matrices"
+author: Gibran Hemani
+date: "2023-10-31"
+categories: []
+---
+
+## Background
+
+**Aim:** Want to predict side effects using MR. 
+
+Have a matrix of side effects x drugs. 
+
+```
+A = n_se X m_drugs
+```
+
+Each drug binds some genes
+
+```
+B = p_genes X m_drugs
+```
+
+MR of each gene on all traits
+
+```
+C = q_traits X p_genes
+```
+
+and a matrix linking trait terms to side effect terms
+
+```
+D = q_traits X n_se
+```
+
+## Basic simulation
+
+- m=3 drugs
+- n=5 side effects
+- p=6 genes
+- q=10 traits
+
+```{r}
+# gene x drug - e.g. based on binding affinities
+B <- matrix(c(
+    0, 1, 1,
+    1, 0, 0,
+    0, 1, 0,
+    0, 0, 1,
+    0, 0, 0,
+    0, 1, 1
+), 6, 3)
+
+# trait x se - matches trait names to side effect terms
+D <- matrix(c(
+    1, 0, 0, 0, 0,
+    1, 0, 0, 0, 0,
+    0, 1, 0, 0, 0,
+    0, 1, 0, 0, 0,
+    0, 0, 1, 0, 0, 
+    0, 0, 1, 0, 0,
+    0, 0, 1, 0, 0,
+    0, 0, 1, 0, 0,
+    0, 0, 0, 1, 0,
+    0, 0, 0, 1, 0
+), 10, 5)
+
+# True mapping of genes to side effects - we don't observe this
+gse <- matrix(c(
+    1, 0, 0, 0, 0, 0,
+    1, 1, 0, 0, 0, 0,
+    0, 0, 1, 0, 0, 0,
+    0, 0, 0, 1, 1, 0,
+    0, 0, 0, 0, 1, 0
+), 5, 6)
+
+# True drug x side effect matrix is generated from gene side effects by gene drug binding
+A <- gse %*% B
+A
+```
+
+
+We don't actually see the gse matrix. If everything works as we hypothesise then the trait x gene matrix that we observe would follow:
+
+```{r}
+C <- D %*% gse
+C
+```
+
+Now we have B, C and D. How do we get back to A? Need to invert D, which isn't square so use Moore-Penrose pseudoinverse
+
+```{r}
+library(pracma)
+Ahat <- pinv(D) %*% C %*% B
+```
+
+Does the prediction match the true A?
+
+```{r}
+cor(c(Ahat), c(A))
+```
+
+```{r}
+plot(Ahat, A)
+```
+
+Quite close - the pseudoinverse has failed to get some of the values correct. Alternative to using pseudoinverse is to just manually re-label trait names with side effect values
+
+---
+
+```{r}
+sessionInfo()
+```
