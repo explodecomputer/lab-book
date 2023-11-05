@@ -1,0 +1,76 @@
+---
+title: "Do odds ratios change for varying prevalence?"
+author: Gibran Hemani
+date: "2023-11-05"
+categories: []
+---
+
+## Background
+
+Disease prevalence may change across ancestries but effect sizes stay the same. Does this lead to different effect estimates?
+
+mean of risk factor changes - does it influence beta hat?
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+p <- expand.grid(
+    b=c(-1, 0.5, 0, 0.5, 1),
+    m=seq(-0.8, 0.8, by=0.1),
+    bhat=NA,
+    prev=NA
+)
+
+n <- 10000
+for(i in 1:nrow(p)) {
+    a <- rnorm(n, mean=p$m[i])
+    b <- a * p$b[i] + rnorm(n)
+    d <- rbinom(n, 1, plogis(b))
+    p$bhat[i] <- glm(d ~ a, family="binomial")$coef[2]
+    p$prev[i] <- mean(d)
+}
+
+ggplot(p, aes(x=prev, y=bhat)) +
+geom_point(aes(colour=m)) +
+facet_grid(. ~ b)
+```
+
+no influence.
+
+What about if prevalence changes due to another factor
+
+```{r}
+p <- expand.grid(
+    b=c(-1, 0.5, 0, 0.5, 1),
+    m1=seq(-0.8, 0.8, by=0.1),
+    m2=seq(-0.8, 0.8, by=0.1),
+    bhat=NA,
+    prev=NA
+)
+
+n <- 10000
+for(i in 1:nrow(p)) {
+    a <- rnorm(n, mean=p$m1[i])
+    a1 <- rnorm(n, mean=p$m2[i])
+    b <- a * p$b[i] + rnorm(n) + a1
+    d <- rbinom(n, 1, plogis(b))
+    p$bhat[i] <- glm(d ~ a, family="binomial")$coef[2]
+    p$prev[i] <- mean(d)
+}
+
+ggplot(p, aes(x=prev, y=bhat)) +
+geom_point(aes(colour=m2)) +
+facet_grid(m1 ~ b)
+
+summary(lm(bhat ~ m1 + m2, p))
+
+```
+
+no influence
+
+---
+
+```{r}
+sessionInfo()
+```

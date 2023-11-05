@@ -1,0 +1,64 @@
+---
+title: "fst R package for gwas summary data"
+author: Gibran Hemani
+date: "2023-11-05"
+categories: [computation, summarystats]
+---
+
+## Background
+
+Scope of using fst to store summary data. e.g. matrix of snps x traits, and each element it's a list of summary stats.
+
+
+```{r}
+library(fst)
+library(dplyr)
+```
+
+
+
+```{r}
+nsnp <- 1e7
+dat <- tibble(
+    rsid = paste0("rs", 1:nsnp),
+    beta = rnorm(nsnp),
+    af = runif(nsnp),
+    se = 1/sqrt(100000) * 1/sqrt(af * (1-af)),
+    pval = pnorm(abs(beta)/se, low=F)
+)
+
+dat
+write_fst(dat, path="temp.fst", compress=100)
+saveRDS(dat, file="temp.rds")
+```
+
+fst is slightly smaller than rds
+
+```{r}
+x <- read_fst("temp.fst", columns=c("beta", "se"), from=6000000, to=6500000)
+x
+```
+
+very fast at reading a segment but unfortunately doesn't allow list of indices (only a range)
+
+```{r, error=TRUE}
+
+a <- c(list(1, 2), list(2,3), list(2,5), list(1,3))
+b <- c(list(1, 2), list(2,3), list(2,5), list(1,3))
+
+dat2 <- tibble(a=a, b=b)
+write_fst(dat2, path="temp2.fst")
+```
+
+doesn't allow list objects per cell
+
+```{r}
+unlink("temp.fst")
+unlink("temp.rds")
+```
+
+---
+
+```{r}
+sessionInfo()
+```
