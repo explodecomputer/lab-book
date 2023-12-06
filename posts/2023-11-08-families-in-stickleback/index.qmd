@@ -1,0 +1,120 @@
+---
+title: "Founders in population expansion"
+author: Gibran Hemani
+date: "2023-11-08"
+categories: []
+---
+
+## Background
+
+After discussion with [Katy Peichel](https://www.bigbiology.org/episodes/2023/9/21/ep-106-long-term-experimental-evolution-in-the-wild-with-katie-peichel-and-andrew-hendry) about MR for natural selection in an experimental situation.
+
+9k three-spine stickleback fish populated 10 lakes, and in three is now several hundred thousand. How many of the founders actually contribute to the gene pool after a few generations?
+
+```{r}
+library(dplyr)
+library(vctrs)
+
+founder_population <- function(n1, n2) {
+    bind_rows(
+        tibble(iid=paste0("f0_", 1:n1), fid=iid, sex=1),
+        tibble(iid=paste0("f0_", (n1+1):n2), fid=iid, sex=2)
+    ) %>% mutate(generation=0)
+}
+
+sample_nchildren <- function(n) {
+    rpois(n, 10)^2
+}
+
+simulate_children <- function(founder, pdeath) {
+    lastgen <- strsplit(founder$iid[1], "_")[[1]][1] %>% gsub("f", "", .) %>% as.numeric()
+    thisgen <- lastgen + 1
+    p <- founder %>%
+        mutate(death = rbinom(n(), 1, pdeath)) %>%
+        filter(death == 0)
+    n <- round(nrow(p)/2)
+    founder$i <- 1:nrow(founder)
+    ind1 <- subset(founder, sex==1)$i %>% {sample(., n, replace=TRUE)}
+    ind2 <- subset(founder, sex==2)$i %>% {sample(., n, replace=TRUE)}
+    parents <- tibble(
+        dad=founder$iid[ind1],
+        mum=founder$iid[ind2],
+        fid=paste(founder$fid[ind1], founder$fid[ind2]),
+        nchildren=sample_nchildren(n)
+    )
+    ind <- vec_rep_each(1:n, parents$nchildren)
+    children <- tibble(
+        iid = paste0("f", thisgen, "_", 1:length(ind)),
+        mum = parents$mum[ind],
+        dad = parents$dad[ind],
+        fid = parents$fid[ind],
+        sex = rbinom(length(dad), 1, 0.5) + 1,
+        generation=thisgen
+    )
+    return(children)
+}
+```
+
+Generate founder population
+
+```{r}
+a <- founder_population(4500, 4500)
+b <- simulate_children(a, 0.1)
+b1 <- simulate_children(b, 0.9)
+
+dim(b)
+dim(b1)
+```
+
+Do subsequent generations
+
+```{r}
+l <- list()
+l[[1]] <- founder_population(4500, 4500)
+for(i in 2:4) {
+    l[[i]] <- simulate_children(l[[i-1]], 0.95)
+    print(dim(l[[i]]))
+}
+
+dat <- bind_rows(l)
+dim(dat)
+tail(dat$fid)
+head(dat)
+```
+
+How many founders per generation?
+
+```{r}
+nfounders_per_generation <- function(dat) {
+    group_by(dat, generation) %>%
+        do({
+            tibble(founder = unlist(strsplit(.$fid, " ")))
+        }) %>%
+        ungroup() %>%
+        group_by(generation, founder) %>%
+            summarise(n=n())
+}
+
+counts <- nfounders_per_generation(dat)
+counts
+```
+
+```{r}
+table(counts$generation)
+```
+
+```{r}
+hist(counts$n, breaks=100)
+```
+
+```{r}
+table(counts$n)
+```
+
+Very few original pairings are represented by generation 3
+
+---
+
+```{r}
+sessionInfo()
+```

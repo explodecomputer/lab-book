@@ -1,0 +1,281 @@
+---
+title: "Heterogeneity in cell-type interaction model"
+author: Gibran Hemani
+date: "2023-11-28"
+categories: []
+---
+
+## Background
+
+Two models
+
+- Estimate mQTL in purified cells. Marginal effects obtained per cell type. Can estimate heterogeneity between of mQTL effect estimates across cell types
+- Estimate G x celltype proportion interaction for each celltype. Interaction is a deviation fron mean effect. Quite a complex model Can we just estimate heterogeneity between interaction terms?
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+sim <- function(nc, n, betas = runif(nc, -2, 2)) {
+    g <- rbinom(n, 2, 0.4)
+    
+    m <- sapply(1:nc, function(i)
+    {
+        g * betas[i] + rnorm(n)
+    })
+    # for each individual sample cell type proportions
+    cellprop <- sapply(1:n, function(x) {a <- runif(nc); a/sum(a)}) %>% t()
+    # weighted sum
+    M <- (scale(m) * cellprop) %>% rowSums
+
+    res <- lapply(1:nc, function(i)
+    {
+        o <- summary(lm(M ~ g * cellprop[,i]))
+        tibble(cell=i, b=o$coef[4,1], se=o$coef[4,2], pval=o$coef[4,4], method="interaction")
+    }) %>% bind_rows()
+
+    res2 <- lapply(1:nc, function(i)
+    {
+        o <- summary(lm(m[,i] ~ g))
+        tibble(cell=i, b=o$coef[2,1], se=o$coef[2,2], pval=o$coef[2,4], method="marginal")
+    }) %>% bind_rows()
+
+    betas <- tibble(cell=1:nc, b=betas, method="true")
+    
+
+    # cellprop <- as_tibble(cellprop)
+    # m <- as_tibble(m)
+    # names(m) <- paste0("m", 1:nc)
+    # names(cellprop) <- paste0("cp", 1:nc)
+    # cellprop$M <- M
+    # cellprop$g <- g
+
+    # cellprop <- bind_cols(cellprop, m)
+
+    # return(tibble(int=res, marg=res2, betas))
+
+
+    # heterogeneity
+    het <- bind_rows(
+        fixed_effects_meta_analysis(res$b, res$se) %>% 
+            as_tibble() %>%
+            slice_head(n=1) %>%
+            mutate(method="interaction"),
+        fixed_effects_meta_analysis(res2$b, res2$se) %>% 
+            as_tibble() %>%
+            slice_head(n=1) %>%
+            mutate(method="marginal"),
+    )
+
+    effs <- bind_rows(res, res2, betas)
+    return(list(effs=effs, het=het))
+}
+```
+
+```{r}
+# Provide vector of interaction betas and their standard errors
+fixed_effects_meta_analysis <- function(beta_vec, se_vec) {
+    w <- 1 / se_vec^2
+    beta <- sum(beta_vec * w, na.rm=T) / sum(w, na.rm=T)
+    se <- sqrt(1 / sum(w, na.rm=T))
+    pval <- pnorm(abs(beta / se), lower.tail = FALSE)
+    Qj <- w * (beta-beta_vec)^2
+    Q <- sum(Qj, na.rm=T)
+    Qdf <- sum(!is.na(beta_vec))-1
+    if(Qdf == 0) Q <- 0
+    Qjpval <- pchisq(Qj, 1, lower.tail=FALSE)
+    Qpval <- pchisq(Q, Qdf, lower.tail=FALSE)
+    pv <- pnorm(abs(beta_vec)/se_vec, lower.tail=FALSE)
+    min_pv <- min(pv, na.rm=T)
+    return(list(beta=beta, se=se, Q=Q, Qdf=Qdf, Qpval=Qpval, Qj=Qj, Qjpval=Qjpval, min_pv=min_pv))
+}
+```
+
+```{r}
+param <- expand.grid(
+    nc=5,
+    n=seq(100,1000, by=50),
+    bsd=0.4,
+    nsim=1:100
+)
+dim(param)
+r <- lapply(1:nrow(param), function(i) {
+    o <- sim(param$nc[i], param$n[i], rnorm(param$nc[i], sd=param$bsd[i]))
+    bind_rows(
+        param[i,] %>% mutate(Qpval=o$het$Qpval[1], method="interaction"),
+        param[i,] %>% mutate(Qpval=o$het$Qpval[2], method="marginal")
+    )
+}) %>% bind_rows()
+
+r %>% group_by(n, method) %>%
+    summarise(pow=sum(Qpval < 0.05)/n()) %>%
+    ggplot(., aes(x=n, y=pow)) +
+    geom_point(aes(colour=method)) +
+    geom_line(aes(colour=method))
+```
+
+```{r}
+ggplot(r, aes(x=as.factor(n), y=-log10(Qpval))) +
+    geom_boxplot(aes(colour=method))
+```
+
+## Summary
+
+- Heterogeneity estimate seems ok
+- Interaction model is very low power compared to marginal cell estimates
+
+---
+
+## Ignore
+
+```{r, eval=FALSE}
+d <- sim(2, 1000)
+
+sim(5, 1000, b=rnorm(5, sd=0.4))
+sim(2, 10000, c(1,2))
+
+
+n <- 10000
+nc <- 2
+betas <- c(1,2)
+g <- rbinom(n, 2, 0.4)
+
+m <- sapply(1:nc, function(i) {
+    g * betas[i] + rnorm(n)
+})
+# for each individual sample cell type proportions
+cp <- sapply(1:n, function(x) {a <- runif(nc); a/sum(a)}) %>% t()
+# weighted sum
+M <- (scale(m) * cp) %>% rowSums
+
+cov(M, g * cp[,1]) / var(g*cp[,1])
+
+summary(lm(M ~ g*cp[,1]))
+
+summary(lm(M ~ g))
+cov(M, g) / var(g)
+
+summary(lm(M ~ cp[,1]))
+cov(M, cp[,1]) / var(cp[,1])
+
+summary(lm(M ~ g*cp[,1]))
+cov(M, g*cp[,1]) / var(g*cp[,1])
+
+Mr <- residuals(lm(M ~ g+cp[,1]))
+summary(lm(Mr ~ g:cp[,1]))
+cov(Mr, g*cp[,1]) / var(g*cp[,1])
+
+
+
+
+summary(lm(M ~ g:cp[,1]))
+cov(M, cp[,1]) / var(cp[,1])
+
+
+summary(lm(M ~ g * cp1, d))
+summary(lm(m1 ~ g, d))
+```
+
+```{r}
+sim2 <- function(nc, n, betas = runif(nc, -2, 2)) {
+    g <- rbinom(n, 2, 0.4)
+    
+    m <- sapply(1:nc, function(i)
+    {
+        g * betas[i] + rnorm(n)
+    })
+    # for each individual sample cell type proportions
+    cellprop <- sapply(1:n, function(x) {a <- runif(nc); a/sum(a)}) %>% t()
+    # weighted sum
+    M <- (scale(m) * cellprop) %>% rowSums
+
+    res <- lapply(1:nc, function(i)
+    {
+        o <- summary(lm(M ~ g * cellprop[,i]))
+        tibble(cell=i, b=o$coef[4,1], se=o$coef[4,2], pval=o$coef[4,4], method="interaction")
+    }) %>% bind_rows()
+
+    res2 <- lapply(1:nc, function(i)
+    {
+        o <- summary(lm(m[,i] ~ g))
+        tibble(cell=i, b=o$coef[2,1], se=o$coef[2,2], pval=o$coef[2,4], method="marginal")
+    }) %>% bind_rows()
+
+    betas <- tibble(cell=1:nc, b=betas, method="true")
+    
+
+    cellprop <- as_tibble(cellprop)
+    m <- as_tibble(m)
+    names(m) <- paste0("m", 1:nc)
+    names(cellprop) <- paste0("cp", 1:nc)
+    cellprop$M <- M
+    cellprop$g <- g
+
+    cellprop <- bind_cols(cellprop, m)
+    return(cellprop)
+}
+
+ana <- function(d) {
+    nc <- length(grep("cp", names(d)))
+
+    # per cell estimates
+    o1 <- lapply(1:nc, \(x) { 
+        f <- paste0("M ~ g * cp", x)
+        o <- summary(lm(f, data=d))$coef
+        n <- rownames(o)
+        o <- as_tibble(o)
+        names(o) <- c("b", "se", "tval", "pval")
+        o$term <- n
+        o$cell <- x
+        o$mod <- "interaction"
+        o
+    }) %>% bind_rows()
+
+    # cell int estimates
+    o2 <- lapply(1:nc, \(x) { 
+        f <- paste0("m", x, " ~ g")
+        o <- summary(lm(f, data=d))$coef
+        n <- rownames(o)
+        o <- as_tibble(o)
+        names(o) <- c("b", "se", "tval", "pval")
+        o$term <- n
+        o$cell <- x
+        o$mod <- "marginal"
+        o
+    }) %>% bind_rows()
+    bind_rows(o1, o2)
+}
+d <- sim2(2, 1000)
+ana(d) %>% as.data.frame
+```
+
+```{r, eval=FALSE}
+cov(residuals(lm(M ~ g + cp1, d)), d$g*d$cp1) / var(d$g*d$cp1)
+cov(d$M, d$g*d$cp1) / var(d$g*d$cp1)
+summary(lm(M ~ g*cp1, d))
+cov(d$M, d$g) / var(d$g)
+
+summary(lm(M ~ g + cp1, d))
+summary(lm(M ~ g + cp1 + g*cp1, d))
+summary(lm(M ~ g + cp1 + g*cp1 + cp2 + g*cp2, d))
+
+
+r <- residuals(lm(M ~ g + cp1, d))
+
+summary(lm(r ~ g*cp1, d))
+cov(d$cp1)
+
+n <- 10000
+a <- rnorm(n, m=0 sd=10)
+b <- rnorm(n, sd=3)
+y <- a + b - 4*a*b + rnorm(n)
+
+cov(y, a*b) / var(a*b)
+summary(lm(y ~ a*b))
+```
+
+---
+
+```{r}
+sessionInfo()
+```

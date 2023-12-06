@@ -1,11 +1,13 @@
 ---
-title: "2023-11-10-rare-power-sibs"
+title: "Power of sibling estimate of for rare variants"
 author: Gibran Hemani
-date: "`r Sys.Date()`"
+date: "2023-11-10"
 categories: []
 ---
 
 ## Background
+
+Ascertaining families who have rare disease can improve power of detection because rare variant is segregating within the family. What about rare variants influencing trait where families are not ascertained?
 
 
 ```{r}
@@ -217,7 +219,6 @@ param <- tibble(
 )
 
 res <- lapply(1:nrow(param), \(i) {
-    message(i)
     f <- make_families(param$af[i], 500000)
     p <- dynastic_phen(f, param$b[i], 0, 0, 0, 0)
     r <- reg(f, p)
@@ -236,6 +237,10 @@ ggplot(., aes(x=af, y=fvalratio)) +
 geom_point()
 ```
 
+
+## Summary
+
+- Power ratio does not change by allele frequency
 
 ---
 

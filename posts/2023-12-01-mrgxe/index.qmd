@@ -1,0 +1,57 @@
+---
+title: "Standard errors of MR GxE"
+author: Gibran Hemani
+date: "2023-12-01"
+categories: []
+---
+
+## Background
+
+Coding the MR-GxE model to have standard errors obtained through parametric bootstrap
+
+```{r}
+library(dplyr)
+est <- function(b_gx, se_gx, b_gy, se_gy, nboot=1000) {
+    npop <- length(b_gx)
+    stopifnot(length(se_gx) == npop)
+    stopifnot(length(b_gy) == npop)
+    stopifnot(length(se_gy) == npop)
+    
+    mod <- summary(lm(b_gy ~ b_gx))
+
+    # standard errors
+    o <- lapply(1:nboot, \(i) {
+        bgxb <- rnorm(npop, b_gx, se_gx)
+        bgyb <- rnorm(npop, b_gy, se_gy)
+        modb <- summary(lm(bgyb ~ bgxb))$coef
+        tibble(boot=i, a=modb[1,1], b=modb[2,1])
+    }) %>% bind_rows()
+
+    res <- tibble(
+        a = mod$coef[1,1],
+        b = mod$coef[2,1],
+        a_se = sd(o$a),
+        b_se = sd(o$b),
+        a_pval = pnorm(abs(a) / a_se, lower.tail=FALSE),
+        b_pval = pnorm(abs(b) / b_se, lower.tail=FALSE),
+        a_mean = mean(o$a),
+        b_mean = mean(o$b)
+    ) %>% as.list()
+    return(res)
+}
+
+o <- est(
+    b_gx=c(0, 1),
+    se_gx = c(0.2, 0.2),
+    b_gy=c(1, 1),
+    se_gy = c(0.2, 0.2)
+)
+o
+```
+
+
+---
+
+```{r}
+sessionInfo()
+```
