@@ -23,8 +23,7 @@ categories: [DNA methylation, statistics]
 library(dplyr)
 library(ggplot2)
 
-sim <- function(nc, n)
-{
+sim <- function(nc, n) {
     g <- rbinom(n, 2, 0.4)
     betas <- runif(nc, -2, 2)
     m <- sapply(1:nc, function(i)
@@ -35,15 +34,27 @@ sim <- function(nc, n)
     cellprop <- sapply(1:n, function(x) {a <- runif(nc); a/sum(a)}) %>% t()
     # weighted sum
     M <- (scale(m) * cellprop) %>% rowSums
-    res <- sapply(1:nc, function(i)
-    {
+    res <- sapply(1:nc, function(i) {
       summary(lm(M ~ g * cellprop[,i]))$coef[4,1]
     })
-    return(tibble(res, betas))
+
+    res2 <- sapply(1:nc, function(i)
+    {
+      summary(lm(m[,i] ~ g))$coef[2,1]
+    })
+    return(tibble(res, res2, betas))
 }
 
-o <- lapply(1:1000, function(i) sim(5, 10000) %>% mutate(sim=i)) %>% bind_rows()
-o
+o <- lapply(1:100, function(i) sim(5, 10000) %>% mutate(sim=i)) %>% bind_rows()
+
+```
+
+```{r}
+ggplot(o, aes(x=betas, y=res)) +
+geom_smooth(method="lm", aes(group=sim), se=FALSE, alpha=0.2, colour="grey") +
+geom_point() +
+geom_abline(colour="red") +
+geom_smooth()
 ```
 
 ```{r}
@@ -53,6 +64,19 @@ geom_abline(colour="red") +
 geom_smooth()
 ```
 
+```{r}
+ggplot(o, aes(x=res2, y=res)) +
+geom_point() +
+geom_abline(colour="red") +
+geom_smooth()
+```
+
+```{r}
+ggplot(o, aes(x=res2, y=betas)) +
+geom_point() +
+geom_abline(colour="red") +
+geom_smooth()
+```
 
 Generally seems to work but expect some shrinkage of large effects
 
@@ -107,6 +131,28 @@ facet_wrap(~ s)
 ```
 
 Noisy estimates of cell type proportions will lead to attenuated effect estimates
+
+```{r}
+n <- 1000000
+a <- rnorm(n, mean=10)
+g <- rbinom(n, 2, 0.3)
+summary(lm(a ~ scale(g)))
+mean(a)
+mean(g)
+```
+
+1. estimate PCs in a reference
+2. project pcs in to each cohort
+3. correlate pcs against actual cell types to check that their interpretation is stable
+4. M ~ G * PC[,i]
+
+## To do
+
+- work out what the intercept is
+- simulation - can we make inconsistent effects across independent studies that have the same underlying causal model
+- simulation - does PC projection solve inconsistency
+
+
 
 ---
 

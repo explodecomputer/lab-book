@@ -1,0 +1,148 @@
+---
+title: "Type 2 diabetes risk differences between populations"
+author: Gibran Hemani
+date: "2023-11-21"
+categories: []
+---
+
+## Background
+
+T2D rates are ~5x higher amongst South Asians than native British populations in Britain. Most likely due to environmental differences, but could it hypothetically be explained by differences in genetic architecture?
+
+Assume polygenic common variant distribution and a disease liability threshold model.
+
+## Descriptive statistice
+
+- t2d diagnosis normally 45-65
+- people aged 45+ constitute approx 50% of 70 million people
+- therefore 4.9 million t2d cases in uk out of 35 million people who are susceptible
+- 3.07 million South Asians, assume 50% aged 45+
+- Prevalence is 5x higher amongst South Asians
+
+Simultaneous equations:
+
+$$
+4.9 = 1.54 x + 35y
+$$
+
+where $x$ is the prevalence amongst South Asians and $y$ is the prevalence amongst white British
+
+Also
+
+$$
+x = y * 5
+$$
+
+Calculate prevalences:
+
+```{r}
+A <- matrix(c(1.54, 35, -1, 5), nrow=2, byrow=T)
+b <- c(4.9, 0)
+prev <- solve(A, b)
+prev
+```
+
+## Model
+
+Assume threshold is the same in both populations. Establish a threshold based on European genetic architecture
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+sim1 <- function(mg, vg, me, ve, prev) {
+    n <- 100000
+    g <- rnorm(n, mg, sqrt(vg))
+    e <- rnorm(n, me, sqrt(ve))
+    l <- g + e
+    thresh <- quantile(l, 1-prev)
+    return(thresh)
+}
+
+thresh <- sim1(0, 0.4, 0, 0.6, prev[2])
+thresh
+```
+
+Estimate prevalence given a threshold when parameters change
+
+```{r}
+
+sim2 <- function(mg, vg, me, ve, thresh) {
+    n <- 100000
+    g <- rnorm(n, mg, sqrt(vg))
+    e <- rnorm(n, me, sqrt(ve))
+    l <- g + e
+    prev <- sum(l > thresh) / n
+    return(prev)
+}
+
+sim2(0.1, 0.4, 0, 0.6, thresh)
+```
+
+Enumerate possibilities
+
+```{r}
+param <- expand.grid(
+    mg = seq(0, 4, by=0.01),
+    vg = 0.4,
+    me = 0,
+    ve = 0.6,
+    thresh = thresh,
+    prev = NA
+)
+
+for(i in 1:nrow(param)) {
+    param$prev[i] <- sim2(param$mg[i], param$vg[i], param$me[i], param$ve[i], param$thresh[i])
+}
+
+param$ratio = param$prev / prev[2]
+
+ggplot(param, aes(x=mg, y=ratio)) +
+geom_line() +
+geom_hline(yintercept=5, linetype="dotted")
+```
+
+This shows how much larger the mean of the genetic liability would have to be to lead to 5x prevalence
+
+Comparison of distributions:
+
+```{r}
+mg <- param$mg[which(param$ratio >= 5)[1]]
+bind_rows(
+    tibble(pop="EUR", x=seq(-3, 3, length.out=1000), val = dnorm(x, sd=sqrt(0.4))),
+    tibble(pop="SAS", x=seq(-3+mg, 3+mg, length.out=1000), val = dnorm(x, m=mg, sd=sqrt(0.4)))
+) %>% ggplot(., aes(x=x, y=val)) +
+geom_line(aes(colour=pop)) +
+geom_vline(xintercept=thresh)
+```
+
+
+Is it plausible in terms of just different allele frequencies?
+
+```{r}
+nsnp <- 10000
+af <- rbeta(nsnp, 1, 1) / 2
+hist(af)
+b <- rnorm(nsnp, 0, (2*af*(1-af))^-0.4)
+vg <- sum(b^2 * 2 * af * (1-af))
+b <- b / sqrt(vg) * 0.4
+plot(b ~ af)
+
+nid <- 1000
+g1 <- sapply(af, \(x) { rbinom(nid, 2, x) })
+score1 <- g1 %*% b
+hist(score1)
+sd(score1)
+
+```
+
+
+## Summary
+
+- Seems unlikely under this model
+
+---
+
+```{r}
+sessionInfo()
+```

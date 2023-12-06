@@ -1,0 +1,103 @@
+---
+title: "Rsq in simulations"
+author: Gibran Hemani
+date: "2023-12-06"
+categories: []
+---
+
+## Background
+
+What determines $R^2$ between X and Y in a linear model under confounding
+
+$$
+\begin{aligned}
+
+Y &= a + bX + E \\
+b &= cov(X, Y) / var(X) \\
+R &= cov(X, Y) / [sd(X)sd(Y)] \\
+&= b * sd(x) / sd(y)
+
+\end{aligned}
+$$
+
+In OLS the b will be different to the IV b if there is unmeasured confounding
+
+$$
+\begin{aligned}
+X &= a + \beta_1 G + \beta_2 U + \epsilon \\
+Y &= a + b_1 X + b_2 U + E \\
+
+b_{OLS} &= cov(X, Y) / var(X) \\
+&= cov(\beta_1 G + \beta_2 U, b_1(\beta_1 G + \beta_2 U) + b_2 U)/var(X) \\
+&= cov(\beta_1 G + \beta_2 U, b_1\beta_1 G + b_1\beta_2 U + b_2 U)/var(X) \\
+&= [b_1\beta_1^2 var(G) + (b_1\beta_2^2 + b_2\beta_2) var(U)]/var(X) \\
+
+
+\end{aligned}
+$$
+
+and
+
+$$
+R_{OLS} = b_{OLS} sd(x)/sd(y)
+$$
+
+therefore to get the OLS $R^2$ of X,Y
+
+$$
+R^2 = \left [ \frac{b_1\beta_1^2 var(G) + (b_1\beta_2^2 + b_2\beta_2) var(U)}{sd(x) sd(y)} \right]^2
+$$
+
+Note that 
+
+$$
+\begin{aligned}
+var(x) &= sd(x)^2 = \beta_1^2var(G) + \beta_2^2var(U) + var(\epsilon) \\
+var(y) &= sd(y)^2 = b_1^2var(X) + b_2^2var(U) + var(E) \\
+\end{aligned}
+$$
+
+So ultimately if you want to fix $R^2$ for different parameters of effects you should be able to scale $var(\epsilon)$ and $var(E)$, the residual variances, according to these formulae. 
+
+By contrast the variance explained by the causal effect of X is
+
+$$
+R^2_{IV, x,y} = b^2_1var(X) / var(Y)
+$$
+
+
+## Check
+
+```{r}
+set.seed(1)
+b1 <- 0.2
+b2 <- 3
+beta1 <- 4
+beta2 <- 5
+n <- 10000
+u <- rnorm(n)
+g <- rnorm(n)
+x <- u * beta2 + g * beta1 + rnorm(n)
+y <- u * b2 + x * b1 + rnorm(n, sd=0)
+```
+
+Beta
+
+```{r}
+cov(x, y)/var(x)
+summary(lm(y ~ x))$coef[2,1]
+( b1*beta1^2*var(g) + (b1*beta2^2 + b2*beta2) * var(u) ) / var(x)
+```
+
+Correlation
+
+```{r}
+((( b1*beta1^2*var(g) + (b1*beta2^2 + b2*beta2) * var(u) ) / var(x)) * sd(x) / sd(y))^2
+cor(x, y)^2
+```
+
+---
+
+```{r}
+sessionInfo()
+```
