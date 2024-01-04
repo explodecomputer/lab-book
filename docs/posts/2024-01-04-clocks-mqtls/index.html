@@ -209,17 +209,67 @@ Attaching package: 'dplyr'</code></pre>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>w <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(ncpg)</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>g <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rbinom</span>(ncpg <span class="sc">*</span> nid, <span class="dv">2</span>, <span class="fl">0.5</span>), nid, ncpg)</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(ncpg)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(ncpg, <span class="at">sd=</span><span class="fl">0.1</span>)</span>
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(ncpg <span class="sc">*</span> nid), nid, ncpg)</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>cpghat <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">t</span>(g) <span class="sc">*</span> b)</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>cpg <span class="ot">&lt;-</span> cpghat <span class="sc">+</span> e</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>cpgg <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">t</span>(g) <span class="sc">*</span> b)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>cpg <span class="ot">&lt;-</span> cpgg <span class="sc">+</span> e</span>
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>clock <span class="ot">&lt;-</span> cpg <span class="sc">%*%</span> w</span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>clockgwas <span class="ot">&lt;-</span> <span class="fu">gwas</span>(clock, g)</span>
 <span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>clockprs_direct <span class="ot">&lt;-</span> g <span class="sc">%*%</span> clockgwas<span class="sc">$</span>bhat</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>clockprs_mqtl <span class="ot">&lt;-</span> cpghat <span class="sc">%*%</span> w</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(clockprs_direct, clockprs_mqtl)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>bhat <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span>ncpg, \(i) {</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fast_assoc</span>(cpg[,i], g[,i])<span class="sc">$</span>bhat</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>cpghat <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">t</span>(g) <span class="sc">*</span> bhat)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>clockprs_mqtl <span class="ot">&lt;-</span> cpghat <span class="sc">%*%</span> w</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(clockprs_direct, clockprs_mqtl)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Which is better powered?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(clock <span class="sc">~</span> clockprs_direct))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = clock ~ clockprs_direct)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-37.279  -7.035  -0.015   6.933  44.983 
+
+Coefficients:
+                Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)     -0.92219    0.13001  -7.093  1.4e-12 ***
+clockprs_direct  1.01061    0.07803  12.951  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 10.35 on 9998 degrees of freedom
+Multiple R-squared:  0.0165,    Adjusted R-squared:  0.0164 
+F-statistic: 167.7 on 1 and 9998 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(clock <span class="sc">~</span> clockprs_mqtl))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = clock ~ clockprs_mqtl)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-37.123  -7.076   0.032   6.962  45.099 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)     0.2571     0.1059   2.428   0.0152 *  
+clockprs_mqtl   1.0943     0.1332   8.215 2.39e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 10.41 on 9998 degrees of freedom
+Multiple R-squared:  0.006704,  Adjusted R-squared:  0.006605 
+F-statistic: 67.48 on 1 and 9998 DF,  p-value: 2.387e-16</code></pre>
 </div>
 </div>
 </section>
@@ -227,11 +277,12 @@ Attaching package: 'dplyr'</code></pre>
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
 <ul>
 <li>Generating clock PRS using GWAS of clock is equivalent to generating the clock PRS indirectly from mQTLs</li>
+<li>It’s better powered to GWAS the clock directly than to use mQTLs, assuming same sample sizes for clock GWAS and mQTL</li>
 <li>There may be latent heritable factors that influence CpGs that are not the known mQTLs, and which in aggregate are better powered to be detected by the clock GWAS. But these are likely to be a minority of the genetic variation for the clock.</li>
 </ul>
 <hr>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>R version 4.3.2 (2023-10-31)
 Platform: aarch64-apple-darwin20 (64-bit)

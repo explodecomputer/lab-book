@@ -24,20 +24,33 @@ nid <- 10000
 
 w <- rnorm(ncpg)
 g <- matrix(rbinom(ncpg * nid, 2, 0.5), nid, ncpg)
-b <- rnorm(ncpg)
+b <- rnorm(ncpg, sd=0.1)
 e <- matrix(rnorm(ncpg * nid), nid, ncpg)
-cpghat <- t(t(g) * b)
-cpg <- cpghat + e
+cpgg <- t(t(g) * b)
+cpg <- cpgg + e
 clock <- cpg %*% w
 clockgwas <- gwas(clock, g)
 clockprs_direct <- g %*% clockgwas$bhat
+
+bhat <- sapply(1:ncpg, \(i) {
+    fast_assoc(cpg[,i], g[,i])$bhat
+})
+cpghat <- t(t(g) * bhat)
 clockprs_mqtl <- cpghat %*% w
 plot(clockprs_direct, clockprs_mqtl)
+```
+
+Which is better powered?
+
+```{r}
+summary(lm(clock ~ clockprs_direct))
+summary(lm(clock ~ clockprs_mqtl))
 ```
 
 ## Summary
 
 - Generating clock PRS using GWAS of clock is equivalent to generating the clock PRS indirectly from mQTLs
+- It's better powered to GWAS the clock directly than to use mQTLs, assuming same sample sizes for clock GWAS and mQTL
 - There may be latent heritable factors that influence CpGs that are not the known mQTLs, and which in aggregate are better powered to be detected by the clock GWAS. But these are likely to be a minority of the genetic variation for the clock.
 
 ---
