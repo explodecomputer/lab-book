@@ -1,0 +1,56 @@
+---
+title: "Differential vulnerability and susceptibility"
+author: Gibran Hemani
+date: "2023-12-08"
+categories: []
+---
+
+## Background
+
+
+
+
+```{r}
+library(ggplot2)
+ggplot(NULL, aes(c(-5,5))) +
+  geom_area(stat = "function", fun = \(x) dnorm(x, mean=-1), fill = "#00998a", xlim = c(-5, 1.5)) +
+  geom_area(stat = "function", fun = \(x) dnorm(x, mean=-1), fill = "grey80", xlim = c(1.5, 5)) +
+  geom_vline(xintercept=1.5, linetype="dotted") +
+  labs(x = "", y = "") +
+  scale_y_continuous(breaks = NULL) +
+  scale_x_continuous(breaks = NULL) +
+  theme_bw()
+  ggsave(filename="pop1.pdf", width=5, height=2)
+```
+
+```{r}
+ggplot(NULL, aes(c(-5,5))) +
+  geom_area(stat = "function", fun = \(x) dnorm(x, mean=0), fill = "#00998a", xlim = c(-5, 1.5)) +
+  geom_area(stat = "function", fun = \(x) dnorm(x, mean=0), fill = "grey80", xlim = c(1.5, 5)) +
+  geom_line(stat = "function", fun = \(x) dnorm(x, mean=-1), linetype="dotted", xlim = c(-5, 5)) +
+  geom_vline(xintercept=1.5, linetype="dotted") +
+  labs(x = "", y = "") +
+  scale_y_continuous(breaks = NULL) +
+  scale_x_continuous(breaks = NULL) +
+  theme_bw()
+  ggsave(filename="vuln.pdf", width=5, height=2)
+```
+
+```{r}
+ggplot(NULL, aes(c(-5,5))) +
+  geom_area(stat = "function", fun = \(x) dnorm(x, mean=-1), fill = "#00998a", xlim = c(-5, 0.5)) +
+  geom_area(stat = "function", fun = \(x) dnorm(x, mean=-1), fill = "grey80", xlim = c(0.5, 5)) +
+  geom_vline(xintercept=1.5, linetype="dotted") +
+  labs(x = "", y = "") +
+  scale_y_continuous(breaks = NULL) +
+  scale_x_continuous(breaks = NULL) +
+  theme_bw()
+  ggsave(filename="susc.pdf", width=5, height=2)
+
+```
+
+---
+
+```{r}
+sessionInfo()
+```

@@ -1,0 +1,16 @@
+{
+  "hash": "4c99aa4b554db81804246da9d1c603c1",
+  "result": {
+    "markdown": "---\ntitle: \"Generating PRS of clocks from mQTLs\"\nauthor: Gibran Hemani\ndate: \"2024-01-04\"\ncategories: []\n---\n\n\n## Background\n\nCan we generate a PRS for an epigenetic clock using just mQTLs?\n\n\n## Model\n\nThe clock is a weighted sum of CpGs. Each CpG has an mQTL. No other genetic factors influence the clock.\n\n## Simulation\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(dplyr)\n```\n\n::: {.cell-output .cell-output-stderr}\n```\n\nAttaching package: 'dplyr'\n```\n:::\n\n::: {.cell-output .cell-output-stderr}\n```\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n```\n:::\n\n::: {.cell-output .cell-output-stderr}\n```\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n```\n:::\n\n```{.r .cell-code}\nlibrary(simulateGP)\nncpg <- 100\nnid <- 10000\n\nw <- rnorm(ncpg)\ng <- matrix(rbinom(ncpg * nid, 2, 0.5), nid, ncpg)\nb <- rnorm(ncpg)\ne <- matrix(rnorm(ncpg * nid), nid, ncpg)\ncpghat <- t(t(g) * b)\ncpg <- cpghat + e\nclock <- cpg %*% w\nclockgwas <- gwas(clock, g)\nclockprs_direct <- g %*% clockgwas$bhat\nclockprs_mqtl <- cpghat %*% w\nplot(clockprs_direct, clockprs_mqtl)\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-1-1.png){width=672}\n:::\n:::\n\n\n## Summary\n\n- Generating clock PRS using GWAS of clock is equivalent to generating the clock PRS indirectly from mQTLs\n- There may be latent heritable factors that influence CpGs that are not the known mQTLs, and which in aggregate are better powered to be detected by the clock GWAS. But these are likely to be a minority of the genetic variation for the clock.\n\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsessionInfo()\n```\n\n::: {.cell-output .cell-output-stdout}\n```\nR version 4.3.2 (2023-10-31)\nPlatform: aarch64-apple-darwin20 (64-bit)\nRunning under: macOS Ventura 13.6\n\nMatrix products: default\nBLAS:   /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRblas.0.dylib \nLAPACK: /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0\n\nlocale:\n[1] en_GB.UTF-8/en_GB.UTF-8/en_GB.UTF-8/C/en_GB.UTF-8/en_GB.UTF-8\n\ntime zone: Europe/London\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nother attached packages:\n[1] simulateGP_0.1.2 dplyr_1.1.4     \n\nloaded via a namespace (and not attached):\n [1] digest_0.6.33     utf8_1.2.4        R6_2.5.1          fastmap_1.1.1    \n [5] tidyselect_1.2.0  xfun_0.41         magrittr_2.0.3    glue_1.6.2       \n [9] tibble_3.2.1      knitr_1.45        pkgconfig_2.0.3   htmltools_0.5.7  \n[13] rmarkdown_2.25    generics_0.1.3    lifecycle_1.0.4   cli_3.6.1        \n[17] fansi_1.0.5       vctrs_0.6.4       compiler_4.3.2    tools_4.3.2      \n[21] pillar_1.9.0      evaluate_0.23     yaml_2.3.7        rlang_1.1.2      \n[25] jsonlite_1.8.7    htmlwidgets_1.6.3\n```\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

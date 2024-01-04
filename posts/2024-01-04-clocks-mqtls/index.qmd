@@ -1,0 +1,47 @@
+---
+title: "Generating PRS of clocks from mQTLs"
+author: Gibran Hemani
+date: "2024-01-04"
+categories: []
+---
+
+## Background
+
+Can we generate a PRS for an epigenetic clock using just mQTLs?
+
+
+## Model
+
+The clock is a weighted sum of CpGs. Each CpG has an mQTL. No other genetic factors influence the clock.
+
+## Simulation
+
+```{r}
+library(dplyr)
+library(simulateGP)
+ncpg <- 100
+nid <- 10000
+
+w <- rnorm(ncpg)
+g <- matrix(rbinom(ncpg * nid, 2, 0.5), nid, ncpg)
+b <- rnorm(ncpg)
+e <- matrix(rnorm(ncpg * nid), nid, ncpg)
+cpghat <- t(t(g) * b)
+cpg <- cpghat + e
+clock <- cpg %*% w
+clockgwas <- gwas(clock, g)
+clockprs_direct <- g %*% clockgwas$bhat
+clockprs_mqtl <- cpghat %*% w
+plot(clockprs_direct, clockprs_mqtl)
+```
+
+## Summary
+
+- Generating clock PRS using GWAS of clock is equivalent to generating the clock PRS indirectly from mQTLs
+- There may be latent heritable factors that influence CpGs that are not the known mQTLs, and which in aggregate are better powered to be detected by the clock GWAS. But these are likely to be a minority of the genetic variation for the clock.
+
+---
+
+```{r}
+sessionInfo()
+```
