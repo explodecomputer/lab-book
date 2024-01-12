@@ -1,0 +1,222 @@
+---
+title: "2024-01-12-time-varying-mr"
+author: Gibran Hemani
+date: "`r Sys.Date()`"
+categories: []
+---
+
+## Background
+
+Work from Panagiota Pagoni looked at time-varying instruments for MR. Idea is to estimate the main and age interaction genetic effects on X, and then perform multivariable MR of main + interaction against outcome.
+
+Simple model below to see what happens...
+
+1. Simulate `n_id` individuals with `x` values for each `age` ranging from `1:n_age`.
+2. There are `n_snp`s and each SNP has a different effect on `x` before age 15 and after age 15
+3. `y` is influenced by `x` at age 12 and `x` at age 24. The effect of `x` on `y` has opposing directions at these two time points.
+4. Estimation
+    1. Randomly sample one age point per individual
+    2. Estimate either a main effect of each SNP on `x` to obtain `beta_gx`, or estimate main + interaction effect of each SNP on `x` to get `beta_gxm` and `beta_gxi`.
+    3. Estimate effect of each SNP on `y` to get `beta_gy`
+    4. Univariable MR of `beta_gy ~ beta_gx`
+    5. Multivariable MR of `beta_gy ~ beta_gxm + beta_gxi`
+
+```{r}
+library(dplyr)
+set.seed(1234)
+```
+
+Set parameters
+
+```{r}
+n_id <- 1000
+n_snp <- 10
+g <- matrix(rbinom(n_id*n_snp, 2, 0.4), n_id, n_snp)
+n_age <- 30
+beta <- matrix(rnorm(n_snp * 2), n_snp, 2)
+beta_xy1 <- 1
+beta_xy2 <- -0.3
+```
+
+Simulate x
+
+```{r}
+dat <- lapply(
+    1:n_age, \(i) {
+        dat <- tibble(
+            id = 1:n_id,
+            age = i,
+            score1 = g %*% beta[,1] %>% drop(),
+            score2 = g %*% beta[,2] %>% drop(),
+            x = case_when(
+                age < 15 ~ rnorm(n_id) + score1,
+                TRUE ~ rnorm(n_id) + score2
+            )
+        )
+    }
+) %>% bind_rows()
+dat
+
+plot(dat$score1, dat$score2)
+```
+
+Simulate y
+
+```{r}
+dat2 <- tibble(id = 1:n_id, x1 = subset(dat, age == 12)$x, x2 = subset(dat, age == 24)$x, y = x1 * beta_xy1 + x2 * beta_xy2 + rnorm(n_id))
+plot(dat2$x1, dat2$x2)
+```
+
+Estimation of gx
+
+```{r}
+dats <- dat %>% group_by(id) %>% slice_sample(n=1)
+gx <- lapply(1:n_snp, \(i) {
+    summary(lm(x ~ g[,i] * age, data=dats))$coef[c(2, 4), ] %>%
+    as_tibble() %>%
+    mutate(what=c("main", "interaction"))
+}) %>% bind_rows()
+gx
+
+gxm <- lapply(1:n_snp, \(i) {
+    summary(lm(x ~ g[,i], data=dats))$coef %>%
+    as_tibble() %>% slice_tail(n=1)
+}) %>% bind_rows()
+gxm
+```
+
+Estimation of gy
+
+```{r}
+gy <- lapply(1:n_snp, \(i) {
+    summary(lm(y ~ g[,i], data=dat2))$coef %>%
+    as_tibble() %>% slice_tail(n=1)
+}) %>% bind_rows()
+gy
+```
+
+Univariable MR
+
+```{r}
+summary(lm(gy$Estimate ~ gxm$Estimate, weight=1/gy$`Std. Error`^2))
+```
+
+Multivariable MR
+
+```{r}
+summary(lm(gy$Estimate ~ gx$Estimate[gx$what=="main"] + gx$Estimate[gx$what=="interaction"], weight=1/gy$`Std. Error`^2))
+```
+
+```{r}
+tibble(
+    main = gxm$Estimate,
+    main_intmod = gx$Estimate[gx$what=="main"],
+    int_intmod = gx$Estimate[gx$what=="interaction"]
+) %>% plot()
+```
+
+Univariable MR using only main effect from interaction model
+
+```{r}
+summary(lm(gy$Estimate ~ gx$Estimate[gx$what=="main"] + gx$Estimate[gx$what=="interaction"], weight=1/gy$`Std. Error`^2))
+summary(lm(gy$Estimate ~ gx$Estimate[gx$what=="interaction"], weight=1/gy$`Std. Error`^2))
+summary(lm(gy$Estimate ~ gx$Estimate[gx$what=="main"], weight=1/gy$`Std. Error`^2))
+```
+
+
+## Run a few different parameters
+
+Make simulation and estimation functions from above
+
+```{r}
+sim <- function(n_id, n_snp, n_age, beta_xy1, beta_xy2) {
+    g <- matrix(rbinom(n_id*n_snp, 2, 0.4), n_id, n_snp)
+    beta <- matrix(rnorm(n_snp * 2), n_snp, 2)
+    dat <- lapply(
+        1:n_age, \(i) {
+            dat <- tibble(
+                id = 1:n_id,
+                age = i,
+                score1 = g %*% beta[,1] %>% drop(),
+                score2 = g %*% beta[,2] %>% drop(),
+                x = case_when(
+                    age < 15 ~ rnorm(n_id) + score1,
+                    TRUE ~ rnorm(n_id) + score2
+                )
+            )
+        }
+    ) %>% bind_rows()
+
+    dat2 <- tibble(id = 1:n_id, x1 = subset(dat, age == 12)$x, x2 = subset(dat, age == 24)$x, y = x1 * beta_xy1 + x2 * beta_xy2 + rnorm(n_id))
+    dats <- dat %>% group_by(id) %>% slice_sample(n=1)
+    gx <- lapply(1:n_snp, \(i) {
+        summary(lm(x ~ g[,i] * age, data=dats))$coef[c(2, 4), ] %>%
+        as_tibble() %>%
+        mutate(what=c("main", "interaction"))
+    }) %>% bind_rows()
+
+    gxm <- lapply(1:n_snp, \(i) {
+        summary(lm(x ~ g[,i], data=dats))$coef %>%
+        as_tibble() %>% slice_tail(n=1)
+    }) %>% bind_rows()
+
+    gy <- lapply(1:n_snp, \(i) {
+        summary(lm(y ~ g[,i], data=dat2))$coef %>%
+        as_tibble() %>% slice_tail(n=1)
+    }) %>% bind_rows()
+
+    return(list(gy=gy, gx=gx, gxm=gxm))
+}
+
+estimation <- function(ests) {
+    return(list(
+        main = with(ests, summary(lm(gy$Estimate ~ 0 + gxm$Estimate, weight=1/gy$`Std. Error`^2))$coef),
+        full = with(ests, summary(lm(gy$Estimate ~ 0 + gx$Estimate[gx$what=="main"] + gx$Estimate[gx$what=="interaction"], weight=1/gy$`Std. Error`^2))$coef),
+        int_main = with(ests, summary(lm(gy$Estimate ~ 0 + gx$Estimate[gx$what=="main"], weight=1/gy$`Std. Error`^2))$coef),
+        int_int = with(ests, summary(lm(gy$Estimate ~ 0 + gx$Estimate[gx$what=="interaction"], weight=1/gy$`Std. Error`^2))$coef)
+    ))
+}
+```
+
+
+### Null model
+
+```{r}
+sim(n_id=1000, n_snp=10, n_age=30, beta_xy1=0, beta_xy2=0) %>% estimation
+```
+
+No associations at any model
+
+### Same effect at each time point
+
+```{r}
+sim(n_id=1000, n_snp=10, n_age=30, beta_xy1=1, beta_xy2=1) %>% estimation
+```
+
+Main effect as expected, interaction term is there because of accumulated effect?
+
+### No effect at second time point
+
+```{r}
+sim(n_id=10000, n_snp=10, n_age=30, beta_xy1=1, beta_xy2=0) %>% estimation
+```
+
+Almost no interaction effect
+
+### No effect at first time point
+
+```{r}
+sim(n_id=10000, n_snp=10, n_age=30, beta_xy1=0, beta_xy2=1) %>% estimation
+```
+
+Only shows an interaction effect.
+
+## Summary
+
+No idea what is going on. This model is probably too simple, doesn't include auto-correlation in x across age.
+
+---
+
+```{r}
+sessionInfo()
+```
