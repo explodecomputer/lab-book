@@ -1,0 +1,147 @@
+---
+title: "Selection bias influencing family-based GWAS"
+author: Gibran Hemani
+date: "2024-02-23"
+categories: []
+---
+
+## Background
+
+Selection bias where X influences inclusion in the data can distort genetic associations. Is this also true for family based genetic associations?
+
+```{r}
+library(dplyr)
+library(tidyr)
+```
+
+```{r}
+# from https://github.com/MRCIEU/mrtwin_power/blob/master/scripts/sib_mr_functions.r
+make_families <- function(af, nfam) {
+	nsnp <- length(af)
+	dads <- matrix(0, nfam, nsnp)
+	mums <- matrix(0, nfam, nsnp)
+	sibs1 <- matrix(0, nfam, nsnp)
+	sibs2 <- matrix(0, nfam, nsnp)
+	ibd <- matrix(0, nfam, nsnp)
+	ibs <- matrix(0, nfam, nsnp)
+	for(i in 1:nsnp)
+	{
+		dad1 <- rbinom(nfam, 1, af[i]) + 1
+		dad2 <- (rbinom(nfam, 1, af[i]) + 1) * -1
+		mum1 <- rbinom(nfam, 1, af[i]) + 1
+		mum2 <- (rbinom(nfam, 1, af[i]) + 1) * -1
+
+		dadindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		dadh <- rep(NA, nfam)
+		dadh[dadindex] <- dad1[dadindex]
+		dadh[!dadindex] <- dad2[!dadindex]
+
+		mumindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		mumh <- rep(NA, nfam)
+		mumh[mumindex] <- mum1[mumindex]
+		mumh[!mumindex] <- mum2[!mumindex]
+
+		sib1 <- cbind(dadh, mumh)
+
+		dadindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		dadh <- rep(NA, nfam)
+		dadh[dadindex] <- dad1[dadindex]
+		dadh[!dadindex] <- dad2[!dadindex]
+
+		mumindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		mumh <- rep(NA, nfam)
+		mumh[mumindex] <- mum1[mumindex]
+		mumh[!mumindex] <- mum2[!mumindex]
+
+		sib2 <- cbind(dadh, mumh)
+
+		ibd[,i] <- (as.numeric(sib1[,1] == sib2[,1]) + as.numeric(sib1[,2] == sib2[,2])) / 2
+
+
+		sibs1[,i] <- rowSums(abs(sib1) - 1)
+		sibs2[,i] <- rowSums(abs(sib2) - 1)
+		dads[,i] <- dad1 - 1 + abs(dad2) - 1
+		mums[,i] <- mum1 - 1 + abs(mum2) - 1
+
+		# l[[i]] <- (sum(sib1[,1] == sib2[,1]) / nsnp + sum(sib1[,2] == sib2[,2]) / nsnp) / 2
+
+	}
+
+	# This may not be correct - getting some really large values
+	ibs <- scale(sibs1) * scale(sibs2)
+
+	# Just count how many alleles are in common
+	ibs_unw <- abs(abs(sibs1 - sibs2) - 2) / 2
+
+    sibs1 <- as_tibble(sibs1)
+    sibs2 <- as_tibble(sibs2)
+    sdat <- bind_rows(
+        tibble(fid = 1:nfam, iid = paste0(1:nfam, "a"), sibs1),
+        tibble(fid = 1:nfam, iid = paste0(1:nfam, "b"), sibs2)
+    )
+    return(sdat)
+
+	return(list(dads=dads, mums=mums, sibs1=sibs1, sibs2=sibs2, ibd=ibd, ibs=ibs, ibs_unw=ibs_unw))
+
+}
+```
+
+DAG
+
+```
+g1 -> x
+g2 -> x
+x -> s
+```
+
+
+```{r}
+dat <- make_families(c(0.4, 0.6), 100000)
+```
+
+```{r}
+dat$x <- dat$V1 * 0.4 + dat$V2 * -0.4 + rnorm(nrow(dat))
+dat$s <- rbinom(nrow(dat), 1, plogis(dat$x))
+table(dat$s)
+```
+
+Estimation in populations
+
+```{r}
+# No selection
+summary(lm(x ~ V1, dat, subset=grepl("a", dat$iid)))
+```
+
+```{r}
+# With selection
+summary(lm(x ~ V1, dat, subset=grepl("a", dat$iid) & dat$s))
+```
+
+Estimation in families
+
+```{r}
+a <- subset(dat, grepl("a", dat$iid))
+b <- subset(dat, grepl("b", dat$iid))
+ab <- inner_join(a, b, by="fid")
+ab
+```
+
+```{r}
+# No selection
+summary(lm(I(x.x - x.y) ~ I(V1.x - V1.y), ab))
+```
+
+```{r}
+# With selection
+summary(lm(I(x.x - x.y) ~ I(V1.x - V1.y), ab, subset=ab$s.x==1 & ab$s.y==1))
+```
+
+## Summary
+
+The selection bias is the same using within family and between family
+
+---
+
+```{r}
+sessionInfo()
+```

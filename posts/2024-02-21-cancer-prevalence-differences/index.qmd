@@ -1,0 +1,135 @@
+---
+title: "Differences in cancer prevalence and heritability"
+author: Gibran Hemani
+date: "2024-02-21"
+categories: []
+---
+
+## Background
+
+[Richard Peto points out, and later George Davey Smith](https://link.springer.com/article/10.1007/s10654-023-01090-5#Sec3), that cancer prevalence is very different across geographical regions and across time periods within geographical regions. Such systematic differences are too rapid to be explained by genetic factors, and too structured to be explained by chance. When comparing the rates of cancer between the highest 20% and lowest 20% prevalence, they suggest that ~80% of cancer is due to modifiable risk factors. Similar rates for mortality differences, meaning that it's plausible that this isn't due to differential rates of cancer detection.
+
+How does this square with heritability? It implies that 80% of the variance in cancer is due to a set of modifiable factors. But if h2 is higher than 20% then is this possible?
+
+Consider smoking and lung cancer. If smoking is partially genetic and partially environmental, what happens in this high vs low prevalence calculation?
+
+
+```{r}
+library(dplyr)
+```
+
+Positive control, lets make it so that 80% of the trait is due to environment and 20% random chance
+
+```{r}
+n <- 10000
+
+dat <- bind_rows(
+    tibble(
+        envir = rbinom(n, 1, 0) * 10,
+        cancer = rbinom(n, 1, plogis(-1.9 + envir)),
+        cat="low"
+    ),
+    tibble(
+        envir = rbinom(n, 1, 0.8) * 10,
+        cancer = rbinom(n, 1, plogis(-1.9 + envir)),
+        cat="high"
+    )
+) 
+
+cor(dat$envir[dat$cat=="high"], dat$cancer[dat$cat=="high"])^2
+cor(dat$envir, dat$cancer)^2
+
+dat %>%
+    group_by(cat) %>%
+    summarise(prev_cancer = sum(cancer) / n(), mean_env = mean(envir))
+```
+
+Now introduce genetic variance
+
+There is a heritability of 50% which is independent of environmental effect
+
+```{r}
+dat <- bind_rows(
+    tibble(
+        envir = rbinom(n, 1, 0) * 10,
+        g = rnorm(n),
+        cancer = rbinom(n, 1, plogis(-1.9 + envir + g*10)),
+        cat="low"
+    ),
+    tibble(
+        envir = rbinom(n, 1, 0.8) * 10,
+        g = rnorm(n),
+        cancer = rbinom(n, 1, plogis(-1.9 + envir + g*10)),
+        cat="high"
+    )
+) 
+cor(dat$g[dat$cat=="high"], dat$cancer[dat$cat=="high"])^2
+dat %>%
+    group_by(cat) %>%
+    summarise(prev_cancer = sum(cancer) / n(), mean_env = mean(envir))
+
+```
+
+That raises the prevalence in the low group. Now lets make the genetic factor mediated through behaviour
+
+```{r}
+dat <- bind_rows(
+    tibble(
+        g = rnorm(n),
+        e = rnorm(n, sd=1),
+        envir = rbinom(n, 1, plogis(g + e)) * 10,
+        cancer = rbinom(n, 1, plogis(-1.9 + envir)),
+        cat="low"
+    ),
+    tibble(
+        g = rnorm(n),
+        e = rnorm(n, sd=10),
+        envir = rbinom(n, 1, plogis(g + e)) * 10,
+        cancer = rbinom(n, 1, plogis(-1.9 + envir)),
+        cat="high"
+    )
+) 
+cor(dat$g[dat$cat=="high"], dat$cancer[dat$cat=="high"])^2
+dat %>%
+    group_by(cat) %>%
+    summarise(prev_cancer = sum(cancer) / n(), mean_env = mean(envir))
+```
+
+I think you need a G x E interaction. You might have a high liability to smoke but the availability of cigarettes is very low, so that genetic variance cannot manifest. How does that appear as a statistical model? It will be the genetic risk on outcome + environmental risk on outcome, multiplied by accessibility to the outcome
+
+```{r}
+dat <- bind_rows(
+    tibble(
+        g = rbeta(n, 3, 1),
+        accessibility = rbinom(n, 1, 0.001),
+        envir = rbinom(n, 1, g * accessibility),
+        cancer = rbinom(n, 1, plogis(-1.9 + envir * 10)),
+        cat="low"
+    ),
+    tibble(
+        g = rbeta(n, 3, 1),
+        accessibility = rbinom(n, 1, 0.999),
+        envir = rbinom(n, 1, g * accessibility),
+        cancer = rbinom(n, 1, plogis(-1.9 + envir * 10)),
+        cat="high"
+    )
+) 
+cor(dat$g[dat$cat=="high"], dat$cancer[dat$cat=="high"])^2
+cor(dat$g[dat$cat=="low"], dat$cancer[dat$cat=="low"])^2
+dat %>%
+    group_by(cat) %>%
+    summarise(prev_cancer = sum(cancer) / n(), mean_env = mean(envir), mean_acc=mean(accessibility), mean_env_p = mean(plogis(envir)))
+```
+
+But here the heritability is limited to the non-genetic variance.
+
+## Summary
+
+Not clear what model would allow heritability to be greater than the variance explained by environmental factors. 
+
+
+---
+
+```{r}
+sessionInfo()
+```

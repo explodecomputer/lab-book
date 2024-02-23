@@ -1,0 +1,217 @@
+---
+title: "Modal colocalisation"
+author: Gibran Hemani
+date: "2024-02-11"
+categories: []
+execute:
+  eval: false
+---
+
+## Background
+
+```{r}
+
+library(GWASbrewer)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(mrclust)
+```
+
+```{r}
+data("ld_mat_list")
+data("AF")
+
+make_ld_mat <- function(n, ld_mat_list) {
+
+    ind <- tibble(ind = 1:nrow(ld_mat_list[[1]]), lind = 1:nrow(ld_mat_list[[1]]), i = 1)
+    for(i in 2:length(ld_mat_list)) {
+        ind <- bind_rows(ind, tibble(ind = max(ind$ind) + 1:nrow(ld_mat_list[[i]]), lind = 1:nrow(ld_mat_list[[i]]), i = i))
+    }
+    ind <- ind[ind$ind <= n,]
+    mat <- matrix(0, n, n)
+    for(i1 in 1:length(unique(ind$i))) {
+        d <- subset(ind, i == i1)
+        mat[d$ind[1]:max(d$ind), d$ind[1]:max(d$ind)] <- as.matrix(ld_mat_list[[i1]][d$lind[1]:max(d$lind), d$lind[1]:max(d$lind)])
+    }
+    return(mat)
+}
+ldmat <- make_ld_mat(1000, ld_mat_list)
+dim(ldmat)
+
+set.seed(1)
+
+G <- matrix(c(0, sqrt(0.25), 0, sqrt(0.15), 
+              0, 0, 0, sqrt(0.1), 
+              sqrt(0.2), 0, 0, -sqrt(0.3), 
+              0, 0, 0, 0), nrow = 4, byrow = TRUE)
+colnames(G) <- row.names(G) <- c("X", "Y", "Z", "W")
+G
+
+sim_dat1_LD <- sim_mv(G = G,
+                      J = 1000, 
+                      N = 50000, 
+                      h2 = c(0.3, 0.3, 0.5, 0.4), 
+                      pi = 1/1000, 
+                      R_LD = list(ldmat=Matrix(ldmat)), 
+                      af = AF)
+```
+
+
+
+```{r}
+
+b <- inner_join(
+        sim_dat1_LD$beta_hat %>% as_tibble() %>% rename(X=V1, Y=V2, Z=V3, W=V4) %>% mutate(pos=1:n()) %>%
+            pivot_longer(c("X", "Y", "Z", "W")) %>% rename(bhat=value),
+        sim_dat1_LD$se_beta_hat %>% as_tibble() %>% rename(X=V1, Y=V2, Z=V3, W=V4) %>% mutate(pos=1:n()) %>%
+            pivot_longer(c("X", "Y", "Z", "W")) %>% rename(se=value)
+)
+b
+
+bm <- inner_join(
+        sim_dat1_LD$beta_joint %>% as_tibble() %>% mutate(pos=1:n()) %>%
+            pivot_longer(c("X", "Y", "Z", "W")) %>% rename(bhat=value),
+        sim_dat1_LD$se_beta_hat %>% as_tibble() %>% rename(X=V1, Y=V2, Z=V3, W=V4) %>% mutate(pos=1:n()) %>%
+            pivot_longer(c("X", "Y", "Z", "W")) %>% rename(se=value)
+)
+bm
+
+b %>% ggplot(., aes(x=pos, y=bhat)) +
+geom_point() +
+facet_grid(name ~ .)
+
+bm %>% ggplot(., aes(x=pos, y=bhat)) +
+geom_point() +
+facet_grid(name ~ .)
+
+```
+
+
+```{r}
+bw <- b %>% select(pos, name, bhat) %>% pivot_wider(names_from=c(name), values_from=bhat)
+
+sew <- b %>% select(pos, name, se) %>% pivot_wider(names_from=c(name), values_from=se)
+
+pairs(bw[,-1])
+
+
+```
+
+
+```{r}
+beta <- function(BetaIV.in, seBetaIV.in, phi)
+{
+    #Bandwidth rule - modified Silverman's rule proposed by Bickel (2002)
+    s <- 0.9*(min(stats::sd(BetaIV.in), stats::mad(BetaIV.in)))/length(BetaIV.in)^(1/5)
+
+    #Standardised weights
+    weights <- seBetaIV.in^-2/sum(seBetaIV.in^-2)
+
+    beta <- NULL
+
+    for(cur_phi in phi)
+    {
+        #Define the actual bandwidth
+        h <- max(0.00000001, s*cur_phi)
+        #Compute the smoothed empirical density function
+        densityIV <- stats::density(BetaIV.in, weights=weights, bw=h)
+        #Extract the point with the highest density as the point estimate 
+        beta[length(beta)+1] <- densityIV$x[densityIV$y==max(densityIV$y)]
+    }
+    return(beta)
+}
+
+
+biv <- bw$Z / bw$W
+biv[abs(bw$Z) < 0.01 | abs(bw$Y) < 0.01] <- NA
+plot(biv)
+
+biv <- bw$W / bw$Z
+biv[abs(bw$Z) < 0.01 | abs(bw$Y) < 0.01] <- NA
+plot(biv)
+
+
+biv <- bw$W / bw$X
+biv[abs(bw$Z) < 0.01 | abs(bw$Y) < 0.01] <- NA
+plot(biv)
+
+```
+
+
+```{r}
+ind <- abs(bw$W) > 0.05 | abs(bw$X) > 0.05
+pairs(bw[ind,-1])
+bw <- bw[ind,]
+sew <- sew[ind,]
+res_em = mr_clust_em(theta = bw$W/bw$X, theta_se = sew$W/abs(bw$X), bx = bw$X, by = bw$W, bxse = sew$X, byse = sew$Y, obs_names = bw$pos)
+```
+
+
+```{r}
+head(res_em$results$best)
+
+plot.sbp.best = res_em$plots$two_stage + ggplot2::xlim(0, max(abs(bx)+2*bxse)) + ggplot2::xlab("Genetic association with SBP") + ggplot2::ylab("Genetic association with CAD") + ggplot2::ggtitle("")
+
+plot.sbp.best
+
+```
+
+
+build graph
+
+steiger dir x -> y
+
+
+
+1. get the causal variants across all traits
+2. get conditional on all variants
+3. 
+
+
+```{r}
+get_conditional
+
+```
+
+
+```{r}
+xpx <- t(ldmat) %*% ldmat
+xpx[1:10,1:10]
+
+xpxi <- solve(xpx)
+xpxi[1:10,1:10]
+
+pc <- princomp(xpx)
+
+names(pc)
+
+pc$loadings[1:10,1:10]
+
+xe <- eigen(ldmat)
+
+class(xe)
+xe[[2]][1:10,1:10]
+class(xe)
+
+x <- tcrossprod(xe$vectors, tcrossprod(xe$vectors, diag(xe$values)))
+
+x[1:10,1:10]
+ldmat[1:10,1:10]
+
+rho = t(v)l
+
+rho <- xe$vectors %*% t(xe$vectors %*% diag(xe$values))
+dim(rho)
+rho[1:10,1:10]
+
+
+vi <- solve(xe$vectors)
+
+```
+
+---
+
+```{r}
+sessionInfo()
+```

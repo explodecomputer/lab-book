@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.4.549">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -47,7 +47,13 @@ ul.task-list li input[type="checkbox"] {
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -56,6 +62,7 @@ ul.task-list li input[type="checkbox"] {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -94,16 +101,43 @@ ul.task-list li input[type="checkbox"] {
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
 <link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
+      <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">Gibran Hemani’s lab book</span>
     </a>
@@ -115,23 +149,23 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./about.html" rel="" target="">
- <span class="menu-text">About</span></a>
+    <a class="nav-link" href="./about.html"> 
+<span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/"> <i class="bi bi-github" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com" rel="" target=""><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com"> <i class="bi bi-twitter" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
 </ul>
-            <div class="quarto-navbar-tools">
-</div>
           </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -149,6 +183,7 @@ ul.task-list li input[type="checkbox"] {
 
 
 
+
 <div class="quarto-listing quarto-listing-container-table" id="listing-listing">
 <div class="listing-actions-group">
     <div class="input-group input-group-sm quarto-listing-filter">
@@ -156,7 +191,6 @@ ul.task-list li input[type="checkbox"] {
       <input type="text" class="search form-control" placeholder="Filter">
     </div>
 </div>
-
 <table class="quarto-listing-table table table-striped table-hover">
 <thead>
 <tr>
@@ -172,7 +206,43 @@ Categories
 </tr>
 </thead>
 <tbody class="list">
-<tr data-index="0" data-categories="" data-listing-date-sort="1704326400000" data-listing-file-modified-sort="1704375192991" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Generating PRS of clocks from mQTLs" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="0" data-categories="" data-listing-date-sort="1708646400000" data-listing-file-modified-sort="1708686447355" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="369" data-listing-title-sort="Selection bias influencing family-based GWAS" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+ if (href) { window.location=href ; return false; }">
+<td>
+<span class="listing-date">Feb 23, 2024</span>
+</td>
+<td>
+<a href="./posts/2024-02-23-selection-families/index.html" class="title listing-title">Selection bias influencing family-based GWAS</a>
+</td>
+<td>
+<span class="listing-categories"></span>
+</td>
+</tr>
+<tr data-index="1" data-categories="" data-listing-date-sort="1708473600000" data-listing-file-modified-sort="1708686565314" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="842" data-listing-title-sort="Differences in cancer prevalence and heritability" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+ if (href) { window.location=href ; return false; }">
+<td>
+<span class="listing-date">Feb 21, 2024</span>
+</td>
+<td>
+<a href="./posts/2024-02-21-cancer-prevalence-differences/index.html" class="title listing-title">Differences in cancer prevalence and heritability</a>
+</td>
+<td>
+<span class="listing-categories"></span>
+</td>
+</tr>
+<tr data-index="2" data-categories="" data-listing-date-sort="1707609600000" data-listing-file-modified-sort="1708686346494" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="775" data-listing-title-sort="Modal colocalisation" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+ if (href) { window.location=href ; return false; }">
+<td>
+<span class="listing-date">Feb 11, 2024</span>
+</td>
+<td>
+<a href="./posts/2024-02-11-modal-coloc/index.html" class="title listing-title">Modal colocalisation</a>
+</td>
+<td>
+<span class="listing-categories"></span>
+</td>
+</tr>
+<tr data-index="3" data-categories="" data-listing-date-sort="1704326400000" data-listing-file-modified-sort="1704375192991" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="183" data-listing-title-sort="Generating PRS of clocks from mQTLs" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jan 4, 2024</span>
@@ -184,7 +254,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="1" data-categories="" data-listing-date-sort="1701993600000" data-listing-file-modified-sort="1702036700466" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Differential vulnerability and susceptibility" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="4" data-categories="" data-listing-date-sort="1701993600000" data-listing-file-modified-sort="1702036700466" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="208" data-listing-title-sort="Differential vulnerability and susceptibility" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Dec 8, 2023</span>
@@ -196,7 +266,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="2" data-categories="" data-listing-date-sort="1701820800000" data-listing-file-modified-sort="1701899741020" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Rsq in simulations" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="5" data-categories="" data-listing-date-sort="1701820800000" data-listing-file-modified-sort="1701899741020" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="267" data-listing-title-sort="Rsq in simulations" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Dec 6, 2023</span>
@@ -208,7 +278,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="3" data-categories="" data-listing-date-sort="1701388800000" data-listing-file-modified-sort="1701901511197" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Standard errors of MR GxE" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="6" data-categories="" data-listing-date-sort="1701388800000" data-listing-file-modified-sort="1701901511197" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="249" data-listing-title-sort="Standard errors of MR GxE" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Dec 1, 2023</span>
@@ -220,7 +290,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="4" data-categories="" data-listing-date-sort="1701129600000" data-listing-file-modified-sort="1701901399142" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-title-sort="Heterogeneity in cell-type interaction model" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="7" data-categories="" data-listing-date-sort="1701129600000" data-listing-file-modified-sort="1701901399142" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1322" data-listing-title-sort="Heterogeneity in cell-type interaction model" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Nov 28, 2023</span>
@@ -232,7 +302,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="5" data-categories="" data-listing-date-sort="1700524800000" data-listing-file-modified-sort="1701899725748" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Type 2 diabetes risk differences between populations" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="8" data-categories="" data-listing-date-sort="1700524800000" data-listing-file-modified-sort="1701899725748" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="432" data-listing-title-sort="Type 2 diabetes risk differences between populations" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Nov 21, 2023</span>
@@ -244,7 +314,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="6" data-categories="" data-listing-date-sort="1699574400000" data-listing-file-modified-sort="1701902076994" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-title-sort="Power of sibling estimate of for rare variants" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="9" data-categories="" data-listing-date-sort="1699574400000" data-listing-file-modified-sort="1701902076994" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="788" data-listing-title-sort="Power of sibling estimate of for rare variants" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Nov 10, 2023</span>
@@ -256,7 +326,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="7" data-categories="" data-listing-date-sort="1699401600000" data-listing-file-modified-sort="1701900613851" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Founders in population expansion" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="10" data-categories="" data-listing-date-sort="1699401600000" data-listing-file-modified-sort="1701900613851" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="427" data-listing-title-sort="Founders in population expansion" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Nov 8, 2023</span>
@@ -268,7 +338,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="8" data-categories="computation,summarystats" data-listing-date-sort="1699142400000" data-listing-file-modified-sort="1699223686573" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="fst R package for gwas summary data" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="11" data-categories="computation,summarystats" data-listing-date-sort="1699142400000" data-listing-file-modified-sort="1699223686573" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="114" data-listing-title-sort="fst R package for gwas summary data" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Nov 5, 2023</span>
@@ -277,10 +347,10 @@ Categories
 <a href="./posts/2023-11-05-fst/index.html" class="title listing-title">fst R package for gwas summary data</a>
 </td>
 <td>
-<span class="listing-categories">computation,summarystats</span>
+<span class="listing-categories">computation, summarystats</span>
 </td>
 </tr>
-<tr data-index="9" data-categories="" data-listing-date-sort="1699142400000" data-listing-file-modified-sort="1699223652641" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Do odds ratios change for varying prevalence?" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="12" data-categories="" data-listing-date-sort="1699142400000" data-listing-file-modified-sort="1699223652641" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="209" data-listing-title-sort="Do odds ratios change for varying prevalence?" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Nov 5, 2023</span>
@@ -292,7 +362,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="10" data-categories="" data-listing-date-sort="1698710400000" data-listing-file-modified-sort="1698750746159" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Decomposing drug X side effect matrices" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="13" data-categories="" data-listing-date-sort="1698710400000" data-listing-file-modified-sort="1698750746159" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="382" data-listing-title-sort="Decomposing drug X side effect matrices" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Oct 31, 2023</span>
@@ -304,7 +374,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="11" data-categories="GxE" data-listing-date-sort="1696460400000" data-listing-file-modified-sort="1696518378719" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Age interactions" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="14" data-categories="GxE" data-listing-date-sort="1696460400000" data-listing-file-modified-sort="1696518378719" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="542" data-listing-title-sort="Age interactions" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Oct 5, 2023</span>
@@ -316,7 +386,7 @@ Categories
 <span class="listing-categories">GxE</span>
 </td>
 </tr>
-<tr data-index="12" data-categories="" data-listing-date-sort="1692918000000" data-listing-file-modified-sort="1693004585221" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="GWAS catalog traits" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="15" data-categories="" data-listing-date-sort="1692918000000" data-listing-file-modified-sort="1693004585221" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="233" data-listing-title-sort="GWAS catalog traits" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Aug 25, 2023</span>
@@ -328,7 +398,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="13" data-categories="" data-listing-date-sort="1691362800000" data-listing-file-modified-sort="1691420649429" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Logistic regression residuals" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="16" data-categories="" data-listing-date-sort="1691362800000" data-listing-file-modified-sort="1691420649429" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="274" data-listing-title-sort="Logistic regression residuals" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Aug 7, 2023</span>
@@ -340,7 +410,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="14" data-categories="" data-listing-date-sort="1690153200000" data-listing-file-modified-sort="1692997793655" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-title-sort="Summary stat storage" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="17" data-categories="" data-listing-date-sort="1690153200000" data-listing-file-modified-sort="1692997793655" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1359" data-listing-title-sort="Summary stat storage" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jul 24, 2023</span>
@@ -352,7 +422,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="15" data-categories="" data-listing-date-sort="1689807600000" data-listing-file-modified-sort="1692995550625" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="IV confounding with changing variances" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="18" data-categories="" data-listing-date-sort="1689807600000" data-listing-file-modified-sort="1692995550625" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="541" data-listing-title-sort="IV confounding with changing variances" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jul 20, 2023</span>
@@ -364,7 +434,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="16" data-categories="" data-listing-date-sort="1689202800000" data-listing-file-modified-sort="1689259869758" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="MR and imperfect clumping" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="19" data-categories="" data-listing-date-sort="1689202800000" data-listing-file-modified-sort="1689259869758" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="500" data-listing-title-sort="MR and imperfect clumping" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jul 13, 2023</span>
@@ -376,7 +446,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="17" data-categories="" data-listing-date-sort="1688857200000" data-listing-file-modified-sort="1689235525634" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Meta regression using exposure effect size" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="20" data-categories="" data-listing-date-sort="1688857200000" data-listing-file-modified-sort="1689235525634" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="566" data-listing-title-sort="Meta regression using exposure effect size" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jul 9, 2023</span>
@@ -388,7 +458,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="18" data-categories="confounding,mr" data-listing-date-sort="1688684400000" data-listing-file-modified-sort="1688912045598" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Confounder instruments via networks" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="21" data-categories="confounding,mr" data-listing-date-sort="1688684400000" data-listing-file-modified-sort="1688912045598" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="505" data-listing-title-sort="Confounder instruments via networks" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jul 7, 2023</span>
@@ -397,10 +467,10 @@ Categories
 <a href="./posts/2023-07-07-mr-network-confounding/index.html" class="title listing-title">Confounder instruments via networks</a>
 </td>
 <td>
-<span class="listing-categories">confounding,mr</span>
+<span class="listing-categories">confounding, mr</span>
 </td>
 </tr>
-<tr data-index="19" data-categories="statistics" data-listing-date-sort="1688598000000" data-listing-file-modified-sort="1688674540487" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Standard error in two-stage least squares" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="22" data-categories="statistics" data-listing-date-sort="1688598000000" data-listing-file-modified-sort="1688674540487" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="155" data-listing-title-sort="Standard error in two-stage least squares" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jul 6, 2023</span>
@@ -412,7 +482,7 @@ Categories
 <span class="listing-categories">statistics</span>
 </td>
 </tr>
-<tr data-index="20" data-categories="" data-listing-date-sort="1688511600000" data-listing-file-modified-sort="1688592728863" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Interactions and scale" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="23" data-categories="" data-listing-date-sort="1688511600000" data-listing-file-modified-sort="1688592728863" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="118" data-listing-title-sort="Interactions and scale" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jul 5, 2023</span>
@@ -424,7 +494,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="21" data-categories="interactions,multi-ancestry" data-listing-date-sort="1686265200000" data-listing-file-modified-sort="1686831341642" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Differential susceptibility explained by interactors and mediators with different distributions" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="24" data-categories="interactions,multi-ancestry" data-listing-date-sort="1686265200000" data-listing-file-modified-sort="1686831341642" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="142" data-listing-title-sort="Differential susceptibility explained by interactors and mediators with different distributions" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jun 9, 2023</span>
@@ -433,10 +503,10 @@ Categories
 <a href="./posts/2023-06-07-cross-group-effect-comparison/2023-06-09-interaction-distribution/index.html" class="title listing-title">Differential susceptibility explained by interactors and mediators with different distributions</a>
 </td>
 <td>
-<span class="listing-categories">interactions,multi-ancestry</span>
+<span class="listing-categories">interactions, multi-ancestry</span>
 </td>
 </tr>
-<tr data-index="22" data-categories="" data-listing-date-sort="1686092400000" data-listing-file-modified-sort="1686175254617" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-title-sort="Cross group effect comparison" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="25" data-categories="" data-listing-date-sort="1686092400000" data-listing-file-modified-sort="1686175254617" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1075" data-listing-title-sort="Cross group effect comparison" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jun 7, 2023</span>
@@ -448,7 +518,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="23" data-categories="Statistics" data-listing-date-sort="1686006000000" data-listing-file-modified-sort="1686058947459" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Checking PCA projection" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="26" data-categories="Statistics" data-listing-date-sort="1686006000000" data-listing-file-modified-sort="1686058947459" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="60" data-listing-title-sort="Checking PCA projection" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jun 6, 2023</span>
@@ -460,7 +530,7 @@ Categories
 <span class="listing-categories">Statistics</span>
 </td>
 </tr>
-<tr data-index="24" data-categories="MR,genetic confounding" data-listing-date-sort="1683932400000" data-listing-file-modified-sort="1689259812610" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-title-sort="Genetic confounding as a function of sample size" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="27" data-categories="MR,genetic confounding" data-listing-date-sort="1683932400000" data-listing-file-modified-sort="1689259812610" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1386" data-listing-title-sort="Genetic confounding as a function of sample size" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">May 13, 2023</span>
@@ -469,10 +539,10 @@ Categories
 <a href="./posts/2023-05-13-mr-confounder/index.html" class="title listing-title">Genetic confounding as a function of sample size</a>
 </td>
 <td>
-<span class="listing-categories">MR,genetic confounding</span>
+<span class="listing-categories">MR, genetic confounding</span>
 </td>
 </tr>
-<tr data-index="25" data-categories="" data-listing-date-sort="1679616000000" data-listing-file-modified-sort="1680192630692" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="LDL and drug adjustment" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="28" data-categories="" data-listing-date-sort="1679616000000" data-listing-file-modified-sort="1680192630692" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="502" data-listing-title-sort="LDL and drug adjustment" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Mar 24, 2023</span>
@@ -484,7 +554,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="26" data-categories="" data-listing-date-sort="1678838400000" data-listing-file-modified-sort="1679034382783" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-title-sort="Gene-environment equivalence" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="29" data-categories="" data-listing-date-sort="1678838400000" data-listing-file-modified-sort="1679034382783" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1123" data-listing-title-sort="Gene-environment equivalence" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Mar 15, 2023</span>
@@ -496,7 +566,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="27" data-categories="" data-listing-date-sort="1678492800000" data-listing-file-modified-sort="1678582478487" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-title-sort="Boosting MZ vQTL power" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="30" data-categories="" data-listing-date-sort="1678492800000" data-listing-file-modified-sort="1678582478487" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="801" data-listing-title-sort="Boosting MZ vQTL power" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Mar 11, 2023</span>
@@ -508,7 +578,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="28" data-categories="interactions,genetics,statistics" data-listing-date-sort="1677542400000" data-listing-file-modified-sort="1677603522414" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-title-sort="Variance QTL using MZs" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="31" data-categories="interactions,genetics,statistics" data-listing-date-sort="1677542400000" data-listing-file-modified-sort="1677603522414" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2124" data-listing-title-sort="Variance QTL using MZs" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Feb 28, 2023</span>
@@ -517,10 +587,10 @@ Categories
 <a href="./posts/2023-02-28-mz-vqtl/index.html" class="title listing-title">Variance QTL using MZs</a>
 </td>
 <td>
-<span class="listing-categories">interactions,genetics,statistics</span>
+<span class="listing-categories">interactions, genetics, statistics</span>
 </td>
 </tr>
-<tr data-index="29" data-categories="genetics,interactions,statistics" data-listing-date-sort="1677542400000" data-listing-file-modified-sort="1681865683079" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Spurious vQTL simulation" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="32" data-categories="genetics,interactions,statistics" data-listing-date-sort="1677542400000" data-listing-file-modified-sort="1681865683079" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="575" data-listing-title-sort="Spurious vQTL simulation" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Feb 28, 2023</span>
@@ -529,10 +599,10 @@ Categories
 <a href="./posts/2023-02-28-vqtl/index.html" class="title listing-title">Spurious vQTL simulation</a>
 </td>
 <td>
-<span class="listing-categories">genetics,interactions,statistics</span>
+<span class="listing-categories">genetics, interactions, statistics</span>
 </td>
 </tr>
-<tr data-index="30" data-categories="genomics" data-listing-date-sort="1676678400000" data-listing-file-modified-sort="1677071283294" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Overlapping genes" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="33" data-categories="genomics" data-listing-date-sort="1676678400000" data-listing-file-modified-sort="1677071283294" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="207" data-listing-title-sort="Overlapping genes" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Feb 18, 2023</span>
@@ -544,7 +614,7 @@ Categories
 <span class="listing-categories">genomics</span>
 </td>
 </tr>
-<tr data-index="31" data-categories="" data-listing-date-sort="1675987200000" data-listing-file-modified-sort="1676753971223" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-title-sort="Sandwich variance estimators to control LD leakage" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="34" data-categories="" data-listing-date-sort="1675987200000" data-listing-file-modified-sort="1676753971223" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="630" data-listing-title-sort="Sandwich variance estimators to control LD leakage" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Feb 10, 2023</span>
@@ -556,7 +626,7 @@ Categories
 <span class="listing-categories"></span>
 </td>
 </tr>
-<tr data-index="32" data-categories="DNA methylation,statistics" data-listing-date-sort="1675728000000" data-listing-file-modified-sort="1701899501902" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Cell-specific effects for mQTLs from bulk tissue" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="35" data-categories="DNA methylation,statistics" data-listing-date-sort="1675728000000" data-listing-file-modified-sort="1701899501902" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="542" data-listing-title-sort="Cell-specific effects for mQTLs from bulk tissue" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Feb 7, 2023</span>
@@ -565,22 +635,26 @@ Categories
 <a href="./posts/2023-02-07-mqtl-interaction/index.html" class="title listing-title">Cell-specific effects for mQTLs from bulk tissue</a>
 </td>
 <td>
-<span class="listing-categories">DNA methylation,statistics</span>
+<span class="listing-categories">DNA methylation, statistics</span>
 </td>
 </tr>
-<tr data-index="33" data-categories="statistics,winner" s="" curse,multivariable="" mr'="" data-listing-date-sort="1675036800000" data-listing-file-modified-sort="1675088363564" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Can winner's curse generate a high conditional F statistic" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="36" data-categories="statistics,winner" s="" curse,multivariable="" mr'="" data-listing-date-sort="1675036800000" data-listing-file-modified-sort="1675088363564" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="511" data-listing-title-sort="Can winner's curse generate a high conditional F statistic" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
+
 <td>
 <span class="listing-date">Jan 30, 2023</span>
 </td>
+
 <td>
 <a href="./posts/2023-01-30-conditional-f-winners-curse/index.html" class="title listing-title">Can winner's curse generate a high conditional F statistic</a>
 </td>
+
 <td>
-<span class="listing-categories">statistics,winner's curse,multivariable mr</span>
+<span class="listing-categories">statistics, winner's curse, multivariable mr</span>
 </td>
+
 </tr>
-<tr data-index="34" data-categories="power calculation" data-listing-date-sort="1674691200000" data-listing-file-modified-sort="1674766901222" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="Metabolite power calculation" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="37" data-categories="power calculation" data-listing-date-sort="1674691200000" data-listing-file-modified-sort="1674766901222" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="153" data-listing-title-sort="Metabolite power calculation" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jan 26, 2023</span>
@@ -592,7 +666,7 @@ Categories
 <span class="listing-categories">power calculation</span>
 </td>
 </tr>
-<tr data-index="35" data-categories="statistics,fine mapping" data-listing-date-sort="1674691200000" data-listing-file-modified-sort="1674766914875" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Convert Bayes factors to beta and standard error" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="38" data-categories="statistics,fine mapping" data-listing-date-sort="1674691200000" data-listing-file-modified-sort="1674766914875" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="375" data-listing-title-sort="Convert Bayes factors to beta and standard error" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jan 26, 2023</span>
@@ -601,10 +675,10 @@ Categories
 <a href="./posts/2023-01-26-convert-lbf-to-summary-stats/index.html" class="title listing-title">Convert Bayes factors to beta and standard error</a>
 </td>
 <td>
-<span class="listing-categories">statistics,fine mapping</span>
+<span class="listing-categories">statistics, fine mapping</span>
 </td>
 </tr>
-<tr data-index="36" data-categories="statistics,genetics" data-listing-date-sort="1671321600000" data-listing-file-modified-sort="1677071335445" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="BMI instrument replication" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="39" data-categories="statistics,genetics" data-listing-date-sort="1671321600000" data-listing-file-modified-sort="1677071335445" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="436" data-listing-title-sort="BMI instrument replication" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Dec 18, 2022</span>
@@ -613,10 +687,10 @@ Categories
 <a href="./posts/2022-12-18-bmi-wf-replication/index.html" class="title listing-title">BMI instrument replication</a>
 </td>
 <td>
-<span class="listing-categories">statistics,genetics</span>
+<span class="listing-categories">statistics, genetics</span>
 </td>
 </tr>
-<tr data-index="37" data-categories="statistics,genetics,interactions" data-listing-date-sort="1671148800000" data-listing-file-modified-sort="1677071427391" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-title-sort="Inflation of vQTLs" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="40" data-categories="statistics,genetics,interactions" data-listing-date-sort="1671148800000" data-listing-file-modified-sort="1677071427391" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1126" data-listing-title-sort="Inflation of vQTLs" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Dec 16, 2022</span>
@@ -625,10 +699,10 @@ Categories
 <a href="./posts/2022-12-16-vqtl/index.html" class="title listing-title">Inflation of vQTLs</a>
 </td>
 <td>
-<span class="listing-categories">statistics,genetics,interactions</span>
+<span class="listing-categories">statistics, genetics, interactions</span>
 </td>
 </tr>
-<tr data-index="38" data-categories="rare variants,genetics,family studies" data-listing-date-sort="1670976000000" data-listing-file-modified-sort="1673370145670" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-title-sort="Sibling replication of Backman rare variants" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="41" data-categories="rare variants,genetics,family studies" data-listing-date-sort="1670976000000" data-listing-file-modified-sort="1673370145670" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="640" data-listing-title-sort="Sibling replication of Backman rare variants" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Dec 14, 2022</span>
@@ -637,10 +711,10 @@ Categories
 <a href="./posts/2022-12-14-wf-rare-variants/index.html" class="title listing-title">Sibling replication of Backman rare variants</a>
 </td>
 <td>
-<span class="listing-categories">rare variants,genetics,family studies</span>
+<span class="listing-categories">rare variants, genetics, family studies</span>
 </td>
 </tr>
-<tr data-index="39" data-categories="statistics" data-listing-date-sort="1667260800000" data-listing-file-modified-sort="1667920341121" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Probability of a random variable being larger than all other random variables in a multivariate normal vector" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="42" data-categories="statistics" data-listing-date-sort="1667260800000" data-listing-file-modified-sort="1667920341121" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="351" data-listing-title-sort="Probability of a random variable being larger than all other random variables in a multivariate normal vector" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Nov 1, 2022</span>
@@ -652,7 +726,7 @@ Categories
 <span class="listing-categories">statistics</span>
 </td>
 </tr>
-<tr data-index="40" data-categories="statistics" data-listing-date-sort="1666652400000" data-listing-file-modified-sort="1687443563822" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Regression with non i.i.d. samples" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="43" data-categories="statistics" data-listing-date-sort="1666652400000" data-listing-file-modified-sort="1687443563822" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="477" data-listing-title-sort="Regression with non i.i.d. samples" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Oct 25, 2022</span>
@@ -664,7 +738,7 @@ Categories
 <span class="listing-categories">statistics</span>
 </td>
 </tr>
-<tr data-index="41" data-listing-date-sort="1660258800000" data-listing-file-modified-sort="1671488869778" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-title-sort="Correlated SNPs" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="44" data-listing-date-sort="1660258800000" data-listing-file-modified-sort="1671488869778" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="2" data-listing-word-count-sort="288" data-listing-title-sort="Correlated SNPs" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Aug 12, 2022</span>
@@ -673,10 +747,10 @@ Categories
 <a href="./posts/2022-08-12-correlated-snps/index.html" class="title listing-title">Correlated SNPs</a>
 </td>
 <td>
-<span class="listing-categories">undefined</span>
+<span class="listing-categories">&nbsp;</span>
 </td>
 </tr>
-<tr data-index="42" data-listing-date-sort="1658617200000" data-listing-file-modified-sort="1671530159125" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-title-sort="Power of GWAS in ascertained case control datasets" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="45" data-listing-date-sort="1658617200000" data-listing-file-modified-sort="1671530159125" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="455" data-listing-title-sort="Power of GWAS in ascertained case control datasets" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jul 24, 2022</span>
@@ -685,10 +759,10 @@ Categories
 <a href="./posts/2022-07-24-case-control-power/index.html" class="title listing-title">Power of GWAS in ascertained case control datasets</a>
 </td>
 <td>
-<span class="listing-categories">undefined</span>
+<span class="listing-categories">&nbsp;</span>
 </td>
 </tr>
-<tr data-index="43" data-categories="statistics,Mendelian randomization" data-listing-date-sort="1651964400000" data-listing-file-modified-sort="1671630967575" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-title-sort="PRS vs IVW" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="46" data-categories="statistics,Mendelian randomization" data-listing-date-sort="1651964400000" data-listing-file-modified-sort="1671630967575" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="87" data-listing-title-sort="PRS vs IVW" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">May 8, 2022</span>
@@ -697,10 +771,10 @@ Categories
 <a href="./posts/2022-05-08-prs-vs-ivw/index.html" class="title listing-title">PRS vs IVW</a>
 </td>
 <td>
-<span class="listing-categories">statistics,Mendelian randomization</span>
+<span class="listing-categories">statistics, Mendelian randomization</span>
 </td>
 </tr>
-<tr data-index="44" data-listing-date-sort="1641686400000" data-listing-file-modified-sort="1673274490436" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-title-sort="Difference in difference models in observational data are still potentially confounded" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="47" data-listing-date-sort="1641686400000" data-listing-file-modified-sort="1673274490436" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="667" data-listing-title-sort="Difference in difference models in observational data are still potentially confounded" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Jan 9, 2022</span>
@@ -709,10 +783,10 @@ Categories
 <a href="./posts/2022-01-09-did-models-confounding/index.html" class="title listing-title">Difference in difference models in observational data are still potentially confounded</a>
 </td>
 <td>
-<span class="listing-categories">undefined</span>
+<span class="listing-categories">&nbsp;</span>
 </td>
 </tr>
-<tr data-index="45" data-categories="" data-listing-date-sort="NaN" data-listing-file-modified-sort="1705060662369" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-title-sort="2024-01-12-time-varying-mr" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
+<tr data-index="48" data-categories="" data-listing-date-sort="NaN" data-listing-file-modified-sort="1705060662369" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1120" data-listing-title-sort="2024-01-12-time-varying-mr" data-listing-filename-sort="index.qmd" onclick="href = this.querySelector('a').getAttribute('href');
  if (href) { window.location=href ; return false; }">
 <td>
 <span class="listing-date">Invalid Date</span>
@@ -725,7 +799,6 @@ Categories
 </td>
 </tr>
 </tbody>
-
 </table>
 <div class="listing-no-matching d-none">
 No matching items
@@ -810,10 +883,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -823,8 +895,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -837,6 +918,125 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -880,6 +1080,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -905,6 +1106,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -965,6 +1192,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+
 
 
 
