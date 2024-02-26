@@ -1,0 +1,158 @@
+---
+title: "Do p-values deflate when looking at rare variants in families?"
+author: Gibran Hemani
+date: "2024-02-26"
+categories: []
+---
+
+## Background
+
+Do p-values deflate when the variant is rare?
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+Family simulation function
+
+```{r}
+# adapted from https://github.com/MRCIEU/mrtwin_power/blob/master/scripts/sib_mr_functions.r
+# 3 sibs per family
+# skewed phenotype
+make_families <- function(af, nfam) {
+	nsnp <- length(af)
+	dads <- matrix(0, nfam, nsnp)
+	mums <- matrix(0, nfam, nsnp)
+	sibs1 <- matrix(0, nfam, nsnp)
+	sibs2 <- matrix(0, nfam, nsnp)
+    sibs3 <- matrix(0, nfam, nsnp)
+	for(i in 1:nsnp)
+	{
+		dad1 <- rbinom(nfam, 1, af[i]) + 1
+		dad2 <- (rbinom(nfam, 1, af[i]) + 1) * -1
+		mum1 <- rbinom(nfam, 1, af[i]) + 1
+		mum2 <- (rbinom(nfam, 1, af[i]) + 1) * -1
+
+		dadindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		dadh <- rep(NA, nfam)
+		dadh[dadindex] <- dad1[dadindex]
+		dadh[!dadindex] <- dad2[!dadindex]
+
+		mumindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		mumh <- rep(NA, nfam)
+		mumh[mumindex] <- mum1[mumindex]
+		mumh[!mumindex] <- mum2[!mumindex]
+
+		sib1 <- cbind(dadh, mumh)
+
+		dadindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		dadh <- rep(NA, nfam)
+		dadh[dadindex] <- dad1[dadindex]
+		dadh[!dadindex] <- dad2[!dadindex]
+
+		mumindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		mumh <- rep(NA, nfam)
+		mumh[mumindex] <- mum1[mumindex]
+		mumh[!mumindex] <- mum2[!mumindex]
+
+		sib2 <- cbind(dadh, mumh)
+
+		dadindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		dadh <- rep(NA, nfam)
+		dadh[dadindex] <- dad1[dadindex]
+		dadh[!dadindex] <- dad2[!dadindex]
+
+		mumindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		mumh <- rep(NA, nfam)
+		mumh[mumindex] <- mum1[mumindex]
+		mumh[!mumindex] <- mum2[!mumindex]
+
+		sib3 <- cbind(dadh, mumh)
+
+		sibs1[,i] <- rowSums(abs(sib1) - 1)
+		sibs2[,i] <- rowSums(abs(sib2) - 1)
+		sibs3[,i] <- rowSums(abs(sib3) - 1)
+		dads[,i] <- dad1 - 1 + abs(dad2) - 1
+		mums[,i] <- mum1 - 1 + abs(mum2) - 1
+
+	}
+
+    sibs1 <- as_tibble(sibs1)
+    sibs2 <- as_tibble(sibs2)
+    sibs3 <- as_tibble(sibs3)
+    sdat <- bind_rows(
+        tibble(fid = 1:nfam, iid = paste0(1:nfam, "a"), sibs1),
+        tibble(fid = 1:nfam, iid = paste0(1:nfam, "b"), sibs2),
+        tibble(fid = 1:nfam, iid = paste0(1:nfam, "b"), sibs3)
+    )
+    sdat <- sdat %>% group_by(fid) %>%
+        mutate(
+            FG = mean(V1), 
+            CG = FG - V1, 
+            sex = rbinom(n(), 1, 0.5),
+            phen = rbeta(n(), 1, 5)
+        ) %>% 
+        ungroup()
+
+    return(sdat)
+}
+```
+
+Example
+
+```{r}
+a <- make_families(0.01, 10000)
+str(a)
+summary(lm(phen ~ FG + CG, a))
+```
+
+Perform analysis over a range of rare allele frequencies
+
+```{r}
+param <- expand.grid(
+    nsim = 1:20,
+    af = c(seq(0.00005, 0.0005, by=0.00005)),
+    pvalCG = NA,
+    pvalFG = NA
+)
+
+res <- lapply(1:nrow(param), \(i) {
+    a <- make_families(param$af[i], 10000)
+
+    tryCatch({
+        res <- summary(lm(phen ~ CG + FG + sex, a))
+        p <- param[i, ]
+        p$pvalCG <- res$coef[2,4]
+        p$pvalFG <- res$coef[3,4]
+    }, error = function(e) {
+        return(NULL)
+    })
+    return(p)
+}) %>% bind_rows()
+```
+
+```{r}
+ggplot(res, aes(x=af, y=pvalFG)) +
+geom_point() +
+geom_smooth() +
+scale_x_log10()
+```
+
+```{r}
+ggplot(res, aes(x=af, y=pvalCG)) +
+geom_point() +
+geom_smooth() +
+scale_x_log10()
+``` 
+
+## Summary
+
+No obvious deflation of test statistics
+
+---
+
+```{r}
+sessionInfo()
+```

@@ -10,7 +10,6 @@ execute:
 ## Background
 
 ```{r}
-
 library(GWASbrewer)
 library(tidyr)
 library(dplyr)
