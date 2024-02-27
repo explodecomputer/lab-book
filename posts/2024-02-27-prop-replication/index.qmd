@@ -1,0 +1,315 @@
+---
+title: "Evaluating replication rates"
+author: Gibran Hemani
+date: "2024-02-27"
+categories: []
+---
+
+## Background
+
+Taking a set of genetic effects in one study and replicating in another - what is the appropriate way to determine if the effects are consistent?
+
+
+## Simulation
+
+```{r}
+set.seed(100)
+library(dplyr)
+library(ggplot2)
+
+sim <- function(n1, n2, nsnp, nflip=1, afshared=FALSE, bsd=1) {
+    # different allele frequencies per study
+    af1 <- runif(nsnp, 0.01, 0.99)
+    if(afshared) {
+        af2 <- af1
+    } else {
+        af2 <- runif(nsnp, 0.01, 0.99)
+    }
+
+    # identifical effect sizes across studies
+    b1 <- rnorm(nsnp, sd=bsd)
+    b2 <- b1
+
+    # make one of the effects different
+    if(nflip > 0) {
+        b1[1:nflip] <- b1[1:nflip] * -1
+    }
+
+    # Assume variance of trait is the same across studies
+    se1 <- 1 / sqrt(2 * af1 * (1-af1) * n1)
+    se2 <- 1 / sqrt(2 * af2 * (1-af2) * n2)
+
+    dat <- tibble(
+        af1, af2, b1, b2, se1, se2,
+        bhat1 = rnorm(nsnp, b1, se1),
+        bhat2 = rnorm(nsnp, b2, se2),
+        pval1 = 2 * pnorm(-abs(bhat1/se1)),
+        pval2 = 2 * pnorm(-abs(bhat2/se2)),
+        r21 = b1^2 * af1 * (1-af1) * 2,
+        r22 = b2^2 * af2 * (1-af2) * 2,
+    )
+    return(dat)
+}
+
+```
+
+## Plot relationship
+
+Simple trait, a few large effects
+
+```{r}
+dat_simple <- sim(
+    n1 = 100000, 
+    n2 = 10000, 
+    nsnp = 10,
+    nflip = 0, 
+    afshared = TRUE, 
+    bsd = sqrt(0.5)/10
+)
+ggplot(dat_simple, aes(bhat1, bhat2)) +
+geom_point() +
+geom_errorbarh(aes(xmax = bhat1 + 1.96*se1, xmin = bhat1 - 1.96*se1)) +
+geom_errorbar(aes(ymax = bhat2 + 1.96*se2, ymin = bhat2 - 1.96*se2)) +
+geom_abline(intercept=0, slope=1) +
+geom_smooth(method="lm")
+```
+
+
+Complex trait with many small effects
+
+```{r}
+dat_complex <- sim(
+    n1 = 100000, 
+    n2 = 10000, 
+    nsnp = 1000,
+    nflip = 0, 
+    afshared = TRUE, 
+    bsd = sqrt(0.00008)
+)
+table(dat_complex$pval1 < 5e-8)
+ggplot(dat_complex, aes(bhat1, bhat2)) +
+geom_point() +
+geom_errorbarh(aes(xmax = bhat1 + 1.96*se1, xmin = bhat1 - 1.96*se1)) +
+geom_errorbar(aes(ymax = bhat2 + 1.96*se2, ymin = bhat2 - 1.96*se2)) +
+geom_abline(intercept=0, slope=1) +
+geom_smooth(method="lm")
+```
+
+## Relationship between effect sizes
+
+Expect slope to be about 1 because the betas are the same across the two studies. But differences in power could distort this
+
+Slope in simple trait
+
+```{r}
+summary(lm(bhat2 ~ bhat1, data=dat_simple))
+```
+
+Slope in complex trait
+
+```{r}
+summary(lm(bhat2 ~ bhat1, data=dat_complex))
+```
+
+
+## Replication rate
+
+Expect all significant assocs to replicate. But differences in power could distort this
+
+Replication rate in simple trait is 1
+
+```{r}
+dat_simple %>%
+    mutate(disc = pval1 < 5e-8, rep = disc & pval2 < 0.05) %>%
+    summarise(ndisc=sum(disc), nrep=sum(rep), rate=nrep/ndisc)
+```
+
+Replication rate in complex trait is much lower
+
+```{r}
+dat_complex %>%
+    mutate(disc = pval1 < 5e-8, rep = disc & pval2 < 0.05) %>%
+    summarise(ndisc=sum(disc), nrep=sum(rep), rate=nrep/ndisc)
+
+```
+
+## Expected vs observed replication rates
+
+We can calculate the expected number to replicate given the differential power (due to sample size and allele frequency differences across studies), and compare this to the observed number to replicate. If fewer replicate than expected, then this is evidence of heterogeneity in the effect sizes.
+
+```{r}
+#' Estimate expected vs observed replication of effects between discovery and replication datasets
+#' 
+#' Taken from Okbay et al 2016. Under the assumption that all discovery effects are unbiased, what fraction of associations would replicate in the replication dataset, given the differential power of the discovery and replication datasets.
+#' Uses standard error of the replication dataset to account for differences in sample size and distribution of independent variable
+#' 
+#' @param b_disc Vector of discovery betas
+#' @param b_rep Vector of replication betas
+#' @param se_disc Vector of discovery standard errors
+#' @param se_rep Vector of replication standard errors
+#' @param alpha Nominal replication significance threshold
+#' 
+#' @return List of results
+#' - res: aggregate expected replication rate vs observed replication rate
+#' - variants: per variant expected replication rates
+prop_overlap <- function(b_disc, b_rep, se_disc, se_rep, alpha) {
+  p_sign <- pnorm(-abs(b_disc) / se_disc) * pnorm(-abs(b_disc) / se_rep) + ((1 - pnorm(-abs(b_disc) / se_disc)) * (1 - pnorm(-abs(b_disc) / se_rep)))
+  p_sig <- pnorm(-abs(b_disc) / se_rep + qnorm(alpha / 2)) + (1 - pnorm(-abs(b_disc) / se_rep - qnorm(alpha / 2)))
+  p_rep <- pnorm(abs(b_rep) / se_rep, lower.tail = FALSE)
+  res <- tibble::tibble(
+    nsnp = length(b_disc),
+    metric = c("Sign", "Sign", "P-value", "P-value"),
+    datum = c("Expected", "Observed", "Expected", "Observed"),
+    value = c(sum(p_sign, na.rm = TRUE), sum(sign(b_disc) == sign(b_rep)), sum(p_sig, na.rm = TRUE), sum(p_rep < alpha, na.rm = TRUE))
+  ) %>%
+    dplyr::group_by(metric) %>%
+      dplyr::do({
+        x <- .
+        if(.$nsnp[1] > 0) {
+          bt <- binom.test(
+            x=.$value[.$datum == "Observed"], 
+            n=.$nsnp[1], 
+            p=.$value[.$datum == "Expected"] / .$nsnp[1]
+          )$p.value
+          x$pdiff <- bt
+        }
+        x
+      })
+  return(list(res = res, variants = dplyr::tibble(sig = p_sig, sign = p_sign, )))
+}
+```
+
+
+Simple trait
+
+```{r}
+with(dat_simple %>% filter(pval1 < 5e-8), prop_overlap(bhat1, bhat2, se1, se2, 0.05))$res
+```
+
+This shows that we expect all significant discovery associations to replicate, and indeed they do.
+
+Complex trait
+
+```{r}
+with(dat_complex %>% filter(pval1 < 5e-8), prop_overlap(bhat1, bhat2, se1, se2, 0.05))$res
+```
+
+This shows that we don't expect all significant discovery associations to replicate, and indeed they don't, but the rate of observed replication matches the expected rate of replication. The `pdiff` column is the p-value from a binomial test comparing the observed and expected replication rates, a low p-value indicates that the observed replication rate is substantially different from the expected replication rate.
+
+## Heterogeneity
+
+Evaluate if any one particular variant has heterogeneity in effect sizes across the two studies. This is done using Cochrane's Q statistic, which accounts for difference in power (based on SE) across the studies.
+
+```{r}
+fixed_effects_meta_analysis <- function(beta_vec, se_vec) {
+    w <- 1 / se_vec^2
+    beta <- sum(beta_vec * w, na.rm=T) / sum(w, na.rm=T)
+    se <- sqrt(1 / sum(w, na.rm=T))
+    pval <- pnorm(abs(beta / se), lower.tail = FALSE)
+    Qj <- w * (beta-beta_vec)^2
+    Q <- sum(Qj, na.rm=T)
+    Qdf <- sum(!is.na(beta_vec))-1
+    if(Qdf == 0) Q <- 0
+    Qjpval <- pchisq(Qj, 1, lower.tail=FALSE)
+    Qpval <- pchisq(Q, Qdf, lower.tail=FALSE)
+    return(list(beta=beta, se=se, pval=pval, Q=Q, Qdf=Qdf, Qpval=Qpval, Qj=Qj, Qjpval=Qjpval))
+}
+```
+
+Simple trait, per-variant heterogeneity
+
+```{r}
+het_simple <- lapply(1:nrow(dat_simple), \(i) {
+    o <- fixed_effects_meta_analysis(c(dat_simple$bhat1[i], dat_simple$bhat2[i]), c(dat_simple$se1[i], dat_simple$se2[i]))
+    tibble(
+        SNP = i,
+        beta = o$beta,
+        se = o$se,
+        pval = o$pval,
+        Q = o$Q,
+        Qdf = o$Qdf,
+        Qpval = o$Qpval
+    )
+}) %>% bind_rows() %>%
+    mutate(Qfdr = p.adjust(Qpval, method="fdr"))
+
+het_simple
+```
+
+Complex trait, per variant heterogeneity
+
+```{r}
+het_complex <- lapply(1:nrow(dat_complex), \(i) {
+    o <- fixed_effects_meta_analysis(c(dat_complex$bhat1[i], dat_complex$bhat2[i]), c(dat_complex$se1[i], dat_complex$se2[i]))
+    tibble(
+        SNP = i,
+        beta = o$beta,
+        se = o$se,
+        pval = o$pval,
+        Q = o$Q,
+        Qdf = o$Qdf,
+        Qpval = o$Qpval
+    )
+}) %>% bind_rows() %>%
+    mutate(Qfdr = p.adjust(Qpval, method="fdr"))
+
+het_complex
+```
+
+Try simulating where some of the effects are actually different
+
+```{r}
+dat_dif <- sim(
+    n1 = 100000, 
+    n2 = 10000, 
+    nsnp = 100,
+    nflip = 10, 
+    afshared = FALSE, 
+    bsd = sqrt(0.5)/10
+)
+```
+
+Replication rate estimate
+
+```{r}
+prop_overlap(dat_dif$bhat1, dat_dif$bhat2, dat_dif$se1, dat_dif$se2, 0.05)$res
+```
+
+In this situation the effects have the same magnitude (so the p-values should give comparable estimates), but the signs are different for some of the effects. This is reflected in the observed replication rate for the sign, which is lower than the expected replication rate.
+
+Heterogeneity estimate
+
+```{r}
+het_dif <- lapply(1:nrow(dat_dif), \(i) {
+    o <- fixed_effects_meta_analysis(c(dat_dif$bhat1[i], dat_dif$bhat2[i]), c(dat_dif$se1[i], dat_dif$se2[i]))
+    tibble(
+        SNP = i,
+        beta = o$beta,
+        se = o$se,
+        pval = o$pval,
+        Q = o$Q,
+        Qdf = o$Qdf,
+        Qpval = o$Qpval
+    )
+}) %>% bind_rows() %>%
+    mutate(Qfdr = p.adjust(Qpval, method="fdr"))
+het_dif %>% filter(Qfdr < 0.05)
+```
+
+This detects a heterogeneous effect.
+
+## Limitations
+
+Note that trying to replicate discovery SNPs can have problems because of winner's curse in the discovery estimate, which could lead to lower observed replication rates than expected even accounting for differences in power.
+
+## Summary
+
+- The regression of effects across studies might not be 1 even when the true effects are consistent across studies, because power differences can distort the relationship
+- Estimating the observed vs expected replication rates can help to identify if there are systematic differences in effect sizes across studies
+- Estimating the per-variant heterogeneity can estimate if there are any particular variants that have different effect sizes across studies
+
+---
+
+```{r}
+sessionInfo()
+```
