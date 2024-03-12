@@ -21,7 +21,7 @@ Family simulation function
 # adapted from https://github.com/MRCIEU/mrtwin_power/blob/master/scripts/sib_mr_functions.r
 # 3 sibs per family
 # skewed phenotype
-make_families <- function(af, nfam) {
+make_families <- function(af, nfam, error=0) {
 	nsnp <- length(af)
 	dads <- matrix(0, nfam, nsnp)
 	mums <- matrix(0, nfam, nsnp)
@@ -87,6 +87,7 @@ make_families <- function(af, nfam) {
         tibble(fid = 1:nfam, iid = paste0(1:nfam, "b"), sibs2),
         tibble(fid = 1:nfam, iid = paste0(1:nfam, "b"), sibs3)
     )
+	sdat$V1 <- sdat$V1 + rnorm(nrow(sdat), 0, sd=error)
     sdat <- sdat %>% group_by(fid) %>%
         mutate(
             FG = mean(V1), 

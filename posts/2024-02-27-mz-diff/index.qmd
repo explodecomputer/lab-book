@@ -1,0 +1,568 @@
+---
+title: "Checking MZ difference model"
+author: Gibran Hemani
+date: "2024-02-27"
+categories: []
+---
+
+## Background
+
+
+- Check that mean effects can't influence MZ dif effects
+- That the MZ difference model works for binary traits
+
+Simulate data
+
+- `g1` = main effect on y
+- `g2` = GxE effect with no main effect on y, with an interaction with normally distributed `f` variable
+- `g3` = Effect on variance of y
+- `g4` = Null
+- `y` - continuous variable
+- `cc` - `y` converted to a binary variable
+- `cs` - `cc` scaled to have mean 0 and variance 1
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+n <- 100000
+dat <- tibble(
+    fid = rep(1:(n/2), each=2), # family id
+    id = rep(1:2, n/2),
+    g1 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+    g2 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+    g3 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+    g4 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+    f = rnorm(n),
+    v = rnorm(n, 0, g3),
+    y = 10 + g1 + f + f * drop(scale(g2)) + v + rnorm(n),
+    yr = round(y),
+    cc = rbinom(n, 1, plogis(-2 + y)),
+    cs = drop(scale(cc))
+)
+dat
+```
+
+
+```{r}
+mean(dat$y)
+var(dat$y)
+```
+
+Create MZ data
+
+```{r}
+dat2 <- dat %>% 
+    group_by(fid) %>% 
+    summarise(
+        g1 = g1[1], 
+        g2 = g2[1], 
+        g3 = g3[1], 
+        g4 = g4[1], 
+        y2 = (y[1]+y[2])^2,
+        y = y[1]-y[2], 
+        yrabs = abs(yr[1]-yr[2]), 
+        yabs=abs(y), 
+        cc=cc[1]-cc[2], 
+        cm = mean(cc),
+        ccabs=abs(cc),
+        cs2=(cs[1]-cs[2])^2,
+        cs=cs[1]-cs[2], 
+        csabs=abs(cs)
+    )
+dat2
+```
+
+This creates the following potential dependent variables for the regression.
+
+- `y` which is the difference in `y` between the two MZ twins (as stated in the equation in the paper)
+- `yabs` which is the absolute difference in `y` between the two MZ twins
+- `cc` which is the difference in `cc` between the two MZ twins
+- `ccabs` which is the absolute difference in `cc` between the two MZ twins
+- `cs` which is the difference in the scaled binary variable between the two MZ twins
+- `cs2` which is the squared difference in the scaled binary variable between the two MZ twins
+
+`cm` is also generated - the mean of `cc` for the MZ twins. This is the covariate used in model 2 according to the methods in the paper.
+
+
+```{r}
+reg <- function(f, dat, what) {
+    fo <- as.formula(f)
+    o <- lm(fo, data=dat) %>% summary() %>% 
+        coef() %>% 
+        as.data.frame() %>%
+        slice_tail(n=1) %>%
+        mutate(what=what, f=f)
+    rownames(o) <- NULL
+    names(o) <- c("est", "se", "t", "p", "what", "f")
+    o %>% select(what, f, est, se, p)
+}
+
+o <- bind_rows(
+    reg("cc ~ g1", dat, "pop"),
+    reg("cc ~ g2", dat, "pop"),
+    reg("cc ~ g3", dat, "pop"),
+    reg("cc ~ g4", dat, "pop"),
+    reg("y ~ g1", dat2, "mz"),
+    reg("y ~ g2", dat2, "mz"),
+    reg("y ~ g3", dat2, "mz"),
+    reg("y ~ g4", dat2, "mz"),
+    reg("yabs ~ g1", dat2, "mz"),
+    reg("yabs ~ g2", dat2, "mz"),
+    reg("yabs ~ g3", dat2, "mz"),
+    reg("yabs ~ g4", dat2, "mz"),
+    reg("yrabs ~ g1", dat2, "mz"),
+    reg("yrabs ~ g2", dat2, "mz"),
+    reg("yrabs ~ g3", dat2, "mz"),
+    reg("yrabs ~ g4", dat2, "mz"),
+    reg("yabs ~ g1 + cm", dat2, "mz"),
+    reg("yabs ~ g2 + cm", dat2, "mz"),
+    reg("yabs ~ g3 + cm", dat2, "mz"),
+    reg("yabs ~ g4 + cm", dat2, "mz"),
+    reg("cc ~ g1", dat2, "mz"),
+    reg("cc ~ g2", dat2, "mz"),
+    reg("cc ~ g3", dat2, "mz"),
+    reg("cc ~ g4", dat2, "mz"),
+    reg("ccabs ~ g1", dat2, "mz"),
+    reg("ccabs ~ g2", dat2, "mz"),
+    reg("ccabs ~ g3", dat2, "mz"),
+    reg("ccabs ~ g4", dat2, "mz"),
+    reg("cs ~ g1", dat2, "mz"),
+    reg("cs ~ g2", dat2, "mz"),
+    reg("cs ~ g3", dat2, "mz"),
+    reg("cs ~ g4", dat2, "mz"),
+    reg("csabs ~ g1", dat2, "mz"),
+    reg("csabs ~ g2", dat2, "mz"),
+    reg("csabs ~ g3", dat2, "mz"),
+    reg("csabs ~ g4", dat2, "mz"),
+    reg("cs2 ~ g1", dat2, "mz"),
+    reg("cs2 ~ g2", dat2, "mz"),
+    reg("cs2 ~ g3", dat2, "mz"),
+    reg("cs2 ~ g4", dat2, "mz"),
+    reg("ccabs ~ g1 + cm", dat2, "mz"),
+    reg("ccabs ~ g2 + cm", dat2, "mz"),
+    reg("ccabs ~ g3 + cm", dat2, "mz"),
+    reg("ccabs ~ g4 + cm", dat2, "mz")
+)
+o %>% mutate(log10p=-log10(p)) %>% select(what, f, log10p)
+```
+
+Observations
+
+- The MZ difference model does not work for the difference of `y`
+- The MZ difference model works for continuous traits as expected when using the **absolute** difference in the trait (`yabs`). i.e.
+    - The main effect does not associate with MZ dif
+    - The GxE effect does associate with MZ dif
+    - The variance effect does associate with MZ dif
+- The MZ difference model does not work for the difference of the binary trait `cc`
+- Using the absolute difference in the binary trait (`ccabs`)
+    - Picks up the GxE effect and the variance effect
+    - **But it also picks up the main effect which it is not supposed to do**
+
+
+
+
+```{r}
+reg2 <- function(f, dat, what) {
+    fo <- as.formula(f)
+    o <- glm(fo, data=dat, family="binomial") %>% summary() %>% 
+        coef() %>% 
+        as.data.frame() %>%
+        slice_tail(n=1) %>%
+        mutate(what=what, f=f)
+    rownames(o) <- NULL
+    names(o) <- c("est", "se", "t", "p", "what", "f")
+    o %>% select(what, f, est, se, p)
+}
+o <- bind_rows(
+    reg2("ccabs ~ g1", dat2, "mz"),
+    reg2("ccabs ~ g2", dat2, "mz"),
+    reg2("ccabs ~ g3", dat2, "mz"),
+    reg2("ccabs ~ g4", dat2, "mz"),
+    reg2("ccabs ~ g1 + cm", dat2, "mz"),
+    reg2("ccabs ~ g2 + cm", dat2, "mz"),
+    reg2("ccabs ~ g3 + cm", dat2, "mz"),
+    reg2("ccabs ~ g4 + cm", dat2, "mz")
+)
+o %>% select(what, f, p) %>% mutate(p=-log10(p))
+
+```
+
+
+```{r}
+summary(lm(y ~ f * g2, dat))
+tapply(dat$y, dat$g2, var)
+tapply(dat$y, dat$g3, var)
+tapply(dat2$yabs, dat2$g2, mean)
+tapply(dat2$yabs, dat2$g3, mean)
+
+```
+
+
+## Trait skewness
+
+```{r}
+n <- 100000
+dat <- tibble(
+    fid = rep(1:(n/2), each=2), # family id
+    id = rep(1:2, n/2),
+    g1 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+    g2 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+    g3 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+    g4 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+    f = rnorm(n),
+    v = rnorm(n, 0, g3),
+    y = (10 + g1 + f + f * drop(scale(g2)) + v + rnorm(n))^1.2,
+    yr = round(y),
+    cc = rbinom(n, 1, plogis(-2 + y)),
+    cs = drop(scale(cc))
+)
+dat
+```
+
+Create MZ data
+
+```{r}
+dat2 <- dat %>% 
+    group_by(fid) %>% 
+    summarise(
+        g1 = g1[1], 
+        g2 = g2[1], 
+        g3 = g3[1], 
+        g4 = g4[1], 
+        y2 = (y[1]+y[2])^2,
+        ym = mean(c(y[1], y[2])),
+        y = y[1]-y[2], 
+        yrabs = abs(yr[1]-yr[2]), 
+        yabs=abs(y), 
+        cc=cc[1]-cc[2], 
+        cm = mean(cc),
+        ccabs=abs(cc),
+        cs2=(cs[1]-cs[2])^2,
+        cs=cs[1]-cs[2], 
+        csabs=abs(cs)
+    )
+dat2
+```
+
+```{r}
+o <- bind_rows(
+    reg("y ~ g1", dat, "pop"),
+    reg("y ~ g2", dat, "pop"),
+    reg("y ~ g3", dat, "pop"),
+    reg("y ~ g4", dat, "pop"),
+    reg("y ~ g1", dat2, "mz"),
+    reg("y ~ g2", dat2, "mz"),
+    reg("y ~ g3", dat2, "mz"),
+    reg("y ~ g4", dat2, "mz"),
+    reg("yabs ~ g1", dat2, "mz"),
+    reg("yabs ~ g2", dat2, "mz"),
+    reg("yabs ~ g3", dat2, "mz"),
+    reg("yabs ~ g4", dat2, "mz"),
+    reg("yrabs ~ g1", dat2, "mz"),
+    reg("yrabs ~ g2", dat2, "mz"),
+    reg("yrabs ~ g3", dat2, "mz"),
+    reg("yrabs ~ g4", dat2, "mz"),
+    reg("yabs ~ g1 + cm", dat2, "mz"),
+    reg("yabs ~ g2 + cm", dat2, "mz"),
+    reg("yabs ~ g3 + cm", dat2, "mz"),
+    reg("yabs ~ g4 + cm", dat2, "mz")
+)
+o %>% mutate(log10p=-log10(p)) %>% select(what, f, log10p)
+```
+
+
+```{r}
+cor(dat2$ym, dat2$y, use="pair")
+```
+
+
+Make a Poisson model and then normalise
+
+```{r}
+inormal <- function(x) {
+    x <- x + rnorm(length(x), 0, 1e-10)
+    qnorm((rank(x, na.last = "keep") - 0.5) / sum(!is.na(x)))
+}
+
+n <- 100000
+dat <- tibble(
+    fid = rep(1:(n/2), each=2), # family id
+    id = rep(1:2, n/2),
+    g1 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+    g2 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+    g3 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+    g4 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+    f = rnorm(n),
+    e = rnorm(n),
+    v = rnorm(n, 0, g3 * 0.1),
+    y = drop(scale(g1) * 0.1 + f * 0.1 + f * drop(scale(g2)) * 0.1 + v + e),
+    l = drop(exp(scale(y) * 0.1)),
+    score = rpois(n, l),
+    score_norm = inormal(score),
+    l_norm = inormal(l)
+)
+dat
+```
+
+```{r}
+hist(dat$score)
+hist(dat$score_norm)
+```
+
+```{r}
+cor(dat$score, dat$score_norm, use="pair")
+cor(dat$score, dat$l)
+cor(dat$y, dat$l)
+```
+
+
+```{r}
+mean(dat$y)
+var(dat$l)
+mean(dat$l)
+```
+
+Create MZ data
+
+```{r}
+dat2 <- dat %>% 
+    group_by(fid) %>% 
+    summarise(
+        g1 = g1[1], 
+        g2 = g2[1], 
+        g3 = g3[1], 
+        g4 = g4[1], 
+        y2 = (y[1]+y[2])^2,
+        y = y[1]-y[2], 
+        l = abs(l[1]-l[2]), 
+        l_norm = abs(l_norm[1]-l_norm[2]),
+        yabs = abs(y), 
+        score = abs(score[1]-score[2]), 
+        ms = mean(score_norm),
+        score_norm = abs(score_norm[1]-score_norm[2])
+    )
+dat2
+```
+
+```{r}
+hist(dat2$l)
+hist(dat2$y, breaks=100)
+hist(dat2$score)
+hist(dat2$ms)
+hist(dat2$score_norm, breaks=100)
+
+```
+
+```{r}
+o <- bind_rows(
+    reg("y ~ g1", dat, "pop"),
+    reg("y ~ g2", dat, "pop"),
+    reg("y ~ g3", dat, "pop"),
+    reg("y ~ g4", dat, "pop"),
+    reg("y ~ g1", dat2, "mz"),
+    reg("y ~ g2", dat2, "mz"),
+    reg("y ~ g3", dat2, "mz"),
+    reg("y ~ g4", dat2, "mz"),
+    reg("yabs ~ g1", dat2, "mz"),
+    reg("yabs ~ g2", dat2, "mz"),
+    reg("yabs ~ g3", dat2, "mz"),
+    reg("yabs ~ g4", dat2, "mz"),
+    reg("l ~ g1", dat2, "mz"),
+    reg("l ~ g2", dat2, "mz"),
+    reg("l ~ g3", dat2, "mz"),
+    reg("l ~ g4", dat2, "mz"),
+    reg("l_norm ~ g1", dat2, "mz"),
+    reg("l_norm ~ g2", dat2, "mz"),
+    reg("l_norm ~ g3", dat2, "mz"),
+    reg("l_norm ~ g4", dat2, "mz"),
+    reg("score ~ g1", dat2, "mz"),
+    reg("score ~ g2", dat2, "mz"),
+    reg("score ~ g3", dat2, "mz"),
+    reg("score ~ g4", dat2, "mz"),
+    reg("score_norm ~ g1", dat2, "mz"),
+    reg("score_norm ~ g2", dat2, "mz"),
+    reg("score_norm ~ g3", dat2, "mz"),
+    reg("score_norm ~ g4", dat2, "mz")
+)
+o %>% mutate(log10p=-log10(p)) %>% select(what, f, log10p)
+```
+
+
+## Run simulations with more replications
+
+The general model
+
+- `y` is a continuous variable which relates to the underlying normal liability
+- `ysq` is the square of `y`, to introduce skewness
+- `ysq_norm` is the inverse rank transformed `ysq` to try to rescue the skewness
+- `l` is the exponentiated liability which will eventually give rise to the Poisson distributed variable
+- `l_norm` is the inverse rank transformed `l` to try to rescue the skewness
+- `score` is the Poisson distributed variable arising from the underlying normal liability. This aims to represent the depression / anxiety distributions
+- `score_norm` is the inverse rank transformed `score` to try to rescue the skewness. Note that small amounts of noise are introduced to avoid ties
+
+
+```{r}
+dgm <- function(n, b1, b2, b3, b4, bf, bf2) {
+    dat <- tibble(
+        fid = rep(1:(n/2), each=2), # family id
+        id = rep(1:2, n/2),
+        g1 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+        g2 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+        g3 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+        g4 = rbinom(n/2, 2, 0.4) %>% rep(., each=2),
+        f = rnorm(n),
+        e = rnorm(n),
+        v = rnorm(n, 0, g3 * b3),
+        y = drop(scale(g1) * b1 + scale(g2) * b2 + f * bf + f * drop(scale(g2)) * bf2 + v + e + scale(g4) * b4),
+        ysq = y^2,
+        ysq_norm = inormal(ysq),
+        l = drop(exp(scale(y) * 0.1)),
+        l_norm = inormal(l),
+        score = rpois(n, l),
+        score_norm = inormal(score)
+    )
+
+    dat2 <- dat %>% 
+        group_by(fid) %>% 
+        summarise(
+            g1 = g1[1], 
+            g2 = g2[1], 
+            g3 = g3[1], 
+            g4 = g4[1], 
+            yraw = y[1]-y[2], 
+            y = abs(yraw), 
+            ysq = abs(ysq[1]+ysq[2]),
+            ysq_norm = abs(ysq_norm[1]+ysq_norm[2]),
+            l = abs(l[1]-l[2]), 
+            l_norm = abs(l_norm[1]-l_norm[2]),
+            score = abs(score[1]-score[2]), 
+            score_norm = abs(score_norm[1]-score_norm[2])
+        )
+    return(list(dat=dat, dat2=dat2))
+}
+
+est <- function(out) {
+    dat <- out$dat
+    dat2 <- out$dat2
+    o <- bind_rows(
+        reg("y ~ g1", dat, "pop"),
+        reg("y ~ g2", dat, "pop"),
+        reg("y ~ g3", dat, "pop"),
+        reg("y ~ g4", dat, "pop"),
+        reg("yraw ~ g1", dat2, "mz"),
+        reg("yraw ~ g2", dat2, "mz"),
+        reg("yraw ~ g3", dat2, "mz"),
+        reg("yraw ~ g4", dat2, "mz"),
+        reg("y ~ g1", dat2, "mz"),
+        reg("y ~ g2", dat2, "mz"),
+        reg("y ~ g3", dat2, "mz"),
+        reg("y ~ g4", dat2, "mz"),
+        reg("ysq ~ g1", dat2, "mz"),
+        reg("ysq ~ g2", dat2, "mz"),
+        reg("ysq ~ g3", dat2, "mz"),
+        reg("ysq ~ g4", dat2, "mz"),
+        reg("ysq_norm ~ g1", dat2, "mz"),
+        reg("ysq_norm ~ g2", dat2, "mz"),
+        reg("ysq_norm ~ g3", dat2, "mz"),
+        reg("ysq_norm ~ g4", dat2, "mz"),
+        reg("l ~ g1", dat2, "mz"),
+        reg("l ~ g2", dat2, "mz"),
+        reg("l ~ g3", dat2, "mz"),
+        reg("l ~ g4", dat2, "mz"),
+        reg("l_norm ~ g1", dat2, "mz"),
+        reg("l_norm ~ g2", dat2, "mz"),
+        reg("l_norm ~ g3", dat2, "mz"),
+        reg("l_norm ~ g4", dat2, "mz"),
+        reg("score ~ g1", dat2, "mz"),
+        reg("score ~ g2", dat2, "mz"),
+        reg("score ~ g3", dat2, "mz"),
+        reg("score ~ g4", dat2, "mz"),
+        reg("score_norm ~ g1", dat2, "mz"),
+        reg("score_norm ~ g2", dat2, "mz"),
+        reg("score_norm ~ g3", dat2, "mz"),
+        reg("score_norm ~ g4", dat2, "mz")
+    )
+    return(o)
+}
+```
+
+Run the sims
+
+```{r}
+res <- lapply(1:100, \(i) {
+    out <- dgm(10000, 0.3, 0, 0.3, 0, 0.3, 0.3)
+    est(out) %>% mutate(i=i)
+}) %>% bind_rows()
+```
+
+Re-label
+
+```{r}
+res <- res %>% separate(f, c("trait", "g"), sep=" ~ ", remove=FALSE)
+res$g[res$g == "g1"] <- "Main"
+res$g[res$g == "g2"] <- "GxE"
+res$g[res$g == "g3"] <- "Var"
+res$g[res$g == "g4"] <- "Null"
+
+res$trait[res$trait == "yraw"] <- "yraw"
+res$trait[res$trait == "y"] <- "Normal liability"
+res$trait[res$trait == "ysq"] <- "Normal liability squared"
+res$trait[res$trait == "ysq_norm"] <- "Normal liability squared (INT)"
+res$trait[res$trait == "l"] <- "Exponentiated liability"
+res$trait[res$trait == "l_norm"] <- "Exponentiated liability (INT)"
+res$trait[res$trait == "score"] <- "Poisson of liability"
+res$trait[res$trait == "score_norm"] <- "Poisson of liability (INT)"
+```
+
+Evaluate performance of variance estimates on power and bias. Expect that `Main` and `Null` should be null in the MZ difference model, and `GxE` and `Var` should be non-null.
+
+```{r}
+ggplot(res %>% filter(what =="mz" & trait != "yraw") %>% group_by(trait) %>% mutate(est = est/max(est)), aes(x=g, y=est)) + 
+    geom_boxplot(aes(fill=g)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5), legend.position="none") +
+    scale_fill_brewer(palette="Set3") +
+    geom_hline(yintercept=0, linetype="dashed") +
+    facet_grid(. ~ trait, scale="free_y", labeller = label_wrap_gen()) +
+    labs(y = "Relative effect size", x="", fill="")
+```
+
+```{r}
+ggsave(file="mz_diff.pdf", width=10, height=8)
+```
+
+
+```{r}
+ggplot(res %>% filter(what =="mz" & trait != "yraw"), aes(x=trait, y=-log10(p))) + 
+    geom_boxplot(aes(fill=g)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+    scale_fill_brewer(palette="Set3")
+```
+
+
+```{r}
+res %>% group_by(what, f, g, trait) %>% summarise(power = sum(p < 0.05)) %>%
+    ungroup %>%
+    {
+    ggplot(., aes(x=g, y=power)) + 
+        geom_bar(stat="identity", aes(fill=g), position="dodge") +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+        scale_fill_brewer(palette="Set3") +
+        facet_grid(. ~ trait)
+    }
+```
+
+
+## Summary
+
+- Inverse rank transformation of most traits rescues the MZ difference model
+- Inverse rank transformation of the Poisson variable does not seem to work - it erases the variance effects and there is some bias remaining for the main effect
+
+
+---
+
+
+```{r}
+sessionInfo()
+```

@@ -16,6 +16,8 @@ Consider smoking and lung cancer. If smoking is partially genetic and partially 
 
 ```{r}
 library(dplyr)
+library(tidyr)
+library(ggplot2)
 ```
 
 Positive control, lets make it so that 80% of the trait is due to environment and 20% random chance
@@ -122,6 +124,374 @@ dat %>%
 ```
 
 But here the heritability is limited to the non-genetic variance.
+
+
+## Allow liability variance to change
+
+- Simulate twins
+- Estimate heritability in high and low prevalence groups
+- Estimate fraction of cases change
+
+15-30x more likely to get lung cancer if you smoke
+1.5% of non-smokers get lung cancer
+12% of smokers get lung cancer
+
+```{r}
+n <- 1000000
+dat <- bind_rows(
+    tibble(
+        g = rnorm(n, sd=1),
+        e = rnorm(n, sd=1),
+        smoking = 2,
+        liability = -4 + g + e + smoking,
+        cancer = rbinom(n, 1, plogis(liability)),
+        cat="high"
+    ),
+    tibble(
+        g = rnorm(n, sd=1),
+        e = rnorm(n, sd=1),
+        smoking = 0,
+        liability = -4 + g + e + smoking,
+        cancer = rbinom(n, 1, plogis(liability)),
+        cat="low"
+    ),
+)
+
+group_by(dat, cat) %>%
+    summarise(
+        prev_cancer = sum(cancer) / n(),
+        mean_g = mean(g),
+        mean_e = mean(e),
+        mean_smoking = mean(smoking),
+        mean_liability = mean(liability),
+        h2 = cor(g, liability)^2,
+        h2obs = cor(g, cancer)^2,
+    )
+
+cor(dat$cancer, dat$g)^2
+cor(dat$smoking, dat$cancer)^2
+
+ggplot(dat, aes(x=liability)) +
+geom_density(aes(fill=cat), alpha=0.5)
+```
+
+Twin model
+
+```{r}
+make_families <- function(af, nfam, beta) {
+	nsnp <- length(af)
+	dads <- matrix(0, nfam, nsnp)
+	mums <- matrix(0, nfam, nsnp)
+	sibs1 <- matrix(0, nfam, nsnp)
+	sibs2 <- matrix(0, nfam, nsnp)
+    sibs3 <- matrix(0, nfam, nsnp)
+	for(i in 1:nsnp)
+	{
+		dad1 <- rbinom(nfam, 1, af[i]) + 1
+		dad2 <- (rbinom(nfam, 1, af[i]) + 1) * -1
+		mum1 <- rbinom(nfam, 1, af[i]) + 1
+		mum2 <- (rbinom(nfam, 1, af[i]) + 1) * -1
+
+		dadindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		dadh <- rep(NA, nfam)
+		dadh[dadindex] <- dad1[dadindex]
+		dadh[!dadindex] <- dad2[!dadindex]
+
+		mumindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		mumh <- rep(NA, nfam)
+		mumh[mumindex] <- mum1[mumindex]
+		mumh[!mumindex] <- mum2[!mumindex]
+
+		sib1 <- cbind(dadh, mumh)
+
+		dadindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		dadh <- rep(NA, nfam)
+		dadh[dadindex] <- dad1[dadindex]
+		dadh[!dadindex] <- dad2[!dadindex]
+
+		mumindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		mumh <- rep(NA, nfam)
+		mumh[mumindex] <- mum1[mumindex]
+		mumh[!mumindex] <- mum2[!mumindex]
+
+		sib2 <- cbind(dadh, mumh)
+
+		sibs1[,i] <- rowSums(abs(sib1) - 1)
+		sibs2[,i] <- rowSums(abs(sib2) - 1)
+	}
+
+    sdat <- bind_rows(
+        tibble(fid = 1:nfam, iid = paste0(1:nfam, "a"), prs = drop(sibs1 %*% beta)),
+        tibble(fid = 1:nfam, iid = paste0(1:nfam, "b"), prs = drop(sibs2 %*% beta))
+    )
+    return(sdat)
+}
+```
+
+```{r}
+make_twins <- function(nmz, ndz, nsnp, bsd) {
+    af <- runif(nsnp, 0.01, 0.99)
+    b <- rnorm(nsnp, sd=bsd)
+    g <- sapply(af, function(x) rbinom(nmz, 2, x))
+    prs <- drop(g %*% b)
+    dim(g)
+    mz <- tibble(
+        fid = c(1:nmz, 1:nmz),
+        iid = c(paste0(1:nmz, "a"), paste0(1:nmz, "b")),
+        prs = c(prs, prs),
+        what = "mz"
+    )
+
+    dz <- make_families(af, ndz, b) %>% mutate(what="dz")
+    bind_rows(mz, dz)
+}
+```
+
+```{r}
+gx_to_gp <- function(gx, h2x, prev) {
+	x_prime <- qnorm(prev, 0, 1, lower.tail=FALSE)
+	p <- pnorm(x_prime, mean=gx, sd = 1 - sqrt(h2x), lower.tail=FALSE)
+	return(p)
+}
+rbinom(100000, 1, gx_to_gp(rnorm(100000), 0.5, 0.014)) %>% table %>% prop.table
+```
+
+```{r}
+make_twins2 <- function(nmz, ndz, prev, h2) {
+    mzg <- rnorm(nmz)
+    dzg <- mvtnorm::rmvnorm(ndz, sigma=matrix(c(1,0.5,0.5,1), 2, 2))
+    mz <- tibble(
+        fid = paste(c(1:nmz, 1:nmz), "mz", sep="_"),
+        iid = c(paste0(1:nmz, "a"), paste0(1:nmz, "b")),
+        g = c(mzg, mzg),
+        what = "mz"
+    )
+    dz <- tibble(
+        fid = paste(c(1:ndz, 1:ndz), "dz", sep="_"),
+        iid = c(paste0(1:ndz, "a"), paste0(1:ndz, "b")),
+        g = c(dzg[,1], dzg[,2]),
+        what = "dz"
+    )
+    d <- bind_rows(mz, dz) %>%
+        mutate(
+            p = gx_to_gp(g, h2, prev),
+            cancer = rbinom(n(), 1, p)
+        )
+    return(d)
+}
+```
+
+```{r}
+get_twin_h2 <- function(x) {
+    a <- subset(x, grepl("a", iid))
+    b <- subset(x, grepl("b", iid))
+    ab <- inner_join(a, b, by=c("fid", "what"))
+    ab %>% group_by(what) %>%
+        summarise(
+            cor = cor(cancer.x, cancer.y)
+        ) %>% pivot_wider(names_from=what, values_from=cor) %>%
+        mutate(h2 = 0.5 * (mz - dz))
+}
+
+get_twin_h2_binary <- function(x) {
+    a <- subset(x, grepl("a", iid))
+    b <- subset(x, grepl("b", iid))
+    ab <- inner_join(a, b, by=c("fid", "what"))
+    temp <- group_by(ab, what, cancer.x, cancer.y) %>% summarise(n=n()) %>% ungroup()
+    temp %>% group_by(what) %>%
+        mutate(
+            cl = paste(cancer.x, cancer.y),
+        ) %>%
+        summarise(
+            t = (n[cl=="1 1"] * n[cl=="0 0"] - n[cl=="1 0"] * n[cl == "0 1"]) / (n[cl=="1 1"] * n[cl=="0 0"] + n[cl=="1 0"] * n[cl == "0 1"])
+        ) %>% ungroup() %>%
+        summarise(h2 = 2 * (t[2]-t[1]))
+}
+
+get_twin_h2_falconer <- function(x) {
+    qg <- subset(x, grepl("a", iid)) %>% summarise(prev = sum(cancer) / n()) %>% {.$prev}
+
+    xg <- qnorm(1 - qg)
+
+    fids_mz <- subset(x, what == "mz" & cancer == 1 & grepl("a", iid))$fid
+    fids_dz <- subset(x, what == "dz" & cancer == 1 & grepl("a", iid))$fid
+
+    x1 <- subset(x, (what == "mz" & fid %in% fids_mz) | (what == "dz" & fid %in% fids_dz))
+    p <- x1 %>% group_by(what, fid) %>%
+        summarise(c = sum(cancer)) %>%
+        group_by(what, c) %>%
+        summarise(n=n())
+    print(p)
+    
+    xr <- p %>% group_by(what) %>%
+        summarise(qr = n[2] / (n[2]+n[1]), xr = qnorm(1 - qr), N = sum(n))
+
+    zg <- dnorm(xg)
+    ag <- zg / qg
+    
+    xr <- xr %>% 
+        mutate(
+            xg,
+            qg,
+            zg,
+            ag,
+            b = (xg - xr) / ag, 
+            r = case_when(what=="mz" ~ 1, what == "dz" ~ 0.5, TRUE ~ NA), 
+            h2 = b / r,
+            h2se = 1 / (b * ag^2) * sqrt((1-qr) / (qr * N))
+        )
+    xr
+}
+```
+
+```{r}
+twins <- make_twins(100000, 100000, 100, 1)
+twins
+twins %>% group_by(what) %>% 
+    summarise(mean_prs = mean(prs), sd_prs = sd(prs))
+
+twins %>% filter(what == "mz") %>%
+    mutate(sib = gsub("[0-9]", "", iid)) %>%
+    select(fid, sib, g=prs) %>%
+    pivot_wider(values_from=g, names_from=sib) %>% {cov(.[,-1])}
+
+twins %>% filter(what == "dz") %>%
+    mutate(sib = gsub("[0-9]", "", iid)) %>%
+    select(fid, sib, g=prs) %>%
+    pivot_wider(values_from=g, names_from=sib) %>% {cov(.[,-1])}
+```
+
+
+```{r}
+sd(twins$prs[1:1000])
+```
+
+```{r}
+twdat <- make_twins(1000000, 1000000, 100, 0.3)
+twins <- twdat %>%
+    rename(g=prs) %>%
+    mutate(
+        g = (g - mean(g))*2,
+        e = rnorm(n(), sd=sd(g[1:1000])),
+        cat = sample(0:1, n(), replace=TRUE),
+        smoking = cat * 3.5,
+        liability = -7 + g + e + smoking,
+        cancer = rbinom(n(), 1, plogis(liability))
+    )
+
+twins
+twins %>% filter(grepl("a", iid)) %>%
+    group_by(cat) %>%
+    summarise(prev = sum(cancer) / n())
+
+group_by(twins, cat) %>%
+    summarise(
+        prev_cancer = sum(cancer) / n(),
+        mean_g = mean(g),
+        mean_e = mean(e),
+        mean_smoking = mean(smoking),
+        mean_liability = mean(liability),
+        h2 = cor(g, liability)^2,
+        h2obs = cor(g, cancer)^2
+    ) %>% str
+
+group_by(twins, cat) %>%
+    do({
+        tibble(
+            h2twin = get_twin_h2(.)$h2,
+            h2twin2 = get_twin_h2_binary(.)$h2
+        )
+    })
+
+get_twin_h2_binary(twins)
+
+twins %>%
+    summarise(
+        prev_cancer = sum(cancer) / n(),
+        mean_g = mean(g),
+        mean_e = mean(e),
+        mean_smoking = mean(smoking),
+        mean_liability = mean(liability),
+        h2 = cor(g, liability)^2,
+        h2obs = cor(g, cancer)^2,
+        h2twin = get_twin_h2(.)$h2,
+        h2twin2 = get_twin_h2_binary(.)$h2,
+    ) %>% str
+
+group_by(twins, cat) %>%
+    do({
+        tibble(
+            h2twin = get_twin_h2(.)$h2,
+            h2twin2 = get_twin_h2_binary(.)$h2
+        )
+    })
+
+group_by(twins, cat) %>%
+    do({
+        print(.)
+        get_twin_h2_falconer(.)
+    }) %>% str
+
+get_twin_h2_falconer(twins) %>% str
+
+get_twin_h2_falconer(twins %>% filter(cat == 1)) %>% str
+
+
+```
+
+
+```{r}
+twins$fid <- paste(twins$fid, twins$what, sep="_")
+kid <- twins %>% subset(cancer & !duplicated(fid)) %>% {.$fid}
+twins_proband <- twins %>% filter(fid %in% kid) %>% arrange(desc(cancer)) %>% mutate(proband = !duplicated(fid)) 
+twins_proband %>% group_by(proband) %>% summarise(n=n(), nc=sum(cancer))
+
+mean(twins$liability)
+mean(twins_proband$liability)
+mean(twins_proband$liability[twins_proband$proband])
+mean(twins_proband$liability[!twins_proband$proband])
+sum(twins$cancer)/nrow(twins)
+sum(twins_proband$cancer)/nrow(twins_proband)
+sum(twins_proband$cancer[!twins_proband$proband])/sum(!twins_proband$proband)
+```
+
+
+```{r}
+tw <- bind_rows(
+    make_twins2(100000, 100000, 0.005, 0.2) %>% mutate(cat = 0),
+    make_twins2(100000, 100000, 0.15, 0.2) %>% mutate(cat = 1)
+)
+tw %>% group_by(cat) %>%
+    filter(what == "mz" & !duplicated(fid)) %>%
+    summarise(
+        prev = sum(cancer) / n(),
+        mean_g = mean(g),
+        h2 = cor(g, cancer)^2
+    )
+
+
+twins_proband %>% group_by(cat, proband) %>% 
+    summarise(prev = sum(cancer)/n())
+
+twins2 <- left_join(twins, twins_proband %>% select(fid, iid, proband), by=c("fid", "iid")) %>%
+    mutate(proband = case_when(proband ~ "proband", !proband ~ "relative", is.na(proband) ~ "pop", TRUE ~ NA))
+table(twins2$proband, twins2$cancer)
+
+twins2 %>% group_by(cat, what) %>% 
+    summarise(
+        qg = sum(cancer)/n(),
+        xg = qnorm(1 - qg),
+        qr = sum(cancer[proband=="relative"])/sum(proband=="relative"),
+        xr = qnorm(1 - qr),        
+    )
+
+
+
+```
+
+```{r}
+```
+
 
 ## Summary
 

@@ -212,7 +212,7 @@ Attaching package: 'dplyr'</code></pre>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># adapted from https://github.com/MRCIEU/mrtwin_power/blob/master/scripts/sib_mr_functions.r</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 3 sibs per family</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># skewed phenotype</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>make_families <span class="ot">&lt;-</span> <span class="cf">function</span>(af, nfam) {</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>make_families <span class="ot">&lt;-</span> <span class="cf">function</span>(af, nfam, <span class="at">error=</span><span class="dv">0</span>) {</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    nsnp <span class="ot">&lt;-</span> <span class="fu">length</span>(af)</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    dads <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, nfam, nsnp)</span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    mums <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, nfam, nsnp)</span>
@@ -278,17 +278,18 @@ Attaching package: 'dplyr'</code></pre>
 <span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(<span class="at">fid =</span> <span class="dv">1</span><span class="sc">:</span>nfam, <span class="at">iid =</span> <span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span>nfam, <span class="st">"b"</span>), sibs2),</span>
 <span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(<span class="at">fid =</span> <span class="dv">1</span><span class="sc">:</span>nfam, <span class="at">iid =</span> <span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span>nfam, <span class="st">"b"</span>), sibs3)</span>
 <span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>    sdat <span class="ot">&lt;-</span> sdat <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(fid) <span class="sc">%&gt;%</span></span>
-<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(</span>
-<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>            <span class="at">FG =</span> <span class="fu">mean</span>(V1), </span>
-<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>            <span class="at">CG =</span> FG <span class="sc">-</span> V1, </span>
-<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>            <span class="at">sex =</span> <span class="fu">rbinom</span>(<span class="fu">n</span>(), <span class="dv">1</span>, <span class="fl">0.5</span>),</span>
-<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>            <span class="at">phen =</span> <span class="fu">rbeta</span>(<span class="fu">n</span>(), <span class="dv">1</span>, <span class="dv">5</span>)</span>
-<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ungroup</span>()</span>
-<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(sdat)</span>
-<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>    sdat<span class="sc">$</span>V1 <span class="ot">&lt;-</span> sdat<span class="sc">$</span>V1 <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="fu">nrow</span>(sdat), <span class="dv">0</span>, <span class="at">sd=</span>error)</span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>    sdat <span class="ot">&lt;-</span> sdat <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(fid) <span class="sc">%&gt;%</span></span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(</span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>            <span class="at">FG =</span> <span class="fu">mean</span>(V1), </span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>            <span class="at">CG =</span> FG <span class="sc">-</span> V1, </span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a>            <span class="at">sex =</span> <span class="fu">rbinom</span>(<span class="fu">n</span>(), <span class="dv">1</span>, <span class="fl">0.5</span>),</span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>            <span class="at">phen =</span> <span class="fu">rbeta</span>(<span class="fu">n</span>(), <span class="dv">1</span>, <span class="dv">5</span>)</span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ungroup</span>()</span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(sdat)</span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Example</p>
 <div class="cell">
@@ -303,11 +304,11 @@ Attaching package: 'dplyr'</code></pre>
 <pre><code>tibble [30,000 × 7] (S3: tbl_df/tbl/data.frame)
  $ fid : int [1:30000] 1 2 3 4 5 6 7 8 9 10 ...
  $ iid : chr [1:30000] "1a" "2a" "3a" "4a" ...
- $ V1  : num [1:30000] 0 0 0 0 0 0 0 0 0 0 ...
- $ FG  : num [1:30000] 0 0 0 0 0 0 0 0 0 0 ...
- $ CG  : num [1:30000] 0 0 0 0 0 0 0 0 0 0 ...
- $ sex : int [1:30000] 1 0 0 0 1 1 0 0 1 0 ...
- $ phen: num [1:30000] 0.2228 0.0682 0.543 0.0146 0.2571 ...</code></pre>
+ $ V1  : num [1:30000] 0 0 0 0 0 0 0 0 0 1 ...
+ $ FG  : num [1:30000] 0 0 0 0 0 ...
+ $ CG  : num [1:30000] 0 0 0 0 0 ...
+ $ sex : int [1:30000] 1 1 1 1 1 0 0 0 1 1 ...
+ $ phen: num [1:30000] 0.1029 0.2683 0.1351 0.1688 0.0277 ...</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">lm</span>(phen <span class="sc">~</span> FG <span class="sc">+</span> CG, a))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -317,19 +318,19 @@ lm(formula = phen ~ FG + CG, data = a)
 
 Residuals:
      Min       1Q   Median       3Q      Max 
--0.17182 -0.10922 -0.03621  0.07345  0.77668 
+-0.16700 -0.11173 -0.03695  0.07566  0.70842 
 
 Coefficients:
-             Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept) 0.1653896  0.0008179 202.210   &lt;2e-16 ***
-FG          0.0071577  0.0069098   1.036    0.300    
-CG          0.0023271  0.0094268   0.247    0.805    
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  0.1670052  0.0008247 202.501   &lt;2e-16 ***
+FG          -0.0007463  0.0071542  -0.104    0.917    
+CG          -0.0008002  0.0102352  -0.078    0.938    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.1394 on 29997 degrees of freedom
-Multiple R-squared:  3.78e-05,  Adjusted R-squared:  -2.887e-05 
-F-statistic: 0.567 on 2 and 29997 DF,  p-value: 0.5672</code></pre>
+Residual standard error: 0.1408 on 29997 degrees of freedom
+Multiple R-squared:  5.665e-07, Adjusted R-squared:  -6.611e-05 
+F-statistic: 0.008497 on 2 and 29997 DF,  p-value: 0.9915</code></pre>
 </div>
 </div>
 <p>Perform analysis over a range of rare allele frequencies</p>
@@ -364,10 +365,12 @@ F-statistic: 0.567 on 2 and 29997 DF,  p-value: 0.5672</code></pre>
 <pre><code>`geom_smooth()` using method = 'loess' and formula = 'y ~ x'</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 6 rows containing non-finite values (`stat_smooth()`).</code></pre>
+<pre><code>Warning: Removed 5 rows containing non-finite outside the scale range
+(`stat_smooth()`).</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: Removed 6 rows containing missing values (`geom_point()`).</code></pre>
+<pre><code>Warning: Removed 5 rows containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
 </div>
 <div class="cell-output-display">
 <div>
@@ -401,13 +404,13 @@ F-statistic: 0.567 on 2 and 29997 DF,  p-value: 0.5672</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>R version 4.3.2 (2023-10-31)
-Platform: aarch64-apple-darwin20 (64-bit)
+<pre><code>R version 4.3.3 (2024-02-29)
+Platform: x86_64-apple-darwin20 (64-bit)
 Running under: macOS Ventura 13.6
 
 Matrix products: default
-BLAS:   /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRblas.0.dylib 
-LAPACK: /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0
+BLAS:   /Library/Frameworks/R.framework/Versions/4.3-x86_64/Resources/lib/libRblas.0.dylib 
+LAPACK: /Library/Frameworks/R.framework/Versions/4.3-x86_64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0
 
 locale:
 [1] en_GB.UTF-8/en_GB.UTF-8/en_GB.UTF-8/C/en_GB.UTF-8/en_GB.UTF-8
@@ -419,19 +422,19 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] ggplot2_3.4.2 tidyr_1.3.0   dplyr_1.1.4  
+[1] ggplot2_3.5.0 tidyr_1.3.1   dplyr_1.1.3  
 
 loaded via a namespace (and not attached):
- [1] Matrix_1.6-1.1    gtable_0.3.3      jsonlite_1.8.7    compiler_4.3.2   
- [5] tidyselect_1.2.0  splines_4.3.2     scales_1.2.1      yaml_2.3.7       
- [9] fastmap_1.1.1     lattice_0.21-9    R6_2.5.1          labeling_0.4.2   
-[13] generics_0.1.3    knitr_1.45        htmlwidgets_1.6.3 tibble_3.2.1     
+ [1] Matrix_1.6-5      gtable_0.3.4      jsonlite_1.8.7    compiler_4.3.3   
+ [5] tidyselect_1.2.0  splines_4.3.3     scales_1.3.0      yaml_2.3.7       
+ [9] fastmap_1.1.1     lattice_0.22-5    R6_2.5.1          labeling_0.4.3   
+[13] generics_0.1.3    knitr_1.45        htmlwidgets_1.6.2 tibble_3.2.1     
 [17] munsell_0.5.0     pillar_1.9.0      rlang_1.1.2       utf8_1.2.4       
 [21] xfun_0.41         cli_3.6.1         withr_2.5.2       magrittr_2.0.3   
-[25] mgcv_1.9-0        digest_0.6.33     grid_4.3.2        lifecycle_1.0.4  
-[29] nlme_3.1-163      vctrs_0.6.4       evaluate_0.23     glue_1.6.2       
+[25] mgcv_1.9-1        digest_0.6.33     grid_4.3.3        lifecycle_1.0.4  
+[29] nlme_3.1-164      vctrs_0.6.4       evaluate_0.23     glue_1.6.2       
 [33] farver_2.1.1      fansi_1.0.5       colorspace_2.1-0  rmarkdown_2.25   
-[37] purrr_1.0.2       tools_4.3.2       pkgconfig_2.0.3   htmltools_0.5.7  </code></pre>
+[37] purrr_1.0.2       tools_4.3.3       pkgconfig_2.0.3   htmltools_0.5.7  </code></pre>
 </div>
 </div>
 
