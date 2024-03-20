@@ -415,13 +415,16 @@ dgm <- function(n, b1, b2, b3, b4, bf, bf2) {
         f = rnorm(n),
         e = rnorm(n),
         v = rnorm(n, 0, g3 * b3),
-        y = drop(scale(g1) * b1 + scale(g2) * b2 + f * bf + f * drop(scale(g2)) * bf2 + v + e + scale(g4) * b4),
+        covar = rnorm(n, 0, 0.5),
+        y = drop(covar + scale(g1) * b1 + scale(g2) * b2 + f * bf + f * drop(scale(g2)) * bf2 + v + e + scale(g4) * b4),
         ysq = y^2,
         ysq_norm = inormal(ysq),
         l = drop(exp(scale(y) * 0.1)),
         l_norm = inormal(l),
         score = rpois(n, l),
-        score_norm = inormal(score)
+        score_norm = inormal(score),
+        score_res = residuals(lm(y ~ covar)),
+        score_res_norm = inormal(score_res)
     )
 
     dat2 <- dat %>% 
@@ -438,7 +441,9 @@ dgm <- function(n, b1, b2, b3, b4, bf, bf2) {
             l = abs(l[1]-l[2]), 
             l_norm = abs(l_norm[1]-l_norm[2]),
             score = abs(score[1]-score[2]), 
-            score_norm = abs(score_norm[1]-score_norm[2])
+            score_norm = abs(score_norm[1]-score_norm[2]),
+            score_res = abs(score_res[1]-score_res[2]),
+            score_res_norm = abs(score_res_norm[1]-score_res_norm[2])
         )
     return(list(dat=dat, dat2=dat2))
 }
@@ -482,7 +487,15 @@ est <- function(out) {
         reg("score_norm ~ g1", dat2, "mz"),
         reg("score_norm ~ g2", dat2, "mz"),
         reg("score_norm ~ g3", dat2, "mz"),
-        reg("score_norm ~ g4", dat2, "mz")
+        reg("score_norm ~ g4", dat2, "mz"),
+        reg("score_res ~ g1", dat2, "mz"),
+        reg("score_res ~ g2", dat2, "mz"),
+        reg("score_res ~ g3", dat2, "mz"),
+        reg("score_res ~ g4", dat2, "mz"),
+        reg("score_res_norm ~ g1", dat2, "mz"),
+        reg("score_res_norm ~ g2", dat2, "mz"),
+        reg("score_res_norm ~ g3", dat2, "mz"),
+        reg("score_res_norm ~ g4", dat2, "mz")
     )
     return(o)
 }
@@ -514,6 +527,8 @@ res$trait[res$trait == "l"] <- "Exponentiated liability"
 res$trait[res$trait == "l_norm"] <- "Exponentiated liability (INT)"
 res$trait[res$trait == "score"] <- "Poisson of liability"
 res$trait[res$trait == "score_norm"] <- "Poisson of liability (INT)"
+res$trait[res$trait == "score_res"] <- "Residuals of Poisson"
+res$trait[res$trait == "score_res_norm"] <- "Residuals of Poisson (INT)"
 ```
 
 Evaluate performance of variance estimates on power and bias. Expect that `Main` and `Null` should be null in the MZ difference model, and `GxE` and `Var` should be non-null.
@@ -529,7 +544,7 @@ ggplot(res %>% filter(what =="mz" & trait != "yraw") %>% group_by(trait) %>% mut
 ```
 
 ```{r}
-ggsave(file="mz_diff.pdf", width=10, height=8)
+ggsave(file="mz_diff.pdf", width=12, height=8)
 ```
 
 

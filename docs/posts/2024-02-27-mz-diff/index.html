@@ -238,29 +238,29 @@ Attaching package: 'dplyr'</code></pre>
 <span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>dat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 100,000 × 12
-     fid    id    g1    g2    g3    g4      f       v     y    yr    cc     cs
-   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;  &lt;dbl&gt;
- 1     1     1     0     1     2     2 -1.13   1.23   10.2     10     1 0.0485
- 2     1     2     0     1     2     2 -0.370 -4.28    5.64     6     1 0.0485
- 3     2     1     1     0     1     1  0.221 -0.974  10.0     10     1 0.0485
- 4     2     2     1     0     1     1 -1.08   0.864  12.9     13     1 0.0485
- 5     3     1     0     1     2     1  0.139  2.83   12.6     13     1 0.0485
- 6     3     2     0     1     2     1 -0.183  1.91   11.4     11     1 0.0485
- 7     4     1     0     0     1     1  0.742  0.709  10.4     10     1 0.0485
- 8     4     2     0     0     1     1 -0.223  0.865  10.1     10     1 0.0485
- 9     5     1     2     0     1     1 -0.473 -2.45   10.2     10     1 0.0485
-10     5     2     2     0     1     1  0.118  0.0939 13.7     14     1 0.0485
+     fid    id    g1    g2    g3    g4      f        v     y    yr    cc     cs
+   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;  &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;  &lt;dbl&gt;
+ 1     1     1     2     1     1     2  1.55  -0.443   16.4     16     1 0.0515
+ 2     1     2     2     1     1     2  0.367  0.126   11.2     11     1 0.0515
+ 3     2     1     0     1     1     0  1.29   0.379   14.3     14     1 0.0515
+ 4     2     2     0     1     1     0 -0.291  2.96    11.1     11     1 0.0515
+ 5     3     1     0     1     2     0 -0.891 -0.402    8.49     8     1 0.0515
+ 6     3     2     0     1     2     0  0.313  0.823   11.3     11     1 0.0515
+ 7     4     1     0     1     0     0  0.105  0       12.1     12     1 0.0515
+ 8     4     2     0     1     0     0 -1.72   0        9.25     9     1 0.0515
+ 9     5     1     0     0     1     2  0.911 -0.405    8.44     8     1 0.0515
+10     5     2     0     0     1     2  1.60   0.00454  8.86     9     1 0.0515
 # ℹ 99,990 more rows</code></pre>
 </div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(dat<span class="sc">$</span>y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 10.80003</code></pre>
+<pre><code>[1] 10.80035</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(dat<span class="sc">$</span>y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 4.556581</code></pre>
+<pre><code>[1] 4.629854</code></pre>
 </div>
 </div>
 <p>Create MZ data</p>
@@ -288,16 +288,16 @@ Attaching package: 'dplyr'</code></pre>
 <pre><code># A tibble: 50,000 × 15
      fid    g1    g2    g3    g4    y2      y yrabs  yabs    cc    cm ccabs
    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;int&gt;
- 1     1     0     1     2     2  252.  4.59      4 4.59      0     0     0
- 2     2     1     0     1     1  528. -2.90      3 2.90      0     0     0
- 3     3     0     1     2     1  576.  1.27      2 1.27      0     0     0
- 4     4     0     0     1     1  420.  0.396     0 0.396     0     0     0
- 5     5     2     0     1     1  574. -3.48      4 3.48      0     0     0
- 6     6     0     0     0     0  393. -0.900     1 0.900     0     0     0
- 7     7     2     1     1     1  433.  3.78      3 3.78      0     0     0
- 8     8     0     0     1     1  427. -0.790     1 0.790     0     0     0
- 9     9     1     1     1     0  412.  5.79      6 5.79      0     0     0
-10    10     0     0     1     1  299.  0.424     1 0.424     0     0     0
+ 1     1     2     1     1     2  758.  5.22      5 5.22      0     0     0
+ 2     2     0     1     1     0  645.  3.23      3 3.23      0     0     0
+ 3     3     0     1     2     0  392. -2.84      3 2.84      0     0     0
+ 4     4     0     1     0     0  456.  2.84      3 2.84      0     0     0
+ 5     5     0     0     1     2  299. -0.420     1 0.420     0     0     0
+ 6     6     0     0     0     0  451. -0.714     1 0.714     0     0     0
+ 7     7     0     1     1     1  537.  3.64      3 3.64      0     0     0
+ 8     8     2     1     1     2  493.  4.73      4 4.73      0     0     0
+ 9     9     0     1     1     1  560. -1.74      2 1.74      0     0     0
+10    10     0     0     1     0  414.  2.64      2 2.64      0     0     0
 # ℹ 49,990 more rows
 # ℹ 3 more variables: cs2 &lt;dbl&gt;, cs &lt;dbl&gt;, csabs &lt;dbl&gt;</code></pre>
 </div>
@@ -373,51 +373,51 @@ Attaching package: 'dplyr'</code></pre>
 <span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>o <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">log10p=</span><span class="sc">-</span><span class="fu">log10</span>(p)) <span class="sc">%&gt;%</span> <span class="fu">select</span>(what, f, log10p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>   what               f      log10p
-1   pop         cc ~ g1  8.13437917
-2   pop         cc ~ g2 46.55305857
-3   pop         cc ~ g3 13.91572848
-4   pop         cc ~ g4  0.19781815
-5    mz          y ~ g1  0.19778963
-6    mz          y ~ g2  1.16427524
-7    mz          y ~ g3  1.13649518
-8    mz          y ~ g4  0.15581555
-9    mz       yabs ~ g1  0.06830983
-10   mz       yabs ~ g2         Inf
-11   mz       yabs ~ g3         Inf
-12   mz       yabs ~ g4  1.78854106
-13   mz      yrabs ~ g1  0.18522135
-14   mz      yrabs ~ g2         Inf
-15   mz      yrabs ~ g3         Inf
-16   mz      yrabs ~ g4  1.67808693
-17   mz  yabs ~ g1 + cm  3.47796265
-18   mz  yabs ~ g2 + cm  2.75990563
-19   mz  yabs ~ g3 + cm  3.54724083
-20   mz  yabs ~ g4 + cm  3.48276126
-21   mz         cc ~ g1  0.01511599
-22   mz         cc ~ g2  1.26990270
-23   mz         cc ~ g3  0.05031756
-24   mz         cc ~ g4  0.09356251
-25   mz      ccabs ~ g1  8.15308162
-26   mz      ccabs ~ g2 46.70726528
-27   mz      ccabs ~ g3 13.95034699
-28   mz      ccabs ~ g4  0.19808941
-29   mz         cs ~ g1  0.01511599
-30   mz         cs ~ g2  1.26990270
-31   mz         cs ~ g3  0.05031756
-32   mz         cs ~ g4  0.09356251
-33   mz      csabs ~ g1  8.15308162
-34   mz      csabs ~ g2 46.70726528
-35   mz      csabs ~ g3 13.95034699
-36   mz      csabs ~ g4  0.19808941
-37   mz        cs2 ~ g1  8.15308162
-38   mz        cs2 ~ g2 46.70726528
-39   mz        cs2 ~ g3 13.95034699
-40   mz        cs2 ~ g4  0.19808941
-41   mz ccabs ~ g1 + cm 58.05048015
-42   mz ccabs ~ g2 + cm 57.36591496
-43   mz ccabs ~ g3 + cm 58.03887907
-44   mz ccabs ~ g4 + cm 58.00836961</code></pre>
+<pre><code>   what               f     log10p
+1   pop         cc ~ g1 17.2747743
+2   pop         cc ~ g2 57.2566871
+3   pop         cc ~ g3 10.9891693
+4   pop         cc ~ g4  0.3140467
+5    mz          y ~ g1  0.3100363
+6    mz          y ~ g2  0.8081800
+7    mz          y ~ g3  0.2121713
+8    mz          y ~ g4  0.7146450
+9    mz       yabs ~ g1  0.1442053
+10   mz       yabs ~ g2        Inf
+11   mz       yabs ~ g3        Inf
+12   mz       yabs ~ g4  0.4825420
+13   mz      yrabs ~ g1  0.1554996
+14   mz      yrabs ~ g2        Inf
+15   mz      yrabs ~ g3        Inf
+16   mz      yrabs ~ g4  0.8210111
+17   mz  yabs ~ g1 + cm  0.5437250
+18   mz  yabs ~ g2 + cm  0.5233139
+19   mz  yabs ~ g3 + cm  0.4328067
+20   mz  yabs ~ g4 + cm  0.5493653
+21   mz         cc ~ g1  0.1846266
+22   mz         cc ~ g2  0.1032772
+23   mz         cc ~ g3  0.4853742
+24   mz         cc ~ g4  1.0552000
+25   mz      ccabs ~ g1 16.4912008
+26   mz      ccabs ~ g2 59.0999919
+27   mz      ccabs ~ g3 10.4275082
+28   mz      ccabs ~ g4  0.2597902
+29   mz         cs ~ g1  0.1846266
+30   mz         cs ~ g2  0.1032772
+31   mz         cs ~ g3  0.4853742
+32   mz         cs ~ g4  1.0552000
+33   mz      csabs ~ g1 16.4912008
+34   mz      csabs ~ g2 59.0999919
+35   mz      csabs ~ g3 10.4275082
+36   mz      csabs ~ g4  0.2597902
+37   mz        cs2 ~ g1 16.4912008
+38   mz        cs2 ~ g2 59.0999919
+39   mz        cs2 ~ g3 10.4275082
+40   mz        cs2 ~ g4  0.2597902
+41   mz ccabs ~ g1 + cm 36.8960428
+42   mz ccabs ~ g2 + cm 37.0215620
+43   mz ccabs ~ g3 + cm 36.8091556
+44   mz ccabs ~ g4 + cm 36.9677338</code></pre>
 </div>
 </div>
 <p>Observations</p>
@@ -460,15 +460,15 @@ Attaching package: 'dplyr'</code></pre>
 <span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>o <span class="sc">%&gt;%</span> <span class="fu">select</span>(what, f, p) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">p=</span><span class="sc">-</span><span class="fu">log10</span>(p))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>  what               f         p
-1   mz      ccabs ~ g1  7.935807
-2   mz      ccabs ~ g2 40.034814
-3   mz      ccabs ~ g3 13.406643
-4   mz      ccabs ~ g4  0.198076
-5   mz ccabs ~ g1 + cm 36.633562
-6   mz ccabs ~ g2 + cm 24.068483
-7   mz ccabs ~ g3 + cm 34.455607
-8   mz ccabs ~ g4 + cm 39.375746</code></pre>
+<pre><code>  what               f          p
+1   mz      ccabs ~ g1 15.5448674
+2   mz      ccabs ~ g2 49.1431818
+3   mz      ccabs ~ g3 10.1598219
+4   mz      ccabs ~ g4  0.2597595
+5   mz ccabs ~ g1 + cm 25.0419829
+6   mz ccabs ~ g2 + cm 16.5004672
+7   mz ccabs ~ g3 + cm 26.2644940
+8   mz ccabs ~ g4 + cm 29.5233782</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -480,40 +480,40 @@ lm(formula = y ~ f * g2, data = dat)
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--9.4461 -1.0290 -0.0064  1.0158  8.9290 
+-8.5041 -1.0189 -0.0054  1.0200  9.9971 
 
 Coefficients:
              Estimate Std. Error  t value Pr(&gt;|t|)    
-(Intercept) 10.793645   0.007749 1392.938   &lt;2e-16 ***
-f           -0.143231   0.007751  -18.479   &lt;2e-16 ***
-g2           0.006294   0.007347    0.857    0.392    
-f:g2         1.437658   0.007385  194.679   &lt;2e-16 ***
+(Intercept) 10.792120   0.007755 1391.600   &lt;2e-16 ***
+f           -0.153508   0.007702  -19.930   &lt;2e-16 ***
+g2           0.006775   0.007323    0.925    0.355    
+f:g2         1.445652   0.007259  199.158   &lt;2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 1.608 on 99996 degrees of freedom
-Multiple R-squared:  0.4322,    Adjusted R-squared:  0.4322 
-F-statistic: 2.537e+04 on 3 and 99996 DF,  p-value: &lt; 2.2e-16</code></pre>
+Residual standard error: 1.609 on 99996 degrees of freedom
+Multiple R-squared:  0.4406,    Adjusted R-squared:  0.4405 
+F-statistic: 2.625e+04 on 3 and 99996 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tapply</span>(dat<span class="sc">$</span>y, dat<span class="sc">$</span>g2, var)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       0        1        2 
-2.592929 4.284458 9.876482 </code></pre>
+<pre><code>        0         1         2 
+ 2.634606  4.248730 10.238937 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tapply</span>(dat<span class="sc">$</span>y, dat<span class="sc">$</span>g3, var)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       0        1        2 
-3.496772 4.400120 7.443893 </code></pre>
+3.485533 4.539930 7.455329 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tapply</span>(dat2<span class="sc">$</span>yabs, dat2<span class="sc">$</span>g2, mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       0        1        2 
-1.575618 2.178511 3.482465 </code></pre>
+1.575893 2.168476 3.507917 </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tapply</span>(dat2<span class="sc">$</span>yabs, dat2<span class="sc">$</span>g3, mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       0        1        2 
-1.821039 2.166061 2.954501 </code></pre>
+1.810245 2.189781 2.914333 </code></pre>
 </div>
 </div>
 </section>
@@ -543,16 +543,16 @@ F-statistic: 2.537e+04 on 3 and 99996 DF,  p-value: &lt; 2.2e-16</code></pre>
 <pre><code># A tibble: 100,000 × 12
      fid    id    g1    g2    g3    g4       f      v     y    yr    cc     cs
    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;  &lt;dbl&gt;
- 1     1     1     1     1     2     1 -0.412  -2.83   9.43     9     1 0.0288
- 2     1     2     1     1     2     1 -1.16    1.39  17.7     18     1 0.0288
- 3     2     1     0     0     2     0  0.454   0.786 18.5     19     1 0.0288
- 4     2     2     0     0     2     0 -0.0107  1.83  16.9     17     1 0.0288
- 5     3     1     1     0     1     0 -1.62    1.27  19.8     20     1 0.0288
- 6     3     2     1     0     1     0 -0.644   0.552 19.8     20     1 0.0288
- 7     4     1     2     0     0     0 -0.231   0     24.2     24     1 0.0288
- 8     4     2     2     0     0     0 -0.132   0     21.0     21     1 0.0288
- 9     5     1     0     2     0     1  0.893   0     21.3     21     1 0.0288
-10     5     2     0     2     0     1  2.10    0     24.5     25     1 0.0288
+ 1     1     1     1     1     0     1  0.363   0      19.8    20     1 0.0247
+ 2     1     2     1     1     0     1  1.50    0      19.8    20     1 0.0247
+ 3     2     1     1     0     1     2 -1.75   -2.99   11.7    12     1 0.0247
+ 4     2     2     1     0     1     2 -0.373  -2.33   14.7    15     1 0.0247
+ 5     3     1     1     1     2     0 -0.782  -0.945  14.2    14     1 0.0247
+ 6     3     2     1     1     2     0  0.786   0.380  18.4    18     1 0.0247
+ 7     4     1     2     0     1     0  0.925  -0.726  21.2    21     1 0.0247
+ 8     4     2     2     0     1     0 -0.0610 -0.495  20.1    20     1 0.0247
+ 9     5     1     1     1     1     0  1.18    0.582  18.3    18     1 0.0247
+10     5     2     1     1     1     0 -0.268   0.853  21.0    21     1 0.0247
 # ℹ 99,990 more rows</code></pre>
 </div>
 </div>
@@ -582,16 +582,16 @@ F-statistic: 2.537e+04 on 3 and 99996 DF,  p-value: &lt; 2.2e-16</code></pre>
 <pre><code># A tibble: 50,000 × 16
      fid    g1    g2    g3    g4    y2    ym       y yrabs   yabs    cc    cm
    &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt;
- 1     1     1     1     2     1  738.  13.6 -8.31       9 8.31       0     0
- 2     2     0     0     2     0 1255.  17.7  1.61       2 1.61       0     0
- 3     3     1     0     1     0 1569.  19.8 -0.0223     0 0.0223     0     0
- 4     4     2     0     0     0 2044.  22.6  3.16       3 3.16       0     0
- 5     5     0     2     0     1 2099.  22.9 -3.26       4 3.26       0     0
- 6     6     1     1     2     2  863.  14.7 -4.19       4 4.19       0     0
- 7     7     1     1     2     1 1286.  17.9  4.58       4 4.58       0     0
- 8     8     2     1     0     2 1852.  21.5  0.751      1 0.751      0     0
- 9     9     0     1     1     1 1293.  18.0 -1.99       2 1.99       0     0
-10    10     0     0     1     0  753.  13.7  5.84       6 5.84       0     0
+ 1     1     1     1     0     1 1569.  19.8  0.0214     0 0.0214     0     0
+ 2     2     1     0     1     2  699.  13.2 -2.93       3 2.93       0     0
+ 3     3     1     1     2     0 1062.  16.3 -4.13       4 4.13       0     0
+ 4     4     2     0     1     0 1706.  20.7  1.06       1 1.06       0     0
+ 5     5     1     1     1     0 1539.  19.6 -2.71       3 2.71       0     0
+ 6     6     0     2     1     1 1407.  18.8  4.94       5 4.94       0     0
+ 7     7     1     0     0     1 1190.  17.3 -2.01       2 2.01       0     0
+ 8     8     1     0     0     1 1251.  17.7 -1.55       1 1.55       0     0
+ 9     9     0     0     1     1 1078.  16.4 -0.602      1 0.602      0     0
+10    10     2     2     1     1 2939.  27.1  1.17       1 1.17       0     0
 # ℹ 49,990 more rows
 # ℹ 4 more variables: ccabs &lt;int&gt;, cs2 &lt;dbl&gt;, cs &lt;dbl&gt;, csabs &lt;dbl&gt;</code></pre>
 </div>
@@ -623,31 +623,31 @@ F-statistic: 2.537e+04 on 3 and 99996 DF,  p-value: &lt; 2.2e-16</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>   what              f     log10p
 1   pop         y ~ g1        Inf
-2   pop         y ~ g2 3.54935291
-3   pop         y ~ g3 2.46395634
-4   pop         y ~ g4 0.09327347
-5    mz         y ~ g1 0.08682220
-6    mz         y ~ g2 0.47730024
-7    mz         y ~ g3 0.50247418
-8    mz         y ~ g4 1.00155797
-9    mz      yabs ~ g1 4.49253297
+2   pop         y ~ g2 2.44671037
+3   pop         y ~ g3 3.90724985
+4   pop         y ~ g4 0.29606699
+5    mz         y ~ g1 0.08322533
+6    mz         y ~ g2 0.13162987
+7    mz         y ~ g3 0.07244880
+8    mz         y ~ g4 0.19959080
+9    mz      yabs ~ g1 2.82370784
 10   mz      yabs ~ g2        Inf
 11   mz      yabs ~ g3        Inf
-12   mz      yabs ~ g4 0.01097967
-13   mz     yrabs ~ g1 4.38832450
+12   mz      yabs ~ g4 0.08054570
+13   mz     yrabs ~ g1 2.80228703
 14   mz     yrabs ~ g2        Inf
 15   mz     yrabs ~ g3        Inf
-16   mz     yrabs ~ g4 0.01287839
-17   mz yabs ~ g1 + cm 1.23300446
-18   mz yabs ~ g2 + cm 1.29310112
-19   mz yabs ~ g3 + cm 1.67100047
-20   mz yabs ~ g4 + cm 1.21988939</code></pre>
+16   mz     yrabs ~ g4 0.10686095
+17   mz yabs ~ g1 + cm 3.75871309
+18   mz yabs ~ g2 + cm 3.38758782
+19   mz yabs ~ g3 + cm 4.31651544
+20   mz yabs ~ g4 + cm 3.75068702</code></pre>
 </div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(dat2<span class="sc">$</span>ym, dat2<span class="sc">$</span>y, <span class="at">use=</span><span class="st">"pair"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] -0.003965853</code></pre>
+<pre><code>[1] 0.0005741118</code></pre>
 </div>
 </div>
 <p>Make a Poisson model and then normalise</p>
@@ -677,18 +677,18 @@ F-statistic: 2.537e+04 on 3 and 99996 DF,  p-value: &lt; 2.2e-16</code></pre>
 <span id="cb37-23"><a href="#cb37-23" aria-hidden="true" tabindex="-1"></a>dat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 100,000 × 14
-     fid    id    g1    g2    g3    g4        f       e        v       y     l
-   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;    &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
- 1     1     1     2     0     1     0  0.787    0.546  -0.00113  0.706  1.07 
- 2     1     2     2     0     1     0  0.760    1.53   -0.0487   1.64   1.17 
- 3     2     1     0     1     1     0  1.28     0.0259 -0.00291  0.0722 1.01 
- 4     2     2     0     1     1     0  0.226    0.315  -0.128    0.101  1.01 
- 5     3     1     1     1     1     0 -0.377   -0.383   0.186   -0.217  0.979
- 6     3     2     1     1     1     0  0.901    0.751  -0.147    0.749  1.08 
- 7     4     1     0     0     0     2 -0.571    0.201   0        0.0945 1.01 
- 8     4     2     0     0     0     2 -0.00699  0.663   0        0.548  1.06 
- 9     5     1     2     0     1     0 -0.702   -0.396  -0.183   -0.395  0.962
-10     5     2     2     0     1     0 -0.351    0.738   0.176    1.09   1.11 
+     fid    id    g1    g2    g3    g4       f      e       v       y     l
+   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+ 1     1     1     2     1     1     0  0.476  -0.155 -0.0560  0.0236 1.00 
+ 2     1     2     2     1     1     0 -0.545   0.591 -0.253   0.441  1.04 
+ 3     2     1     0     1     2     1 -0.539   1.14   0.213   1.17   1.12 
+ 4     2     2     0     1     2     1 -1.79    0.810  0.0542  0.517  1.05 
+ 5     3     1     1     1     0     1 -0.0322  0.926  0       0.951  1.10 
+ 6     3     2     1     1     0     1 -0.634  -1.39   0      -1.44   0.868
+ 7     4     1     1     0     1     2 -0.916   1.43  -0.0631  1.41   1.15 
+ 8     4     2     1     0     1     2  0.620   0.690  0.127   0.837  1.08 
+ 9     5     1     0     1     1     2  0.131  -0.337  0.0989 -0.336  0.967
+10     5     2     0     1     1     2 -0.113   0.874 -0.0615  0.682  1.07 
 # ℹ 99,990 more rows
 # ℹ 3 more variables: score &lt;int&gt;, score_norm &lt;dbl&gt;, l_norm &lt;dbl&gt;</code></pre>
 </div>
@@ -714,25 +714,25 @@ F-statistic: 2.537e+04 on 3 and 99996 DF,  p-value: &lt; 2.2e-16</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(dat<span class="sc">$</span>score, dat<span class="sc">$</span>score_norm, <span class="at">use=</span><span class="st">"pair"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.9132064</code></pre>
+<pre><code>[1] 0.9121883</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(dat<span class="sc">$</span>score, dat<span class="sc">$</span>l)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.09932395</code></pre>
+<pre><code>[1] 0.09660049</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(dat<span class="sc">$</span>y, dat<span class="sc">$</span>l)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.9974787</code></pre>
+<pre><code>[1] 0.9975233</code></pre>
 </div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(dat<span class="sc">$</span>y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] -0.0005732355</code></pre>
+<pre><code>[1] 0.006094577</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(dat<span class="sc">$</span>l)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.01016003</code></pre>
+<pre><code>[1] 0.01015692</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(dat<span class="sc">$</span>l)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -760,18 +760,18 @@ F-statistic: 2.537e+04 on 3 and 99996 DF,  p-value: &lt; 2.2e-16</code></pre>
 <span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a>dat2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 50,000 × 13
-     fid    g1    g2    g3    g4     y2       y       l l_norm   yabs score
-   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;int&gt;
- 1     1     2     0     1     0 5.51   -0.936  0.103   0.908  0.936      0
- 2     2     0     1     1     0 0.0298 -0.0284 0.00281 0.0278 0.0284     2
- 3     3     1     1     1     0 0.284  -0.966  0.0972  0.948  0.966      2
- 4     4     0     0     0     2 0.413  -0.454  0.0459  0.443  0.454      1
- 5     5     2     0     1     0 0.486  -1.49   0.151   1.46   1.49       2
- 6     6     1     1     0     1 0.0765  1.31   0.130   1.29   1.31       3
- 7     7     1     1     0     1 0.297   0.830  0.0792  0.820  0.830      1
- 8     8     1     0     1     0 0.162  -1.65   0.159   1.62   1.65       0
- 9     9     1     0     1     2 0.186  -0.880  0.0880  0.864  0.880      3
-10    10     1     2     0     0 1.01   -0.759  0.0708  0.748  0.759      1
+     fid    g1    g2    g3    g4      y2      y      l l_norm  yabs score
+   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+ 1     1     2     1     1     0  0.216  -0.417 0.0419  0.409 0.417     2
+ 2     2     0     1     2     1  2.84    0.652 0.0695  0.628 0.652     1
+ 3     3     1     1     0     1  0.239   2.39  0.230   2.34  2.39      0
+ 4     4     1     0     1     2  5.03    0.569 0.0624  0.561 0.569     2
+ 5     5     0     1     1     2  0.120  -1.02  0.102   0.998 1.02      1
+ 6     6     0     1     1     0  0.229   1.28  0.129   1.25  1.28      2
+ 7     7     1     1     1     1  0.297  -0.260 0.0262  0.257 0.260     1
+ 8     8     1     1     1     1  1.19   -0.660 0.0683  0.640 0.660     2
+ 9     9     0     1     1     0  0.0839 -0.709 0.0705  0.697 0.709     1
+10    10     0     0     0     0 11.3     2.45  0.204   2.42  2.45      1
 # ℹ 49,990 more rows
 # ℹ 2 more variables: ms &lt;dbl&gt;, score_norm &lt;dbl&gt;</code></pre>
 </div>
@@ -852,34 +852,34 @@ F-statistic: 2.537e+04 on 3 and 99996 DF,  p-value: &lt; 2.2e-16</code></pre>
 <span id="cb60-31"><a href="#cb60-31" aria-hidden="true" tabindex="-1"></a>o <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">log10p=</span><span class="sc">-</span><span class="fu">log10</span>(p)) <span class="sc">%&gt;%</span> <span class="fu">select</span>(what, f, log10p)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   what               f       log10p
-1   pop          y ~ g1 185.00457990
-2   pop          y ~ g2   0.20095133
-3   pop          y ~ g3   0.17362325
-4   pop          y ~ g4   0.20554817
-5    mz          y ~ g1   0.13158235
-6    mz          y ~ g2   0.24689088
-7    mz          y ~ g3   0.45566062
-8    mz          y ~ g4   0.03952470
-9    mz       yabs ~ g1   0.22962289
-10   mz       yabs ~ g2   2.48769494
-11   mz       yabs ~ g3   1.70005152
-12   mz       yabs ~ g4   0.04494941
-13   mz          l ~ g1   1.68682175
-14   mz          l ~ g2   2.51802045
-15   mz          l ~ g3   1.89948460
-16   mz          l ~ g4   0.08356243
-17   mz     l_norm ~ g1   0.26688992
-18   mz     l_norm ~ g2   2.45928566
-19   mz     l_norm ~ g3   1.68042327
-20   mz     l_norm ~ g4   0.04571569
-21   mz      score ~ g1   1.50969397
-22   mz      score ~ g2   1.50141433
-23   mz      score ~ g3   0.03509046
-24   mz      score ~ g4   0.46788282
-25   mz score_norm ~ g1   2.05042353
-26   mz score_norm ~ g2   1.52024181
-27   mz score_norm ~ g3   0.39472418
-28   mz score_norm ~ g4   0.32905683</code></pre>
+1   pop          y ~ g1 223.49845803
+2   pop          y ~ g2   0.34714511
+3   pop          y ~ g3   0.25819938
+4   pop          y ~ g4   0.64395220
+5    mz          y ~ g1   0.03632132
+6    mz          y ~ g2   0.38132042
+7    mz          y ~ g3   1.00079267
+8    mz          y ~ g4   0.68887829
+9    mz       yabs ~ g1   0.34922634
+10   mz       yabs ~ g2   1.53015386
+11   mz       yabs ~ g3   0.92366698
+12   mz       yabs ~ g4   0.27304613
+13   mz          l ~ g1   3.60869823
+14   mz          l ~ g2   1.67822720
+15   mz          l ~ g3   0.90363896
+16   mz          l ~ g4   0.33315183
+17   mz     l_norm ~ g1   0.30614450
+18   mz     l_norm ~ g2   1.54241162
+19   mz     l_norm ~ g3   0.93572455
+20   mz     l_norm ~ g4   0.26916190
+21   mz      score ~ g1   0.01469387
+22   mz      score ~ g2   0.45762861
+23   mz      score ~ g3   0.74625997
+24   mz      score ~ g4   0.02614553
+25   mz score_norm ~ g1   0.19612508
+26   mz score_norm ~ g2   0.75161526
+27   mz score_norm ~ g3   0.47842950
+28   mz score_norm ~ g4   0.30320457</code></pre>
 </div>
 </div>
 </section>
@@ -907,77 +907,90 @@ F-statistic: 2.537e+04 on 3 and 99996 DF,  p-value: &lt; 2.2e-16</code></pre>
 <span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">f =</span> <span class="fu">rnorm</span>(n),</span>
 <span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">e =</span> <span class="fu">rnorm</span>(n),</span>
 <span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">v =</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, g3 <span class="sc">*</span> b3),</span>
-<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="fu">drop</span>(<span class="fu">scale</span>(g1) <span class="sc">*</span> b1 <span class="sc">+</span> <span class="fu">scale</span>(g2) <span class="sc">*</span> b2 <span class="sc">+</span> f <span class="sc">*</span> bf <span class="sc">+</span> f <span class="sc">*</span> <span class="fu">drop</span>(<span class="fu">scale</span>(g2)) <span class="sc">*</span> bf2 <span class="sc">+</span> v <span class="sc">+</span> e <span class="sc">+</span> <span class="fu">scale</span>(g4) <span class="sc">*</span> b4),</span>
-<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">ysq =</span> y<span class="sc">^</span><span class="dv">2</span>,</span>
-<span id="cb62-14"><a href="#cb62-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">ysq_norm =</span> <span class="fu">inormal</span>(ysq),</span>
-<span id="cb62-15"><a href="#cb62-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">l =</span> <span class="fu">drop</span>(<span class="fu">exp</span>(<span class="fu">scale</span>(y) <span class="sc">*</span> <span class="fl">0.1</span>)),</span>
-<span id="cb62-16"><a href="#cb62-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">l_norm =</span> <span class="fu">inormal</span>(l),</span>
-<span id="cb62-17"><a href="#cb62-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">score =</span> <span class="fu">rpois</span>(n, l),</span>
-<span id="cb62-18"><a href="#cb62-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">score_norm =</span> <span class="fu">inormal</span>(score)</span>
-<span id="cb62-19"><a href="#cb62-19" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb62-20"><a href="#cb62-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb62-21"><a href="#cb62-21" aria-hidden="true" tabindex="-1"></a>    dat2 <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span> </span>
-<span id="cb62-22"><a href="#cb62-22" aria-hidden="true" tabindex="-1"></a>        <span class="fu">group_by</span>(fid) <span class="sc">%&gt;%</span> </span>
-<span id="cb62-23"><a href="#cb62-23" aria-hidden="true" tabindex="-1"></a>        <span class="fu">summarise</span>(</span>
-<span id="cb62-24"><a href="#cb62-24" aria-hidden="true" tabindex="-1"></a>            <span class="at">g1 =</span> g1[<span class="dv">1</span>], </span>
-<span id="cb62-25"><a href="#cb62-25" aria-hidden="true" tabindex="-1"></a>            <span class="at">g2 =</span> g2[<span class="dv">1</span>], </span>
-<span id="cb62-26"><a href="#cb62-26" aria-hidden="true" tabindex="-1"></a>            <span class="at">g3 =</span> g3[<span class="dv">1</span>], </span>
-<span id="cb62-27"><a href="#cb62-27" aria-hidden="true" tabindex="-1"></a>            <span class="at">g4 =</span> g4[<span class="dv">1</span>], </span>
-<span id="cb62-28"><a href="#cb62-28" aria-hidden="true" tabindex="-1"></a>            <span class="at">yraw =</span> y[<span class="dv">1</span>]<span class="sc">-</span>y[<span class="dv">2</span>], </span>
-<span id="cb62-29"><a href="#cb62-29" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">abs</span>(yraw), </span>
-<span id="cb62-30"><a href="#cb62-30" aria-hidden="true" tabindex="-1"></a>            <span class="at">ysq =</span> <span class="fu">abs</span>(ysq[<span class="dv">1</span>]<span class="sc">+</span>ysq[<span class="dv">2</span>]),</span>
-<span id="cb62-31"><a href="#cb62-31" aria-hidden="true" tabindex="-1"></a>            <span class="at">ysq_norm =</span> <span class="fu">abs</span>(ysq_norm[<span class="dv">1</span>]<span class="sc">+</span>ysq_norm[<span class="dv">2</span>]),</span>
-<span id="cb62-32"><a href="#cb62-32" aria-hidden="true" tabindex="-1"></a>            <span class="at">l =</span> <span class="fu">abs</span>(l[<span class="dv">1</span>]<span class="sc">-</span>l[<span class="dv">2</span>]), </span>
-<span id="cb62-33"><a href="#cb62-33" aria-hidden="true" tabindex="-1"></a>            <span class="at">l_norm =</span> <span class="fu">abs</span>(l_norm[<span class="dv">1</span>]<span class="sc">-</span>l_norm[<span class="dv">2</span>]),</span>
-<span id="cb62-34"><a href="#cb62-34" aria-hidden="true" tabindex="-1"></a>            <span class="at">score =</span> <span class="fu">abs</span>(score[<span class="dv">1</span>]<span class="sc">-</span>score[<span class="dv">2</span>]), </span>
-<span id="cb62-35"><a href="#cb62-35" aria-hidden="true" tabindex="-1"></a>            <span class="at">score_norm =</span> <span class="fu">abs</span>(score_norm[<span class="dv">1</span>]<span class="sc">-</span>score_norm[<span class="dv">2</span>])</span>
-<span id="cb62-36"><a href="#cb62-36" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb62-37"><a href="#cb62-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">dat=</span>dat, <span class="at">dat2=</span>dat2))</span>
-<span id="cb62-38"><a href="#cb62-38" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb62-39"><a href="#cb62-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb62-40"><a href="#cb62-40" aria-hidden="true" tabindex="-1"></a>est <span class="ot">&lt;-</span> <span class="cf">function</span>(out) {</span>
-<span id="cb62-41"><a href="#cb62-41" aria-hidden="true" tabindex="-1"></a>    dat <span class="ot">&lt;-</span> out<span class="sc">$</span>dat</span>
-<span id="cb62-42"><a href="#cb62-42" aria-hidden="true" tabindex="-1"></a>    dat2 <span class="ot">&lt;-</span> out<span class="sc">$</span>dat2</span>
-<span id="cb62-43"><a href="#cb62-43" aria-hidden="true" tabindex="-1"></a>    o <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
-<span id="cb62-44"><a href="#cb62-44" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g1"</span>, dat, <span class="st">"pop"</span>),</span>
-<span id="cb62-45"><a href="#cb62-45" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g2"</span>, dat, <span class="st">"pop"</span>),</span>
-<span id="cb62-46"><a href="#cb62-46" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g3"</span>, dat, <span class="st">"pop"</span>),</span>
-<span id="cb62-47"><a href="#cb62-47" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g4"</span>, dat, <span class="st">"pop"</span>),</span>
-<span id="cb62-48"><a href="#cb62-48" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"yraw ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-49"><a href="#cb62-49" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"yraw ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-50"><a href="#cb62-50" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"yraw ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-51"><a href="#cb62-51" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"yraw ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-52"><a href="#cb62-52" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-53"><a href="#cb62-53" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-54"><a href="#cb62-54" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-55"><a href="#cb62-55" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-56"><a href="#cb62-56" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-57"><a href="#cb62-57" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-58"><a href="#cb62-58" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-59"><a href="#cb62-59" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-60"><a href="#cb62-60" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq_norm ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-61"><a href="#cb62-61" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq_norm ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-62"><a href="#cb62-62" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq_norm ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-63"><a href="#cb62-63" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq_norm ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-64"><a href="#cb62-64" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-65"><a href="#cb62-65" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-66"><a href="#cb62-66" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-67"><a href="#cb62-67" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-68"><a href="#cb62-68" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l_norm ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-69"><a href="#cb62-69" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l_norm ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-70"><a href="#cb62-70" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l_norm ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-71"><a href="#cb62-71" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l_norm ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-72"><a href="#cb62-72" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-73"><a href="#cb62-73" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-74"><a href="#cb62-74" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-75"><a href="#cb62-75" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-76"><a href="#cb62-76" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_norm ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-77"><a href="#cb62-77" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_norm ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-78"><a href="#cb62-78" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_norm ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
-<span id="cb62-79"><a href="#cb62-79" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_norm ~ g4"</span>, dat2, <span class="st">"mz"</span>)</span>
-<span id="cb62-80"><a href="#cb62-80" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb62-81"><a href="#cb62-81" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(o)</span>
-<span id="cb62-82"><a href="#cb62-82" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">covar =</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span>, <span class="fl">0.5</span>),</span>
+<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="fu">drop</span>(covar <span class="sc">+</span> <span class="fu">scale</span>(g1) <span class="sc">*</span> b1 <span class="sc">+</span> <span class="fu">scale</span>(g2) <span class="sc">*</span> b2 <span class="sc">+</span> f <span class="sc">*</span> bf <span class="sc">+</span> f <span class="sc">*</span> <span class="fu">drop</span>(<span class="fu">scale</span>(g2)) <span class="sc">*</span> bf2 <span class="sc">+</span> v <span class="sc">+</span> e <span class="sc">+</span> <span class="fu">scale</span>(g4) <span class="sc">*</span> b4),</span>
+<span id="cb62-14"><a href="#cb62-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">ysq =</span> y<span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb62-15"><a href="#cb62-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">ysq_norm =</span> <span class="fu">inormal</span>(ysq),</span>
+<span id="cb62-16"><a href="#cb62-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">l =</span> <span class="fu">drop</span>(<span class="fu">exp</span>(<span class="fu">scale</span>(y) <span class="sc">*</span> <span class="fl">0.1</span>)),</span>
+<span id="cb62-17"><a href="#cb62-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">l_norm =</span> <span class="fu">inormal</span>(l),</span>
+<span id="cb62-18"><a href="#cb62-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">score =</span> <span class="fu">rpois</span>(n, l),</span>
+<span id="cb62-19"><a href="#cb62-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">score_norm =</span> <span class="fu">inormal</span>(score),</span>
+<span id="cb62-20"><a href="#cb62-20" aria-hidden="true" tabindex="-1"></a>        <span class="at">score_res =</span> <span class="fu">residuals</span>(<span class="fu">lm</span>(y <span class="sc">~</span> covar)),</span>
+<span id="cb62-21"><a href="#cb62-21" aria-hidden="true" tabindex="-1"></a>        <span class="at">score_res_norm =</span> <span class="fu">inormal</span>(score_res)</span>
+<span id="cb62-22"><a href="#cb62-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb62-23"><a href="#cb62-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-24"><a href="#cb62-24" aria-hidden="true" tabindex="-1"></a>    dat2 <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span> </span>
+<span id="cb62-25"><a href="#cb62-25" aria-hidden="true" tabindex="-1"></a>        <span class="fu">group_by</span>(fid) <span class="sc">%&gt;%</span> </span>
+<span id="cb62-26"><a href="#cb62-26" aria-hidden="true" tabindex="-1"></a>        <span class="fu">summarise</span>(</span>
+<span id="cb62-27"><a href="#cb62-27" aria-hidden="true" tabindex="-1"></a>            <span class="at">g1 =</span> g1[<span class="dv">1</span>], </span>
+<span id="cb62-28"><a href="#cb62-28" aria-hidden="true" tabindex="-1"></a>            <span class="at">g2 =</span> g2[<span class="dv">1</span>], </span>
+<span id="cb62-29"><a href="#cb62-29" aria-hidden="true" tabindex="-1"></a>            <span class="at">g3 =</span> g3[<span class="dv">1</span>], </span>
+<span id="cb62-30"><a href="#cb62-30" aria-hidden="true" tabindex="-1"></a>            <span class="at">g4 =</span> g4[<span class="dv">1</span>], </span>
+<span id="cb62-31"><a href="#cb62-31" aria-hidden="true" tabindex="-1"></a>            <span class="at">yraw =</span> y[<span class="dv">1</span>]<span class="sc">-</span>y[<span class="dv">2</span>], </span>
+<span id="cb62-32"><a href="#cb62-32" aria-hidden="true" tabindex="-1"></a>            <span class="at">y =</span> <span class="fu">abs</span>(yraw), </span>
+<span id="cb62-33"><a href="#cb62-33" aria-hidden="true" tabindex="-1"></a>            <span class="at">ysq =</span> <span class="fu">abs</span>(ysq[<span class="dv">1</span>]<span class="sc">+</span>ysq[<span class="dv">2</span>]),</span>
+<span id="cb62-34"><a href="#cb62-34" aria-hidden="true" tabindex="-1"></a>            <span class="at">ysq_norm =</span> <span class="fu">abs</span>(ysq_norm[<span class="dv">1</span>]<span class="sc">+</span>ysq_norm[<span class="dv">2</span>]),</span>
+<span id="cb62-35"><a href="#cb62-35" aria-hidden="true" tabindex="-1"></a>            <span class="at">l =</span> <span class="fu">abs</span>(l[<span class="dv">1</span>]<span class="sc">-</span>l[<span class="dv">2</span>]), </span>
+<span id="cb62-36"><a href="#cb62-36" aria-hidden="true" tabindex="-1"></a>            <span class="at">l_norm =</span> <span class="fu">abs</span>(l_norm[<span class="dv">1</span>]<span class="sc">-</span>l_norm[<span class="dv">2</span>]),</span>
+<span id="cb62-37"><a href="#cb62-37" aria-hidden="true" tabindex="-1"></a>            <span class="at">score =</span> <span class="fu">abs</span>(score[<span class="dv">1</span>]<span class="sc">-</span>score[<span class="dv">2</span>]), </span>
+<span id="cb62-38"><a href="#cb62-38" aria-hidden="true" tabindex="-1"></a>            <span class="at">score_norm =</span> <span class="fu">abs</span>(score_norm[<span class="dv">1</span>]<span class="sc">-</span>score_norm[<span class="dv">2</span>]),</span>
+<span id="cb62-39"><a href="#cb62-39" aria-hidden="true" tabindex="-1"></a>            <span class="at">score_res =</span> <span class="fu">abs</span>(score_res[<span class="dv">1</span>]<span class="sc">-</span>score_res[<span class="dv">2</span>]),</span>
+<span id="cb62-40"><a href="#cb62-40" aria-hidden="true" tabindex="-1"></a>            <span class="at">score_res_norm =</span> <span class="fu">abs</span>(score_res_norm[<span class="dv">1</span>]<span class="sc">-</span>score_res_norm[<span class="dv">2</span>])</span>
+<span id="cb62-41"><a href="#cb62-41" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb62-42"><a href="#cb62-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">dat=</span>dat, <span class="at">dat2=</span>dat2))</span>
+<span id="cb62-43"><a href="#cb62-43" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb62-44"><a href="#cb62-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-45"><a href="#cb62-45" aria-hidden="true" tabindex="-1"></a>est <span class="ot">&lt;-</span> <span class="cf">function</span>(out) {</span>
+<span id="cb62-46"><a href="#cb62-46" aria-hidden="true" tabindex="-1"></a>    dat <span class="ot">&lt;-</span> out<span class="sc">$</span>dat</span>
+<span id="cb62-47"><a href="#cb62-47" aria-hidden="true" tabindex="-1"></a>    dat2 <span class="ot">&lt;-</span> out<span class="sc">$</span>dat2</span>
+<span id="cb62-48"><a href="#cb62-48" aria-hidden="true" tabindex="-1"></a>    o <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
+<span id="cb62-49"><a href="#cb62-49" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g1"</span>, dat, <span class="st">"pop"</span>),</span>
+<span id="cb62-50"><a href="#cb62-50" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g2"</span>, dat, <span class="st">"pop"</span>),</span>
+<span id="cb62-51"><a href="#cb62-51" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g3"</span>, dat, <span class="st">"pop"</span>),</span>
+<span id="cb62-52"><a href="#cb62-52" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g4"</span>, dat, <span class="st">"pop"</span>),</span>
+<span id="cb62-53"><a href="#cb62-53" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"yraw ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-54"><a href="#cb62-54" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"yraw ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-55"><a href="#cb62-55" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"yraw ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-56"><a href="#cb62-56" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"yraw ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-57"><a href="#cb62-57" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-58"><a href="#cb62-58" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-59"><a href="#cb62-59" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-60"><a href="#cb62-60" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"y ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-61"><a href="#cb62-61" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-62"><a href="#cb62-62" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-63"><a href="#cb62-63" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-64"><a href="#cb62-64" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-65"><a href="#cb62-65" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq_norm ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-66"><a href="#cb62-66" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq_norm ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-67"><a href="#cb62-67" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq_norm ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-68"><a href="#cb62-68" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"ysq_norm ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-69"><a href="#cb62-69" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-70"><a href="#cb62-70" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-71"><a href="#cb62-71" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-72"><a href="#cb62-72" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-73"><a href="#cb62-73" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l_norm ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-74"><a href="#cb62-74" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l_norm ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-75"><a href="#cb62-75" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l_norm ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-76"><a href="#cb62-76" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"l_norm ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-77"><a href="#cb62-77" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-78"><a href="#cb62-78" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-79"><a href="#cb62-79" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-80"><a href="#cb62-80" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-81"><a href="#cb62-81" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_norm ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-82"><a href="#cb62-82" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_norm ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-83"><a href="#cb62-83" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_norm ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-84"><a href="#cb62-84" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_norm ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-85"><a href="#cb62-85" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_res ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-86"><a href="#cb62-86" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_res ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-87"><a href="#cb62-87" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_res ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-88"><a href="#cb62-88" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_res ~ g4"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-89"><a href="#cb62-89" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_res_norm ~ g1"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-90"><a href="#cb62-90" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_res_norm ~ g2"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-91"><a href="#cb62-91" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_res_norm ~ g3"</span>, dat2, <span class="st">"mz"</span>),</span>
+<span id="cb62-92"><a href="#cb62-92" aria-hidden="true" tabindex="-1"></a>        <span class="fu">reg</span>(<span class="st">"score_res_norm ~ g4"</span>, dat2, <span class="st">"mz"</span>)</span>
+<span id="cb62-93"><a href="#cb62-93" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb62-94"><a href="#cb62-94" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(o)</span>
+<span id="cb62-95"><a href="#cb62-95" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Run the sims</p>
 <div class="cell">
@@ -1001,7 +1014,9 @@ F-statistic: 2.537e+04 on 3 and 99996 DF,  p-value: &lt; 2.2e-16</code></pre>
 <span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>trait[res<span class="sc">$</span>trait <span class="sc">==</span> <span class="st">"l"</span>] <span class="ot">&lt;-</span> <span class="st">"Exponentiated liability"</span></span>
 <span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>trait[res<span class="sc">$</span>trait <span class="sc">==</span> <span class="st">"l_norm"</span>] <span class="ot">&lt;-</span> <span class="st">"Exponentiated liability (INT)"</span></span>
 <span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>trait[res<span class="sc">$</span>trait <span class="sc">==</span> <span class="st">"score"</span>] <span class="ot">&lt;-</span> <span class="st">"Poisson of liability"</span></span>
-<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>trait[res<span class="sc">$</span>trait <span class="sc">==</span> <span class="st">"score_norm"</span>] <span class="ot">&lt;-</span> <span class="st">"Poisson of liability (INT)"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>trait[res<span class="sc">$</span>trait <span class="sc">==</span> <span class="st">"score_norm"</span>] <span class="ot">&lt;-</span> <span class="st">"Poisson of liability (INT)"</span></span>
+<span id="cb64-15"><a href="#cb64-15" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>trait[res<span class="sc">$</span>trait <span class="sc">==</span> <span class="st">"score_res"</span>] <span class="ot">&lt;-</span> <span class="st">"Residuals of Poisson"</span></span>
+<span id="cb64-16"><a href="#cb64-16" aria-hidden="true" tabindex="-1"></a>res<span class="sc">$</span>trait[res<span class="sc">$</span>trait <span class="sc">==</span> <span class="st">"score_res_norm"</span>] <span class="ot">&lt;-</span> <span class="st">"Residuals of Poisson (INT)"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Evaluate performance of variance estimates on power and bias. Expect that <code>Main</code> and <code>Null</code> should be null in the MZ difference model, and <code>GxE</code> and <code>Var</code> should be non-null.</p>
 <div class="cell">
@@ -1021,7 +1036,7 @@ F-statistic: 2.537e+04 on 3 and 99996 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="at">file=</span><span class="st">"mz_diff.pdf"</span>, <span class="at">width=</span><span class="dv">10</span>, <span class="at">height=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="at">file=</span><span class="st">"mz_diff.pdf"</span>, <span class="at">width=</span><span class="dv">12</span>, <span class="at">height=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(res <span class="sc">%&gt;%</span> <span class="fu">filter</span>(what <span class="sc">==</span><span class="st">"mz"</span> <span class="sc">&amp;</span> trait <span class="sc">!=</span> <span class="st">"yraw"</span>), <span class="fu">aes</span>(<span class="at">x=</span>trait, <span class="at">y=</span><span class="sc">-</span><span class="fu">log10</span>(p))) <span class="sc">+</span> </span>
