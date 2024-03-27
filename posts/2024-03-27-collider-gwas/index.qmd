@@ -1,0 +1,118 @@
+---
+title: "Collider bias due to batch in GWAS"
+author: Gibran Hemani
+date: "2024-03-27"
+categories: []
+---
+
+## Background
+
+Suppose study is split into two batches, where one is enriched for ADHD cases. Given the PRS assoc with ADHD before and after adjusting for batch, we can explore the magnitude of collider bias that might arise due to adjusting for batch.
+
+Model:
+
+```
+g -> x <- y
+```
+
+where `x` is a case/control variable, and is split into two batches, and one batch is enriched for cases.
+
+---
+
+```{r}
+library(dplyr)
+library(ggplot2)
+```
+
+Basic data generating model
+
+```{r}
+fn <- function(n, af, bgx, px, byx, nbatch) {
+    g <- rbinom(n, 2, af)
+    y <- rnorm(n)
+    x <- rbinom(n, 1, plogis(-1 + scale(g) * bgx + y * byx + rnorm(n)))
+    bp <- x
+    bp[x == 1] <- px
+    bp[x == 0] <- 1-px
+    ind <- sample(1:n, nbatch, replace=FALSE, prob=bp)
+    b <- as.numeric(1:n %in% ind)
+
+    mod <- function(f) {
+        o <- summary(lm(as.formula(f))) %>%
+        coef() %>% as_tibble() %>% slice_tail(n=1)
+        names(o) <- c("b", "se", "tval", "pval")
+        o$model <- f
+        o
+    }
+
+    bind_rows(
+        mod("y ~ g"),
+        mod("y ~ b + g"),
+        mod("y ~ x + g"),
+        mod("x ~ g"),
+        mod("x ~ b + g")
+    )
+}
+
+fn(100000, 0.4, 0.5, 0.5, 10000)
+```
+
+Define parameters
+
+```{r}
+param <- expand.grid(
+    n = 100000,
+    af = 0.4,
+    bgx = sqrt(c(0.2, 0.01)),
+    px = c(0.5, 0.9),
+    byx = seq(0, 0.9, 0.1),
+    nbatch = c(10000),
+    sim=1:10
+) %>% as_tibble()
+param
+```
+
+Run simulation across all parameters
+
+```{r}
+res <- lapply(1:nrow(param), \(i) {
+    o <- fn(param$n[i], param$af[i], param$bgx[i], param$px[i], param$byx[i], param$nbatch[i])
+    bind_cols(param[i,], o)
+}) %>% bind_rows()
+```
+
+How does `g->y` test statistic relate to different biases? (Should always be null)
+
+```{r}
+res %>%
+    filter(model == "y ~ b + g") %>%
+    {
+        ggplot(., aes(x=byx, y=tval, color=as.factor(px))) +
+        geom_point() +
+        geom_smooth(method="lm") +
+        facet_wrap(px ~ bgx)    
+    }
+```
+
+How does `g->x` test statistic change when adjusting for batch across parameters?
+
+```{r}
+res %>%
+    filter(model %in% c("x ~ b + g", "x ~ g")) %>%
+    group_by(byx, px, bgx, sim) %>%
+    summarise(bdiff = diff(b)) %>%
+    {
+        ggplot(., aes(x=byx, y=bdiff, color=as.factor(px))) +
+        geom_point() +
+        geom_smooth(method="lm") +
+        facet_wrap(px ~ bgx)    
+    }
+```
+
+## Summary
+
+Need huge effects of target trait `y` on `x` (ADHD) in order to induce any sort of meaningful collider bias unless batch is composed entirely of cases.
+
+```{r}
+sessionInfo()
+```
