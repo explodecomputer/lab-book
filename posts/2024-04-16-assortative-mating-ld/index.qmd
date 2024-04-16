@@ -1,0 +1,144 @@
+---
+title: "LD induced by assortative mating"
+author: Gibran Hemani
+date: "2024-04-16"
+categories: []
+---
+
+## Background
+
+Positive LD is predicted by assortative mating? https://www.youtube.com/watch?v=6m-mLvNQxJA
+
+Assortative mating induces a form of selection bias in that of all possible mating pairs, the observed pairs are not a random sample, they are those that are more similar to each other than would be expected by chance. And therefore the children of those pairs inherit alleles that have not been randomly sampled.
+
+Though this is not a straightforward form of selection where e.g. a higher phenotypic value leads to more chance of inclusion in the population, in which case you would expect negative correlation amongst the SNPs influencing the trait. 
+
+Simulate families with assortative mating and calculate LD between SNPs.
+
+```{r}
+library(dplyr)
+
+make_families <- function(af, nfam) {
+	nsnp <- length(af)
+	dads <- matrix(0, nfam, nsnp)
+	mums <- matrix(0, nfam, nsnp)
+	sibs1 <- matrix(0, nfam, nsnp)
+	sibs2 <- matrix(0, nfam, nsnp)
+	ibd <- matrix(0, nfam, nsnp)
+	ibs <- matrix(0, nfam, nsnp)
+	for(i in 1:nsnp)
+	{
+		dad1 <- rbinom(nfam, 1, af[i]) + 1
+		dad2 <- (rbinom(nfam, 1, af[i]) + 1) * -1
+		mum1 <- rbinom(nfam, 1, af[i]) + 1
+		mum2 <- (rbinom(nfam, 1, af[i]) + 1) * -1
+
+		dadindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		dadh <- rep(NA, nfam)
+		dadh[dadindex] <- dad1[dadindex]
+		dadh[!dadindex] <- dad2[!dadindex]
+
+		mumindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		mumh <- rep(NA, nfam)
+		mumh[mumindex] <- mum1[mumindex]
+		mumh[!mumindex] <- mum2[!mumindex]
+
+		sib1 <- cbind(dadh, mumh)
+
+		dadindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		dadh <- rep(NA, nfam)
+		dadh[dadindex] <- dad1[dadindex]
+		dadh[!dadindex] <- dad2[!dadindex]
+
+		mumindex <- sample(c(TRUE, FALSE), nfam, replace=TRUE)
+		mumh <- rep(NA, nfam)
+		mumh[mumindex] <- mum1[mumindex]
+		mumh[!mumindex] <- mum2[!mumindex]
+
+		sib2 <- cbind(dadh, mumh)
+
+
+		sibs1[,i] <- rowSums(abs(sib1) - 1)
+		sibs2[,i] <- rowSums(abs(sib2) - 1)
+		dads[,i] <- dad1 - 1 + abs(dad2) - 1
+		mums[,i] <- mum1 - 1 + abs(mum2) - 1
+
+	}
+	return(list(dads=dads, mums=mums, sibs1=sibs1, sibs2=sibs2))
+}
+
+makePhen <- function(effs, indep, vy=1, vx=rep(1, length(effs)), my=0) {
+	if(is.null(dim(indep))) indep <- cbind(indep)
+	stopifnot(ncol(indep) == length(effs))
+	stopifnot(length(vx) == length(effs))
+	cors <- effs * vx / sqrt(vx) / sqrt(vy)
+	stopifnot(sum(cors^2) <= 1)
+	cors <- c(cors, sqrt(1-sum(cors^2)))
+	indep <- t(t(scale(cbind(indep, rnorm(nrow(indep))))) * cors * c(vx, 1))
+	y <- drop(scale(rowSums(indep)) * sqrt(vy)) + my
+	return(y)
+}
+
+make_phenotypes <- function(fam, eff_gx, vx, mx) {
+	lapply(fam, function(g)
+	{
+		x <- makePhen(c(eff_gx), cbind(g), vy=vx, my=mx)
+		return(data.frame(x=x))
+	})
+}
+```
+
+Generate 100000 families with 3 SNPs each with MAF 0.5
+
+```{r}
+a <- make_families(c(0.5, 0.5, 0.5), 100000)
+```
+
+Generate phenotypes where those three SNPs explain most of the variance
+
+```{r}
+b <- make_phenotypes(a, sqrt(c(0.3, 0.3, 0.3)), 1, 0)
+str(b)
+```
+
+Select spouse pairs with most similar phenotypes
+
+```{r}
+ssd <- (b$dads$x - b$mums$x)^2
+sel <- which(ssd < quantile(ssd, 0.1))
+```
+
+Calculate LD between SNPs
+
+1. Spouse pairs - expect positive correlation
+
+```{r}
+cor(a$dads[,1], a$mums[,1])
+cor(a$dads[sel,1], a$mums[sel,1])
+```
+
+Positive correlation observed
+
+2. Within fathers only - expect negative correlation
+
+```{r}
+cor(a$dads) %>% round(2)
+cor(a$dads[sel,]) %>% round(2)
+```
+
+Negative correlations observed
+
+3. Within siblings - expect positive correlation
+
+```{r}
+cor(a$sibs1) %>% round(2)
+cor(a$sibs1[sel,]) %>% round(2)
+```
+
+Not seeing any correlation
+
+---
+
+```{r}
+sessionInfo()
+```

@@ -30,7 +30,7 @@ Basic data generating model
 fn <- function(n, af, bgx, px, byx, nbatch) {
     g <- rbinom(n, 2, af)
     y <- rnorm(n)
-    x <- rbinom(n, 1, plogis(-1 + scale(g) * bgx + y * byx + rnorm(n)))
+    x <- rbinom(n, 1, plogis(-1 + scale(g, scale=FALSE) * bgx + y * byx + rnorm(n)))
     bp <- x
     bp[x == 1] <- px
     bp[x == 0] <- 1-px
@@ -63,8 +63,8 @@ Define parameters
 param <- expand.grid(
     n = 100000,
     af = 0.4,
-    bgx = sqrt(c(0.2, 0.01)),
-    px = c(0.5, 0.9),
+    bgx = c(0.4, 0.2, 0.01),
+    px = c(0.5, 0.9, 1),
     byx = seq(0, 0.9, 0.1),
     nbatch = c(10000),
     sim=1:10
@@ -87,27 +87,26 @@ How does `g->y` test statistic relate to different biases? (Should always be nul
 res %>%
     filter(model == "y ~ b + g") %>%
     {
-        ggplot(., aes(x=byx, y=tval, color=as.factor(px))) +
+        ggplot(., aes(x=byx, y=-log10(pval), color=as.factor(px))) +
         geom_point() +
         geom_smooth(method="lm") +
-        facet_wrap(px ~ bgx)    
+        facet_grid(px ~ bgx, labeller=label_both)
     }
 ```
 
-How does `g->x` test statistic change when adjusting for batch across parameters?
+How does the `g->x` effect estimate change when adjusting for batch across parameters? If batch is very tightly related to `x` then expect a larger attenuation of the bgx effect estimate
 
 ```{r}
 res %>%
     filter(model %in% c("x ~ b + g", "x ~ g")) %>%
-    group_by(byx, px, bgx, sim) %>%
-    summarise(bdiff = diff(b)) %>%
     {
-        ggplot(., aes(x=byx, y=bdiff, color=as.factor(px))) +
-        geom_point() +
+        ggplot(., aes(x=as.factor(byx), y=b)) +
+        geom_boxplot(aes(fill=model)) +
+        geom_hline(aes(yintercept=bgx^2), linetype="dashed") +
         geom_smooth(method="lm") +
-        facet_wrap(px ~ bgx)    
+        facet_wrap(px ~ bgx, labeller=label_both, scale="free_y")
     }
-```
+    ```
 
 ## Summary
 

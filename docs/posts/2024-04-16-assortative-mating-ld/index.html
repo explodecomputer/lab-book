@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Gibran Hemani">
-<meta name="dcterms.date" content="2024-03-27">
+<meta name="dcterms.date" content="2024-04-16">
 
-<title>Gibran Hemani’s lab book - Collider bias due to batch in GWAS</title>
+<title>Gibran Hemani’s lab book - LD induced by assortative mating</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -149,7 +149,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Collider bias due to batch in GWAS</h1>
+      <h1 class="title">LD induced by assortative mating</h1>
                       </div>
   </div>
     
@@ -166,7 +166,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">March 27, 2024</p>
+        <p class="date">April 16, 2024</p>
       </div>
     </div>
     
@@ -187,13 +187,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="background" class="level2">
 <h2 class="anchored" data-anchor-id="background">Background</h2>
-<p>Suppose study is split into two batches, where one is enriched for ADHD cases. Given the PRS assoc with ADHD before and after adjusting for batch, we can explore the magnitude of collider bias that might arise due to adjusting for batch.</p>
-<p>Model:</p>
-<pre><code>g -&gt; x &lt;- y</code></pre>
-<p>where <code>x</code> is a case/control variable, and is split into two batches, and one batch is enriched for cases.</p>
-<hr>
+<p>Positive LD is predicted by assortative mating? https://www.youtube.com/watch?v=6m-mLvNQxJA</p>
+<p>Assortative mating induces a form of selection bias in that of all possible mating pairs, the observed pairs are not a random sample, they are those that are more similar to each other than would be expected by chance. And therefore the children of those pairs inherit alleles that have not been randomly sampled.</p>
+<p>Though this is not a straightforward form of selection where e.g.&nbsp;a higher phenotypic value leads to more chance of inclusion in the population, in which case you would expect negative correlation amongst the SNPs influencing the trait.</p>
+<p>Simulate families with assortative mating and calculate LD between SNPs.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>
 Attaching package: 'dplyr'</code></pre>
@@ -208,137 +207,166 @@ Attaching package: 'dplyr'</code></pre>
 
     intersect, setdiff, setequal, union</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>make_families <span class="ot">&lt;-</span> <span class="cf">function</span>(af, nfam) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    nsnp <span class="ot">&lt;-</span> <span class="fu">length</span>(af)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    dads <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, nfam, nsnp)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    mums <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, nfam, nsnp)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    sibs1 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, nfam, nsnp)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    sibs2 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, nfam, nsnp)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    ibd <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, nfam, nsnp)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    ibs <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, nfam, nsnp)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>nsnp)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        dad1 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(nfam, <span class="dv">1</span>, af[i]) <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        dad2 <span class="ot">&lt;-</span> (<span class="fu">rbinom</span>(nfam, <span class="dv">1</span>, af[i]) <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        mum1 <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(nfam, <span class="dv">1</span>, af[i]) <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        mum2 <span class="ot">&lt;-</span> (<span class="fu">rbinom</span>(nfam, <span class="dv">1</span>, af[i]) <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">*</span> <span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        dadindex <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>), nfam, <span class="at">replace=</span><span class="cn">TRUE</span>)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        dadh <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, nfam)</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        dadh[dadindex] <span class="ot">&lt;-</span> dad1[dadindex]</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        dadh[<span class="sc">!</span>dadindex] <span class="ot">&lt;-</span> dad2[<span class="sc">!</span>dadindex]</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        mumindex <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>), nfam, <span class="at">replace=</span><span class="cn">TRUE</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>        mumh <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, nfam)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        mumh[mumindex] <span class="ot">&lt;-</span> mum1[mumindex]</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        mumh[<span class="sc">!</span>mumindex] <span class="ot">&lt;-</span> mum2[<span class="sc">!</span>mumindex]</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        sib1 <span class="ot">&lt;-</span> <span class="fu">cbind</span>(dadh, mumh)</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>        dadindex <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>), nfam, <span class="at">replace=</span><span class="cn">TRUE</span>)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        dadh <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, nfam)</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        dadh[dadindex] <span class="ot">&lt;-</span> dad1[dadindex]</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        dadh[<span class="sc">!</span>dadindex] <span class="ot">&lt;-</span> dad2[<span class="sc">!</span>dadindex]</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        mumindex <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>), nfam, <span class="at">replace=</span><span class="cn">TRUE</span>)</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>        mumh <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, nfam)</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>        mumh[mumindex] <span class="ot">&lt;-</span> mum1[mumindex]</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        mumh[<span class="sc">!</span>mumindex] <span class="ot">&lt;-</span> mum2[<span class="sc">!</span>mumindex]</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>        sib2 <span class="ot">&lt;-</span> <span class="fu">cbind</span>(dadh, mumh)</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>        sibs1[,i] <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">abs</span>(sib1) <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>        sibs2[,i] <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(<span class="fu">abs</span>(sib2) <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>        dads[,i] <span class="ot">&lt;-</span> dad1 <span class="sc">-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="fu">abs</span>(dad2) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>        mums[,i] <span class="ot">&lt;-</span> mum1 <span class="sc">-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="fu">abs</span>(mum2) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">dads=</span>dads, <span class="at">mums=</span>mums, <span class="at">sibs1=</span>sibs1, <span class="at">sibs2=</span>sibs2))</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>makePhen <span class="ot">&lt;-</span> <span class="cf">function</span>(effs, indep, <span class="at">vy=</span><span class="dv">1</span>, <span class="at">vx=</span><span class="fu">rep</span>(<span class="dv">1</span>, <span class="fu">length</span>(effs)), <span class="at">my=</span><span class="dv">0</span>) {</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">is.null</span>(<span class="fu">dim</span>(indep))) indep <span class="ot">&lt;-</span> <span class="fu">cbind</span>(indep)</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stopifnot</span>(<span class="fu">ncol</span>(indep) <span class="sc">==</span> <span class="fu">length</span>(effs))</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stopifnot</span>(<span class="fu">length</span>(vx) <span class="sc">==</span> <span class="fu">length</span>(effs))</span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>    cors <span class="ot">&lt;-</span> effs <span class="sc">*</span> vx <span class="sc">/</span> <span class="fu">sqrt</span>(vx) <span class="sc">/</span> <span class="fu">sqrt</span>(vy)</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stopifnot</span>(<span class="fu">sum</span>(cors<span class="sc">^</span><span class="dv">2</span>) <span class="sc">&lt;=</span> <span class="dv">1</span>)</span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>    cors <span class="ot">&lt;-</span> <span class="fu">c</span>(cors, <span class="fu">sqrt</span>(<span class="dv">1</span><span class="sc">-</span><span class="fu">sum</span>(cors<span class="sc">^</span><span class="dv">2</span>)))</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>    indep <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">t</span>(<span class="fu">scale</span>(<span class="fu">cbind</span>(indep, <span class="fu">rnorm</span>(<span class="fu">nrow</span>(indep))))) <span class="sc">*</span> cors <span class="sc">*</span> <span class="fu">c</span>(vx, <span class="dv">1</span>))</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> <span class="fu">drop</span>(<span class="fu">scale</span>(<span class="fu">rowSums</span>(indep)) <span class="sc">*</span> <span class="fu">sqrt</span>(vy)) <span class="sc">+</span> my</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(y)</span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>make_phenotypes <span class="ot">&lt;-</span> <span class="cf">function</span>(fam, eff_gx, vx, mx) {</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lapply</span>(fam, <span class="cf">function</span>(g)</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>        x <span class="ot">&lt;-</span> <span class="fu">makePhen</span>(<span class="fu">c</span>(eff_gx), <span class="fu">cbind</span>(g), <span class="at">vy=</span>vx, <span class="at">my=</span>mx)</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(<span class="fu">data.frame</span>(<span class="at">x=</span>x))</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Basic data generating model</p>
+<p>Generate 100000 families with 3 SNPs each with MAF 0.5</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fn <span class="ot">&lt;-</span> <span class="cf">function</span>(n, af, bgx, px, byx, nbatch) {</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    g <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">2</span>, af)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">1</span>, <span class="fu">plogis</span>(<span class="sc">-</span><span class="dv">1</span> <span class="sc">+</span> <span class="fu">scale</span>(g) <span class="sc">*</span> bgx <span class="sc">+</span> y <span class="sc">*</span> byx <span class="sc">+</span> <span class="fu">rnorm</span>(n)))</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    bp <span class="ot">&lt;-</span> x</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    bp[x <span class="sc">==</span> <span class="dv">1</span>] <span class="ot">&lt;-</span> px</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    bp[x <span class="sc">==</span> <span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">-</span>px</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    ind <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>n, nbatch, <span class="at">replace=</span><span class="cn">FALSE</span>, <span class="at">prob=</span>bp)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    b <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="dv">1</span><span class="sc">:</span>n <span class="sc">%in%</span> ind)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    mod <span class="ot">&lt;-</span> <span class="cf">function</span>(f) {</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        o <span class="ot">&lt;-</span> <span class="fu">summary</span>(<span class="fu">lm</span>(<span class="fu">as.formula</span>(f))) <span class="sc">%&gt;%</span></span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">coef</span>() <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> <span class="fu">slice_tail</span>(<span class="at">n=</span><span class="dv">1</span>)</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">names</span>(o) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"b"</span>, <span class="st">"se"</span>, <span class="st">"tval"</span>, <span class="st">"pval"</span>)</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>        o<span class="sc">$</span>model <span class="ot">&lt;-</span> f</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        o</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bind_rows</span>(</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mod</span>(<span class="st">"y ~ g"</span>),</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mod</span>(<span class="st">"y ~ b + g"</span>),</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mod</span>(<span class="st">"y ~ x + g"</span>),</span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mod</span>(<span class="st">"x ~ g"</span>),</span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mod</span>(<span class="st">"x ~ b + g"</span>)</span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="fu">fn</span>(<span class="dv">100000</span>, <span class="fl">0.4</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="dv">10000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">make_families</span>(<span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>), <span class="dv">100000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Generate phenotypes where those three SNPs explain most of the variance</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">make_phenotypes</span>(a, <span class="fu">sqrt</span>(<span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.3</span>, <span class="fl">0.3</span>)), <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 5 × 5
-         b      se   tval  pval model    
-     &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;    
-1 -0.00225 0.00459 -0.490 0.624 y ~ g    
-2 -0.00225 0.00459 -0.490 0.624 y ~ b + g
-3  0.00337 0.00276  1.22  0.222 y ~ x + g
-4 -0.00351 0.00229 -1.54  0.125 x ~ g    
-5 -0.00351 0.00229 -1.54  0.125 x ~ b + g</code></pre>
+<pre><code>List of 4
+ $ dads :'data.frame':  100000 obs. of  1 variable:
+  ..$ x: num [1:100000] 0.0211 -1.2521 -0.9917 0.1754 -0.9217 ...
+  .. ..- attr(*, "scaled:center")= num -6.26e-17
+  .. ..- attr(*, "scaled:scale")= num 1
+ $ mums :'data.frame':  100000 obs. of  1 variable:
+  ..$ x: num [1:100000] 0.174 0.899 1.341 -0.173 -0.135 ...
+  .. ..- attr(*, "scaled:center")= num 4.89e-17
+  .. ..- attr(*, "scaled:scale")= num 1
+ $ sibs1:'data.frame':  100000 obs. of  1 variable:
+  ..$ x: num [1:100000] 0.509 0.192 1.35 -1.571 -0.51 ...
+  .. ..- attr(*, "scaled:center")= num -2.44e-17
+  .. ..- attr(*, "scaled:scale")= num 1
+ $ sibs2:'data.frame':  100000 obs. of  1 variable:
+  ..$ x: num [1:100000] -0.368 -0.632 0.176 0.416 -0.44 ...
+  .. ..- attr(*, "scaled:center")= num -2.02e-17
+  .. ..- attr(*, "scaled:scale")= num 0.994</code></pre>
 </div>
 </div>
-<p>Define parameters</p>
+<p>Select spouse pairs with most similar phenotypes</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>param <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="dv">100000</span>,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">af =</span> <span class="fl">0.4</span>,</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">bgx =</span> <span class="fu">sqrt</span>(<span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.01</span>)),</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">px =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.9</span>),</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">byx =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fl">0.9</span>, <span class="fl">0.1</span>),</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">nbatch =</span> <span class="fu">c</span>(<span class="dv">10000</span>),</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">sim=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>()</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>param</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ssd <span class="ot">&lt;-</span> (b<span class="sc">$</span>dads<span class="sc">$</span>x <span class="sc">-</span> b<span class="sc">$</span>mums<span class="sc">$</span>x)<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>sel <span class="ot">&lt;-</span> <span class="fu">which</span>(ssd <span class="sc">&lt;</span> <span class="fu">quantile</span>(ssd, <span class="fl">0.1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Calculate LD between SNPs</p>
+<ol type="1">
+<li>Spouse pairs - expect positive correlation</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(a<span class="sc">$</span>dads[,<span class="dv">1</span>], a<span class="sc">$</span>mums[,<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 400 × 7
-        n    af   bgx    px   byx nbatch   sim
-    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;int&gt;
- 1 100000   0.4 0.447   0.5   0    10000     1
- 2 100000   0.4 0.1     0.5   0    10000     1
- 3 100000   0.4 0.447   0.9   0    10000     1
- 4 100000   0.4 0.1     0.9   0    10000     1
- 5 100000   0.4 0.447   0.5   0.1  10000     1
- 6 100000   0.4 0.1     0.5   0.1  10000     1
- 7 100000   0.4 0.447   0.9   0.1  10000     1
- 8 100000   0.4 0.1     0.9   0.1  10000     1
- 9 100000   0.4 0.447   0.5   0.2  10000     1
-10 100000   0.4 0.1     0.5   0.2  10000     1
-# ℹ 390 more rows</code></pre>
+<pre><code>[1] 0.002640232</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(a<span class="sc">$</span>dads[sel,<span class="dv">1</span>], a<span class="sc">$</span>mums[sel,<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.185586</code></pre>
 </div>
 </div>
-<p>Run simulation across all parameters</p>
+<p>Positive correlation observed</p>
+<ol start="2" type="1">
+<li>Within fathers only - expect negative correlation</li>
+</ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(param), \(i) {</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    o <span class="ot">&lt;-</span> <span class="fu">fn</span>(param<span class="sc">$</span>n[i], param<span class="sc">$</span>af[i], param<span class="sc">$</span>bgx[i], param<span class="sc">$</span>px[i], param<span class="sc">$</span>byx[i], param<span class="sc">$</span>nbatch[i])</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bind_cols</span>(param[i,], o)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>}) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(a<span class="sc">$</span>dads) <span class="sc">%&gt;%</span> <span class="fu">round</span>(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3]
+[1,]    1    0    0
+[2,]    0    1    0
+[3,]    0    0    1</code></pre>
 </div>
-<p>How does <code>g-&gt;y</code> test statistic relate to different biases? (Should always be null)</p>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(a<span class="sc">$</span>dads[sel,]) <span class="sc">%&gt;%</span> <span class="fu">round</span>(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      [,1]  [,2]  [,3]
+[1,]  1.00 -0.19 -0.18
+[2,] -0.19  1.00 -0.19
+[3,] -0.18 -0.19  1.00</code></pre>
+</div>
+</div>
+<p>Negative correlations observed</p>
+<ol start="3" type="1">
+<li>Within siblings - expect positive correlation</li>
+</ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>res <span class="sc">%&gt;%</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(model <span class="sc">==</span> <span class="st">"y ~ b + g"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ggplot</span>(., <span class="fu">aes</span>(<span class="at">x=</span>byx, <span class="at">y=</span>tval, <span class="at">color=</span><span class="fu">as.factor</span>(px))) <span class="sc">+</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">"lm"</span>) <span class="sc">+</span></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">facet_wrap</span>(px <span class="sc">~</span> bgx)    </span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(a<span class="sc">$</span>sibs1) <span class="sc">%&gt;%</span> <span class="fu">round</span>(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3]
+[1,] 1.00    0 0.01
+[2,] 0.00    1 0.00
+[3,] 0.01    0 1.00</code></pre>
 </div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(a<span class="sc">$</span>sibs1[sel,]) <span class="sc">%&gt;%</span> <span class="fu">round</span>(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      [,1]  [,2] [,3]
+[1,]  1.00 -0.01 0.01
+[2,] -0.01  1.00 0.00
+[3,]  0.01  0.00 1.00</code></pre>
 </div>
 </div>
-</div>
-<p>How does <code>g-&gt;x</code> test statistic change when adjusting for batch across parameters?</p>
+<p>Not seeing any correlation</p>
+<hr>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>res <span class="sc">%&gt;%</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(model <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"x ~ b + g"</span>, <span class="st">"x ~ g"</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(byx, px, bgx, sim) <span class="sc">%&gt;%</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">bdiff =</span> <span class="fu">diff</span>(b)) <span class="sc">%&gt;%</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">ggplot</span>(., <span class="fu">aes</span>(<span class="at">x=</span>byx, <span class="at">y=</span>bdiff, <span class="at">color=</span><span class="fu">as.factor</span>(px))) <span class="sc">+</span></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">"lm"</span>) <span class="sc">+</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">facet_wrap</span>(px <span class="sc">~</span> bgx)    </span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>`summarise()` has grouped output by 'byx', 'px', 'bgx'. You can override using
-the `.groups` argument.
-`geom_smooth()` using formula = 'y ~ x'</code></pre>
-</div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="summary" class="level2">
-<h2 class="anchored" data-anchor-id="summary">Summary</h2>
-<p>Need huge effects of target trait <code>y</code> on <code>x</code> (ADHD) in order to induce any sort of meaningful collider bias unless batch is composed entirely of cases.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>R version 4.3.3 (2024-02-29)
 Platform: aarch64-apple-darwin20 (64-bit)
@@ -349,7 +377,7 @@ BLAS:   /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRbla
 LAPACK: /Library/Frameworks/R.framework/Versions/4.3-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.11.0
 
 locale:
-[1] en_GB.UTF-8/en_GB.UTF-8/en_GB.UTF-8/C/en_GB.UTF-8/en_GB.UTF-8
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
 
 time zone: Europe/London
 tzcode source: internal
@@ -358,19 +386,16 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] ggplot2_3.4.2 dplyr_1.1.4  
+[1] dplyr_1.1.4
 
 loaded via a namespace (and not attached):
- [1] vctrs_0.6.5       nlme_3.1-164      cli_3.6.2         knitr_1.45       
- [5] rlang_1.1.3       xfun_0.42         generics_0.1.3    jsonlite_1.8.8   
- [9] labeling_0.4.2    glue_1.7.0        colorspace_2.1-0  htmltools_0.5.7  
-[13] scales_1.2.1      fansi_1.0.6       rmarkdown_2.26    grid_4.3.3       
-[17] munsell_0.5.0     evaluate_0.23     tibble_3.2.1      fastmap_1.1.1    
-[21] yaml_2.3.8        lifecycle_1.0.4   compiler_4.3.3    htmlwidgets_1.6.3
-[25] pkgconfig_2.0.3   mgcv_1.9-1        farver_2.1.1      lattice_0.22-5   
-[29] digest_0.6.34     R6_2.5.1          tidyselect_1.2.0  utf8_1.2.4       
-[33] splines_4.3.3     pillar_1.9.0      magrittr_2.0.3    Matrix_1.6-5     
-[37] withr_3.0.0       tools_4.3.3       gtable_0.3.3     </code></pre>
+ [1] digest_0.6.34     utf8_1.2.4        R6_2.5.1          fastmap_1.1.1    
+ [5] tidyselect_1.2.0  xfun_0.42         magrittr_2.0.3    glue_1.7.0       
+ [9] tibble_3.2.1      knitr_1.45        pkgconfig_2.0.3   htmltools_0.5.7  
+[13] rmarkdown_2.26    generics_0.1.3    lifecycle_1.0.4   cli_3.6.2        
+[17] fansi_1.0.6       vctrs_0.6.5       compiler_4.3.3    tools_4.3.3      
+[21] pillar_1.9.0      evaluate_0.23     yaml_2.3.8        rlang_1.1.3      
+[25] jsonlite_1.8.8    htmlwidgets_1.6.3</code></pre>
 </div>
 </div>
 
