@@ -1,0 +1,124 @@
+---
+title: "MR Standard errors"
+author: Gibran Hemani
+date: "2024-04-19"
+categories: []
+---
+
+## Background
+
+Is there a problem of standard errors in MR methods being overly precise?
+
+Simulate summary data where the exposure has an influence of `bxy` on the outcome, but the SNPs may have independent effects on the outcome as well. 
+
+Simulate 10k SNPs, with 50% of them contributing to heritability.
+
+The pleiotropy effect is that for X and Y, 50% of SNPs are selected independently to contribute to some heritability.
+
+The causal effect is that the the bgx effects on have an additional effect on y of bgx * bxy.
+
+- bxy = 0, pleiotropy = 0
+- bxy = 0, pleiotropy = 0.4
+- bxy = 0.4, pleiotropy = 0
+- bxy = 0.4, pleiotropy = 0.4
+
+For scenarios where bxy = 0, expect that false positive rate is appropriately controlled for IVW, weighted median, weighted mode.
+
+```{r}
+set.seed(12345)
+library(TwoSampleMR)
+library(simulateGP)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+
+sim <- function(nsnp, nid, plei, bxy, sim=1) {
+    
+    # Allele frequencies
+    map <- arbitrary_map(runif(nsnp, 0.01, 0.99))
+
+    # Effects for x
+    paramsx <- generate_gwas_params(map=map, h2=0.4, S=-0.4, Pi=0.5)
+
+    # Summary stats for x
+    betax <- generate_gwas_ss(paramsx, nid=nid)
+
+    # Effects for y
+    paramsy <- generate_gwas_params(map=map, h2=plei, S=-0.4, Pi=0.5) %>% mutate(beta = beta + paramsx$beta * bxy)
+
+    # summary stats for y
+    betay <- generate_gwas_ss(paramsy, nid=nid)
+    dat <- merge_exp_out(betax, betay) 
+
+    
+    bind_rows(
+        # Analysis using thresholded instruments
+        dat %>%
+            filter(pval.exposure < 5e-8) %>%
+            mr(., method_list=c("mr_ivw", "mr_weighted_median", "mr_weighted_mode")) %>%
+            mutate(inst = "threshold"),
+        # Analysis using all variants regardless of threshold
+        dat %>%
+            mr(., method_list=c("mr_ivw", "mr_weighted_median", "mr_weighted_mode")) %>%
+            mutate(inst = "all"),
+    ) %>%
+        mutate(plei=plei, bxy=bxy, sim=sim)
+}
+
+sim(10000, 100000, 0.4, 0)
+sim(10000, 100000, 0, 0.4)
+```
+
+
+```{r, eval=FALSE}
+params <- expand.grid(
+    nsnp = 10000,
+    nid = 100000,
+    plei = c(0, 0.4),
+    bxy = c(0, 0.4),
+    sim = 1:100
+)
+res <- lapply(1:nrow(params), \(i) {
+    do.call(sim, as.list(params[i,])) %>% suppressMessages()
+})
+res <- bind_rows(res)
+save(res, file="res.RData")
+```
+
+Simulation results under bxy = 0
+
+```{r}
+load(file="res.RData")
+group_by(res, plei, bxy, method, inst) %>%
+    summarise(
+        mean_se = mean(se), 
+        mean_beta = mean(b), 
+        power = sum(pval < 0.05) / n(),
+        minp = min(pval)
+    ) %>% filter(bxy == 0) %>% kable()
+```
+
+Simulation results under bxy = 0.4
+
+```{r}
+group_by(res, plei, bxy, method, inst) %>%
+    summarise(
+        mean_se = mean(se), 
+        mean_beta = mean(b), 
+        power = sum(pval < 0.05) / n(),
+        minp = min(pval)
+    ) %>% filter(bxy == 0.4) %>% kable()
+```
+
+## Summary
+
+- Under no pleiotropy the false positive rate is controlled (actually median and mode are slightly over conservative)
+- Under pleiotropy the false positive rate is controlled for weighted mode but slightly inflated for weighted median
+- Not obvious that the bootstrap approach for obtaining standard errors here, which is used by weighted median and weighted mode, is performing particularly poorly.
+
+
+---
+
+```{r}
+sessionInfo()
+```
