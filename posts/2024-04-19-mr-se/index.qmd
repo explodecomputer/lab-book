@@ -115,6 +115,7 @@ group_by(res, plei, bxy, method, inst) %>%
 - Under no pleiotropy the false positive rate is controlled (actually median and mode are slightly over conservative)
 - Under pleiotropy the false positive rate is controlled for weighted mode but slightly inflated for weighted median
 - Not obvious that the bootstrap approach for obtaining standard errors here, which is used by weighted median and weighted mode, is performing particularly poorly.
+- This is only 100 replications so may be unstable but there isn't something very obviously wrong here.
 
 
 ---
