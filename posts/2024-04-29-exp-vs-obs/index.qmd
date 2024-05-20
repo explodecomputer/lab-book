@@ -1,0 +1,191 @@
+---
+title: "Comparing expected vs observed"
+author: Gibran Hemani
+date: "2024-04-29"
+categories: []
+---
+
+## Background
+
+Is binomial test appropriate?
+
+```{r}
+set.seed(100)
+library(dplyr)
+library(ggplot2)
+
+
+#' Simulate GWAS summary data discovery and replication
+#'
+#' @param n1 The number of individuals in the first sample.
+#' @param n2 The number of individuals in the second sample.
+#' @param nsnp The number of causal SNPs (Single Nucleotide Polymorphisms) to simulate.
+#' @param nflip The number of SNPs to set to have 0 effect in the second group.
+#' @param afshared A logical value indicating whether the allele frequencies should be shared between the two groups.
+#' @param bsd The standard deviation of the distribution of effect sizes.
+#'
+#' @return Data frame
+sim <- function(n1, n2, nsnp, nflip=1, afshared=FALSE, bsd=1) {
+    # different allele frequencies per study
+    af1 <- runif(nsnp, 0.01, 0.99)
+    if(afshared) {
+        af2 <- af1
+    } else {
+        af2 <- runif(nsnp, 0.01, 0.99)
+    }
+
+    # identifical effect sizes across studies
+    b1 <- rnorm(nsnp, sd=bsd)
+    b2 <- b1
+
+    # make one of the effects different
+    if(nflip > 0) {
+        b1[1:nflip] <- 0
+    }
+
+    # Assume variance of trait is the same across studies
+    se1 <- 1 / sqrt(2 * af1 * (1-af1) * n1)
+    se2 <- 1 / sqrt(2 * af2 * (1-af2) * n2)
+
+    dat <- tibble(
+        af1, af2, b1, b2, se1, se2,
+        bhat1 = rnorm(nsnp, b1, se1),
+        bhat2 = rnorm(nsnp, b2, se2),
+        pval1 = 2 * pnorm(-abs(bhat1/se1)),
+        pval2 = 2 * pnorm(-abs(bhat2/se2)),
+        r21 = b1^2 * af1 * (1-af1) * 2,
+        r22 = b2^2 * af2 * (1-af2) * 2,
+    )
+    return(dat)
+}
+
+prop_overlap <- function(b_disc, b_rep, se_disc, se_rep, alpha) {
+  p_sign <- pnorm(-abs(b_disc) / se_disc) * pnorm(-abs(b_disc) / se_rep) + ((1 - pnorm(-abs(b_disc) / se_disc)) * (1 - pnorm(-abs(b_disc) / se_rep)))
+  p_sig <- pnorm(-abs(b_disc) / se_rep + qnorm(alpha / 2)) + (1 - pnorm(-abs(b_disc) / se_rep - qnorm(alpha / 2)))
+  p_rep <- pnorm(abs(b_rep) / se_rep, lower.tail = FALSE)
+  res <- tibble::tibble(
+    nsnp = length(b_disc),
+    metric = c("Sign", "Sign", "P-value", "P-value"),
+    datum = c("Expected", "Observed", "Expected", "Observed"),
+    value = c(sum(p_sign, na.rm = TRUE), sum(sign(b_disc) == sign(b_rep)), sum(p_sig, na.rm = TRUE), sum(p_rep < alpha, na.rm = TRUE))
+  ) %>%
+    dplyr::group_by(metric) %>%
+      dplyr::do({
+        x <- .
+        if(.$nsnp[1] > 0) {
+          bt <- binom.test(
+            x=.$value[.$datum == "Observed"], 
+            n=.$nsnp[1], 
+            p=.$value[.$datum == "Expected"] / .$nsnp[1]
+          )$p.value
+          x$pdiff <- bt
+        }
+        x
+      })
+  return(list(res = res, variants = dplyr::tibble(sig = p_sig, sign = p_sign)))
+}
+
+sim_test <- function(res, nboot=1000) {
+    res$res$pdiff_sim <- 0
+    res$res$pdiff_sim_np <- 0
+    bootsig <- sapply(1:nboot, \(i) {
+        rbinom(nrow(res$variants), 1, res$variants$sig) %>% sum
+    })
+    res$res$pdiff_sim[1:2] <- pnorm(res$res$value[2], mean=mean(bootsig), sd=sd(bootsig), lower.tail=FALSE)
+    res$res$pdiff_sim_np[1:2] <- sum(res$res$value[2] < bootsig) / nboot
+    bootsign <- sapply(1:nboot, \(i) {
+        rbinom(nrow(res$variants), 1, res$variants$sign) %>% sum
+    })
+    res$res$pdiff_sim[3:4] <- pnorm(res$res$value[4], mean=mean(bootsign), sd=sd(bootsign), lower.tail=TRUE)
+    res$res$pdiff_sim_np[3:4] <- sum(res$res$value[4] > bootsign) / nboot
+    return(res)
+}
+
+```
+
+
+
+```{r}
+s <- sim(10000, 1000, 100, nflip=0)
+p <- prop_overlap(s$b1, s$b2, s$se1, s$se2, 0.05)
+p <- sim_test(p)
+p
+```
+
+
+```{r, eval=FALSE}
+param <- expand.grid(
+    n1 = c(10000),
+    n2 = c(1000, 10000),
+    nsnp = c(100),
+    nflip = c(rep(0, 10), 1:20),
+    afshared = c(FALSE),
+    nsim=1:100
+)
+dim(param)
+
+res <- lapply(1:nrow(param), \(i) {
+    s <- sim(param$n1[i], param$n2[i], param$nsnp[i], nflip=param$nflip[i], afshared=param$afshared[i])
+    p <- prop_overlap(s$b1, s$b2, s$se1, s$se2, 0.05)
+    res <- sim_test(p)
+
+    pa <- bind_cols(param[i,], res$res %>% select(-nsnp))
+    return(pa)
+}) %>% bind_rows()
+head(res)   
+```
+
+
+```{r}
+load("res.rdata")
+res %>% 
+    as_tibble() %>%
+    filter(datum == "Observed") %>%
+    tidyr::pivot_longer(cols=c(pdiff, pdiff_sim, pdiff_sim_np), names_to="type", values_to="p") %>%
+    group_by(nflip, afshared, metric, n1, n2, nsnp, type) %>%
+    summarise(n=n(), p = sum(p < 0.05)/n()) %>%
+    ggplot(aes(x=nflip, y=p, colour=type)) +
+        geom_point() +
+        geom_line() +
+        facet_grid(n2 ~ metric)
+```
+
+```{r}
+res %>% 
+    as_tibble() %>%
+    filter(datum == "Observed") %>%
+    group_by(nflip, metric) %>%
+    summarise(n=n(), pdiff = sum(pdiff < 0.05)/n(), pdiff_sim = sum(pdiff_sim < 0.05)/n())
+```
+
+
+```{r}
+res %>% 
+    as_tibble() %>%
+    filter(datum == "Observed") %>%
+    group_by(nflip, metric) %>%
+    summarise(n=n(), pdiff = sum(pdiff < 0.05)/n(), pdiff_sim = sum(pdiff_sim < 0.05)/n()) %>%
+    tidyr::pivot_longer(cols=c(pdiff, pdiff_sim), names_to="type", values_to="p") %>%
+    ggplot(aes(x=nflip, y=p, colour=type)) +
+        geom_point() +
+        facet_grid(. ~ metric)
+```
+
+
+```{r}
+res %>%
+    as_tibble() %>%
+    filter(datum == "Observed" & nflip == 0) %>%
+    tidyr::pivot_longer(cols=c(pdiff, pdiff_sim, pdiff_sim_np), names_to="type", values_to="p") %>%
+    group_by(metric, type, n1, n2, nsnp) %>%
+    summarise(n=n(), p = sum(p < 0.05)/n()) %>%
+    ggplot(aes(x=type, y=p, colour=metric)) +
+        geom_point() +
+        facet_grid(n2 ~ .)
+```
+
+---
+
+```{r}
+sessionInfo()
+```

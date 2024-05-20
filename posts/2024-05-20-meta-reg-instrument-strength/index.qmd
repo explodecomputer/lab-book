@@ -1,0 +1,115 @@
+---
+title: "Meta regression of instrument strength"
+author: Gibran Hemani
+date: "2024-05-20"
+categories: []
+---
+
+```{r}
+library(dplyr)
+library(meta)
+```
+
+## Height on EduYears
+
+```{r}
+aivw <- read.csv("~/Downloads/MR_heightonEduYears_testing_different_pval_interval.txt") %>%
+    filter(method=="Inverse variance weighted") %>%
+    mutate(log10p = -log10(P_iv_max), lin = order(log10p))
+aivw
+```
+
+Perform meta analysis
+
+```{r}
+m1 <- meta::metagen(b, se, data=aivw)
+m1
+```
+
+Substantial heterogeneity. Perform meta regression
+
+```{r}
+mu2 <- update(m1, subgroup = aivw$log10p, tau.common = TRUE, common = FALSE)
+metareg(mu2)
+```
+
+Strong relationship with instrument strength
+
+Plot
+
+```{r}
+bubble(metareg(mu2))
+```
+
+Try using a different scale of instrument strength
+
+```{r}
+mu3 <- update(m1, subgroup = aivw$lin, tau.common = TRUE, common = FALSE)
+metareg(mu3)
+```
+
+Stronger relationship with instrument strength now
+
+Plot
+
+```{r}
+bubble(metareg(mu3))
+```
+
+
+
+## Height on CHD
+
+```{r}
+aivw <- read.csv("~/Downloads/MR_heightonCHD_testing_different_pval_interval.txt") %>%
+    filter(method=="Inverse variance weighted") %>%
+    mutate(log10p = -log10(P_iv_max), lin = order(log10p))
+aivw
+```
+
+Perform meta analysis
+
+```{r}
+m1 <- meta::metagen(b, se, data=aivw)
+m1
+```
+
+Weak heterogeneity. Perform meta regression
+
+```{r}
+mu2 <- update(m1, subgroup = aivw$log10p, tau.common = TRUE, common = FALSE)
+metareg(mu2)
+```
+
+Some relationship with instrument strength
+
+Plot
+
+```{r}
+bubble(metareg(mu2))
+```
+
+
+Try again using a different scale for instrument strength
+
+```{r}
+mu3 <- update(m1, subgroup = aivw$lin, tau.common = TRUE, common = FALSE)
+metareg(mu3)
+```
+
+Weaker relationship with instrument strength 
+
+Plot
+
+```{r}
+bubble(metareg(mu3))
+```
+
+
+## Background
+
+---
+
+```{r}
+sessionInfo()
+```
