@@ -1,0 +1,90 @@
+---
+title: "2024-05-23-resid-variances"
+author: Gibran Hemani
+date: "`r Sys.Date()`"
+categories: []
+draft: true
+eval: false
+---
+
+## Background
+
+```{r}
+
+
+pnorm(0.5457/0.099, low=F)
+
+pf(2*0.0054*(1-0.0054)*0.5457^2 * 460000,)
+
+Fval <- qf(3.7e-8, 1, 460000, low=F)
+
+
+g <- rbinom(250000, 2, 0.005)
+y <- g * 0.55 + rnorm(250000, 0, 4)
+var(y)
+
+summary(lm(y ~ g))
+
+cor(y, g)^2
+
+tval <- 0.56/0.079
+
+vg <- mean(g)/2 * 2 * (1-mean(g)/2) * 0.56^2
+rsq <- vg / var(y)
+rsq
+
+Fval <- rsq * 250000 / (1-rsq) / 1
+
+tval^2
+
+# rsq 
+tval^2 / (tval^2 + 250000)
+
+pf(Fval, 1, 250000, low=F)
+
+
+se = var(y) / sqrt(2*p*(1-p) * N)
+
+vyres <- 0.099 * sqrt(2*0.0054*(1-0.0054)*460000)
+
+vyraw <- 0.00857 * sqrt(2*0.0054*(1-0.0054)*460000)
+
+vyraw
+
+0.037 / vyraw
+
+0.54 / (vyres / 0.7)
+
+6.95/0.7
+
+
+5.4e-3
+
+
+a = b - 0.3b
+a = b(1-0.3)
+
+
+
+
+g <- rbinom(250000, 2, 0.005)
+prs <- rnorm(250000, 0, sqrt(10*0.3))
+y <- g * 0.55 + prs + rnorm(250000, 0, sqrt(10*0.7))
+var(y)
+
+summary(lm(y ~ g))
+summary(lm(y ~ g + prs))
+yres <- residuals(lm(y ~ prs))
+summary(lm(yres ~ g))
+
+ysub <- y - prs
+summary(lm(ysub ~ g))
+
+```
+
+
+---
+
+```{r}
+sessionInfo()
+```

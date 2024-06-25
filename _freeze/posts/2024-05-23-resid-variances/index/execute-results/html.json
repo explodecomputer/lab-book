@@ -1,0 +1,15 @@
+{
+  "hash": "a0904310108e41746a13c143cfd892bd",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"2024-05-23-resid-variances\"\nauthor: Gibran Hemani\ndate: \"2024-06-25\"\ncategories: []\ndraft: true\neval: false\n---\n\n\n## Background\n\n\n::: {.cell}\n\n```{.r .cell-code}\npnorm(0.5457/0.099, low=F)\n\npf(2*0.0054*(1-0.0054)*0.5457^2 * 460000,)\n\nFval <- qf(3.7e-8, 1, 460000, low=F)\n\n\ng <- rbinom(250000, 2, 0.005)\ny <- g * 0.55 + rnorm(250000, 0, 4)\nvar(y)\n\nsummary(lm(y ~ g))\n\ncor(y, g)^2\n\ntval <- 0.56/0.079\n\nvg <- mean(g)/2 * 2 * (1-mean(g)/2) * 0.56^2\nrsq <- vg / var(y)\nrsq\n\nFval <- rsq * 250000 / (1-rsq) / 1\n\ntval^2\n\n# rsq \ntval^2 / (tval^2 + 250000)\n\npf(Fval, 1, 250000, low=F)\n\n\nse = var(y) / sqrt(2*p*(1-p) * N)\n\nvyres <- 0.099 * sqrt(2*0.0054*(1-0.0054)*460000)\n\nvyraw <- 0.00857 * sqrt(2*0.0054*(1-0.0054)*460000)\n\nvyraw\n\n0.037 / vyraw\n\n0.54 / (vyres / 0.7)\n\n6.95/0.7\n\n\n5.4e-3\n\n\na = b - 0.3b\na = b(1-0.3)\n\n\n\n\ng <- rbinom(250000, 2, 0.005)\nprs <- rnorm(250000, 0, sqrt(10*0.3))\ny <- g * 0.55 + prs + rnorm(250000, 0, sqrt(10*0.7))\nvar(y)\n\nsummary(lm(y ~ g))\nsummary(lm(y ~ g + prs))\nyres <- residuals(lm(y ~ prs))\nsummary(lm(yres ~ g))\n\nysub <- y - prs\nsummary(lm(ysub ~ g))\n```\n:::\n\n\n\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsessionInfo()\n```\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

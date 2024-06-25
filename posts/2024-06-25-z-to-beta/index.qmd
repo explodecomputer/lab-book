@@ -1,0 +1,109 @@
+---
+title: "Converting z to beta"
+author: Gibran Hemani
+date: "2024-06-25"
+categories: []
+---
+
+## Background
+
+Summary imputation returns Z scores, need to convert back to beta and se. Approach
+
+1. $se(\beta) = var(y) / \sqrt{2p(1-p)n}$
+2. \beta = z * se(\beta)
+
+Assumes no inbreeding or HW disequilibrium and constant N across SNPs. Assumes collapsability of effects, which is probably ok for small effects in logistic regression studies.
+
+Instead of trying to estimate $var(y)$ we could just use known betas to obtain a correction factor for imputed values e.g.
+
+1. Fit a linear model of known betas on imputed betas
+2. Divide imputed betas by coefficient from (1)
+
+## Continuous trait example
+
+```{r}
+library(ieugwasr)
+library(ggplot2)
+library(dplyr)
+
+# Setup data to have Z scores and some known betas
+setup_data <- function(a) {
+    a$z <- a$beta / a$se
+    a$beta_known <- NA
+    a$se_known <- NA
+    index <- sample(1:nrow(a), nrow(a)*0.05)
+    a$beta_known[index] <- a$beta[index]
+    a$se_known[index] <- a$se[index]
+    return(a)
+}
+
+# Function to convert Z to beta
+make_beta <- function(dat) {
+    dat$senew <- 1 / sqrt(2 * dat$eaf * (1 - dat$eaf) * dat$n)
+    dat$betanew <- dat$z * dat$senew
+    correction <- lm(dat$betanew ~ dat$beta_known)$coef[2]
+    dat$betanew <- dat$betanew / correction
+    dat$senew <- dat$senew / correction
+    return(dat)
+}
+```
+
+Get LDL cholesterol region as an example
+
+```{r}
+
+a <- associations("1:11000000-12000000", "ieu-a-300") %>% setup_data()
+a <- make_beta(a)
+
+cor(a$beta, a$betanew, use="pair")
+summary(lm(a$beta ~ a$betanew))
+```
+
+
+```{r}
+plot(a$beta, a$betanew)
+```
+
+```{r}
+plot(a$se, a$senew)
+```
+
+## Case control study example
+
+Use CHD
+
+```{r}
+b <- associations("1:11000000-12000000", "ieu-a-7") %>% setup_data()
+b <- make_beta(b)
+
+cor(b$beta, b$betanew, use="pair")
+summary(lm(b$beta ~ b$betanew))
+```
+
+```{r}
+plot(b$beta, b$betanew)
+```
+
+```{r}
+plot(b$se, b$senew)
+```
+
+## Deviation from expectation?
+
+Some deviation - most likely due to different sample sizes across SNPs. Can check that the deviation doesn't track with allele frequency
+
+```{r}
+b$maf <- b$eaf
+b$maf[b$maf > 0.5] <- 1 - b$maf[b$maf > 0.5]
+ggplot(b, aes(x=beta, y=betanew)) + geom_point(aes(colour=maf)) + geom_smooth(method="lm")
+```
+
+```{r}
+ggplot(b, aes(x=se, y=senew)) + geom_point(aes(colour=maf)) + geom_smooth(method="lm")
+```
+
+---
+
+```{r}
+sessionInfo()
+```
