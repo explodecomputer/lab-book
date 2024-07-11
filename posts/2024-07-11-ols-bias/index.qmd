@@ -1,0 +1,78 @@
+---
+title: "Expected bias in OLS due to a single confounder"
+author: Gibran Hemani
+date: "2024-07-11"
+categories: []
+---
+
+## Background
+
+Assuming means are 0, for this system:
+
+$$
+\begin{align}
+x_i &= \beta_{ux} u_i + e_{xi} \\
+y_i &= \beta_{uy} u_i + \beta_{xy} x_i + e_{yi} \\
+u_i &\sim N(0, \sigma^2_u) \\
+e_{xi} &\sim N(0, \sigma^2_{ex}) \\
+e_{yi} &\sim N(0, \sigma^2_{ey})
+\end{align}
+$$
+
+What is the expected OLS estimate?
+
+
+```{r}
+dat <- expand.grid(
+    n = 10000,
+    bux = c(0.1, 0.2, 1, 2),
+    buy = c(0.1, 0.2, 1, 2),
+    bxy = c(0, 0.5),
+    vu = c(1, 0.1, 2),
+    vex = c(0.1, 1, 2),
+    vey = c(0.1, 1, 2)
+)
+
+sim <- function(n, bux, buy, bxy, vu, vex, vey, ols1=NULL, ols2=NULL) {
+    u <- rnorm(n, sd=sqrt(vu))
+    ex <- rnorm(n, sd=sqrt(vex))
+    ey <- rnorm(n, sd=sqrt(vey))
+    x <- u * bux + ex
+    y <- u * buy + ey + bxy * x
+    
+    o <- c(
+        lm(y ~ u)$coef[2] * lm(x ~ u)$coef[2] + bxy,
+        lm(y ~ x)$coef[2]
+    )
+    return(o)
+}
+
+for(i in 1:nrow(dat)) {
+    a <- do.call(sim, dat[i,])
+    dat$ols1[i] <- a[1]
+    dat$ols2[i] <- a[2]
+}
+
+dat$vx <- with(dat, bux^2 * vu + vex)
+dat$ols3 <- with(dat, ((bux * buy + bxy * bux^2) * vu + bxy * vex) / vx)
+dat$ols4 <- with(dat, (bux * buy * vu + bxy * vx) / vx)
+dat$ols5 <- with(dat, bxy + bux * buy * vu / vx)
+```
+
+Using the simplified equation where variances aren't included:
+
+```{r}
+plot(dat$ols1, dat$ols2, xlab="bux * buy", ylab="OLS")
+```
+
+Using the full equation:
+
+```{r}
+plot(dat$ols2, dat$ols5, xlab="OLS", ylab="expected OLS")
+```
+
+---
+
+```{r}
+sessionInfo()
+```
