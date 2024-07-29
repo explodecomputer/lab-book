@@ -21,28 +21,33 @@ $$
 
 What is the expected OLS estimate?
 
-
 ```{r}
 dat <- expand.grid(
     n = 10000,
     bux = c(0.1, 0.2, 1, 2),
     buy = c(0.1, 0.2, 1, 2),
     bxy = c(0, 0.5),
+    bgu = c(0.1, 0.5),
     vu = c(1, 0.1, 2),
     vex = c(0.1, 1, 2),
     vey = c(0.1, 1, 2)
 )
 
-sim <- function(n, bux, buy, bxy, vu, vex, vey, ols1=NULL, ols2=NULL) {
-    u <- rnorm(n, sd=sqrt(vu))
+sim <- function(n, bux, buy, bxy, bgu, vu, vex, vey, ols1=NULL, ols2=NULL, iv1=NULL) {
+    g <- rbinom(n, 2, 0.4)
+    veu <- vu - var(g) * bgu^2
+    if(veu < 0) return(c(NA, NA, NA))
+    eu <- rnorm(n, sd=sqrt(veu))
+    u <- g * bgu + eu
     ex <- rnorm(n, sd=sqrt(vex))
     ey <- rnorm(n, sd=sqrt(vey))
     x <- u * bux + ex
     y <- u * buy + ey + bxy * x
     
     o <- c(
+        lm(y ~ x)$coef[2],
         lm(y ~ u)$coef[2] * lm(x ~ u)$coef[2] + bxy,
-        lm(y ~ x)$coef[2]
+        lm(y ~ g)$coef[2] / lm(x ~ g)$coef[2]
     )
     return(o)
 }
@@ -50,25 +55,429 @@ sim <- function(n, bux, buy, bxy, vu, vex, vey, ols1=NULL, ols2=NULL) {
 for(i in 1:nrow(dat)) {
     a <- do.call(sim, dat[i,])
     dat$ols1[i] <- a[1]
-    dat$ols2[i] <- a[2]
+    dat$ols2[i] <- a[2] # wrong!
+    dat$iv1[i] <- a[3]
 }
 
 dat$vx <- with(dat, bux^2 * vu + vex)
 dat$ols3 <- with(dat, ((bux * buy + bxy * bux^2) * vu + bxy * vex) / vx)
 dat$ols4 <- with(dat, (bux * buy * vu + bxy * vx) / vx)
 dat$ols5 <- with(dat, bxy + bux * buy * vu / vx)
+dat$rsqux <- with(dat, bux^2 * vu / vx)
+dat$ols6 <- with(dat, bxy + buy / bux * rsqux) # final version
+dat$iv2 <- with(dat, bxy + buy / bux)
 ```
 
 Using the simplified equation where variances aren't included:
 
 ```{r}
-plot(dat$ols1, dat$ols2, xlab="bux * buy", ylab="OLS")
+plot(dat$ols1, dat$ols2, xlab="OLS", ylab="bux * buy")
 ```
 
 Using the full equation:
 
 ```{r}
-plot(dat$ols2, dat$ols5, xlab="OLS", ylab="expected OLS")
+plot(dat$ols1, dat$ols5, xlab="OLS", ylab="expected OLS")
+```
+
+```{r}
+plot(iv2 ~ iv1, data=subset(dat, bux > 0.9), xlab="IV", ylab="expected IV")
+```
+
+Expect that the IV estimate is always more biased than the OLS estimate when instrument arises through U.
+
+```{r}
+plot(iv2 ~ ols1, dat)
+abline(0, 1)
+```
+
+
+## With realisitc genetic architecture
+
+```
+X = bux*U + bax*A + E
+Var(X) = bux^2*Var(U) + bax^2*Var(A) + Var(E)
+
+```
+
+```{r}
+n <- 100000
+gu <- rbinom(n, 2, 0.5)
+ga <- rbinom(n, 2, 0.5)
+u <- gu * 0.1 + rnorm(n, 0, sqrt(1-var(gu)*0.1^2))
+a <- ga * 0.1 + rnorm(n, 0, sqrt(1-var(ga)*0.1^2))
+x <- u*0.2 + a*1
+var(x)
+var(u)
+var(a)
+
+
+```
+
+
+
+```{r}
+library(dplyr)
+library(pwr)
+library(simulateGP)
+library(ggplot2)
+
+# nsnpx <- 1000
+# nsnpu <- 1000
+# bux <- 1
+# buy <- 0.1
+# bax <- 1
+# nid <- seq(10000, 10000000, by=10000)
+# h2x <- 0.4
+# h2u <- 0.2
+# Sx <- 1
+# Su <- 1
+# i <- 10000
+
+# group_by(params, grepl("x", snp)) %>% summarise(var(beta))
+
+simfn2 <- function(nsnpx, nsnpu, bux, buy, nid, h2x, h2u, Sx, Su, bax=1) {
+    args <- environment() %>% as.list() %>% as_tibble()
+    args <- bind_rows(args, args, args)
+    mapx <- tibble(snp=paste0(1:nsnpx, "x"), af=runif(nsnpx, 0.01, 0.99))
+    mapu <- tibble(snp=paste0(1:nsnpu, "u"), af=runif(nsnpu, 0.01, 0.99))
+    paramsx <- generate_gwas_params(map=mapx, h2=h2x, S=Sx, Pi=1)
+    paramsu <- generate_gwas_params(map=mapu, h2=h2u, S=Su, Pi=1)
+    params <- rbind(paramsx %>% mutate(beta=beta*bax), paramsu %>% mutate(beta=beta * bux))
+    o <- lapply(nid, \(i){
+        ssx <- generate_gwas_ss(params, i)
+        ssx$beta <- params$beta
+        ssx$w <- 1/ssx$se^2
+        ssx$bias <- buy/bux
+        ssx$varx <- bux^2 + bax^2
+        ssx$rsqux <- bux^2 / ssx$varx
+        ssx$bias[grepl("x", ssx$snp)] <- 0
+        ssx$bias_ols <- buy/bux * ssx$rsqux
+        ssx <- ssx %>% mutate(h2 = beta^2 * 2 * af * (1-af) / varx)
+        ssx <- ssx %>% arrange(pval)
+        ssx <- ssx %>%
+            mutate(
+                n=i,
+                pow = pwr.r.test(n=i, r=sqrt(ssx$h2), sig.level=5e-8)$power,
+                u_indicator = as.numeric(grepl("u", snp))
+            ) 
+        x1 <- ssx %>%
+            summarise(
+                what="all",
+                bias = sum(bias * w * pow) / sum(w * pow),
+                bias_ols = bias_ols[1],
+                nsnp = sum(pow),
+                proph2 = sum(h2/sum(h2) * pow),
+                fracu = sum(pow * u_indicator) / sum(pow)
+            )
+        x2 <- ssx %>% filter(u_indicator==1) %>%
+            summarise(
+                what="u",
+                bias = sum(bias * w * pow) / sum(w * pow),
+                bias_ols = bias_ols[1],
+                nsnp = sum(pow),
+                proph2 = sum(h2/sum(h2) * pow),
+                fracu = sum(pow * u_indicator) / sum(pow)
+            )
+        x3 <- ssx %>% filter(u_indicator==0) %>%
+            summarise(
+                what="x",
+                bias = sum(bias * w * pow) / sum(w * pow),
+                bias_ols = bias_ols[1],
+                nsnp = sum(pow),
+                proph2 = sum(h2/sum(h2) * pow),
+                fracu = sum(pow * u_indicator) / sum(pow)
+            )
+        return(bind_rows(x1, x2, x3))
+    }) %>% bind_rows()
+    bind_cols(args, o)
+}
+r1 <- simfn2(
+    nsnpx = 2000,
+    nsnpu = 2000, 
+    bux = 1,
+    bax = 0.1,
+    buy = 0.1, 
+    nid = seq(10000, 1000000, by=10000), 
+    h2x = 0.4,
+    h2u = 0.4, 
+    Sx = 1,
+    Su = 1)
+r1 %>% ggplot(aes(x=nid, y=bias)) +
+geom_line(aes(colour=what)) +
+geom_line(aes(y=bias_ols))
+
+param <- expand.grid(
+    nsnpx = 2000,
+    nsnpu = 2000,
+    bux = seq(0.1, 1, by=0.1),
+    buy = 0.1,
+    nid = seq(10000, 1000000, by=10000),
+    h2x = 0.4,
+    h2u = c(0.2, 0.4),
+    Sx=1, Su=1
+)
+
+res <- lapply(1:nrow(param), \(i) {
+    do.call(simfn2, param[i, ])
+}) %>% bind_rows()
+
+ggplot(res %>% filter(bux %in% c(0.1, 0.5, 1)), aes(x=nid, y=bias)) +
+geom_line(aes(colour=fracu)) +
+geom_line(aes(y=bias_ols)) +
+facet_grid(bux ~ h2u)
+
+```
+
+
+
+```{r}
+ggplot(res %>% filter(bux %in% c(0.1, 0.5, 1)), aes(x=fracu, y=bias)) +
+geom_line(aes(colour=nsnp)) +
+geom_line(aes(y=bias_ols)) +
+facet_grid(bux ~ h2u)
+
+```
+
+
+## Measurement error
+
+Adjusting for confounder with measurement error in OLS vs IV
+
+```{r}
+simme <- function(n, bux, buy, bxy, buv, veu, vev, vex, vey) {
+    args <- environment() %>% as.list() %>% as_tibble()
+    nsnp <- 20
+    G <- matrix(rbinom(nsnp * n, 2, 0.5), n, nsnp)
+    bgu <- rnorm(nsnp, sd=0.3)
+    eu <- rnorm(n, sd=sqrt(veu))
+    u <- G %*% bgu + eu
+    ev <- rnorm(n, sd=sqrt(vev))
+    v <- u * buv + ev
+    ex <- rnorm(n, sd=sqrt(vex))
+    ey <- rnorm(n, sd=sqrt(vey))
+    x <- u * bux + ex
+    y <- x * bxy + u * buy + ey
+
+
+    fr <- function(o, m) {
+        tibble(model = m, bhat = o[2,1], se=o[2,2], pval=o[2,4])
+    }
+    fr0 <- function(o, m) {
+        tibble(model = m, bhat = o[1,1], se=o[1,2], pval=o[1,4])
+    }
+
+    ols <- bind_rows(
+        summary(lm(y ~ x))$coef %>% fr("y ~ x"),
+        summary(lm(y ~ x + u))$coef %>% fr("y ~ x + u"),
+        summary(lm(y ~ x + v))$coef %>% fr("y ~ x + v")
+    ) %>% mutate(method = "OLS")
+
+    vhat <- gwas(v, G)
+    uhat <- gwas(u, G)
+    xhat <- gwas(x, G)
+    yhat <- gwas(y, G)
+
+    iv <- bind_rows(
+        summary(lm(yhat$bhat ~ 0 + xhat$bhat, weight=1/yhat$se^2))$coef %>% fr0("y ~ x"),
+        summary(lm(yhat$bhat ~ 0 + xhat$bhat + uhat$bhat, weight=1/yhat$se^2))$coef %>% fr0("y ~ x + u"),
+        summary(lm(yhat$bhat ~ 0 + xhat$bhat + vhat$bhat, weight=1/yhat$se^2))$coef %>% fr0("y ~ x + v")
+    ) %>% mutate(method = "IV")
+
+    return(bind_rows(ols, iv) %>% bind_cols(args))
+}
+
+simme(1000000, 0.2, 0.1, 0, 0.8, 1, 1, 1, 1)
+```
+
+```{r}
+params <- expand.grid(
+    sim = c(1:10),
+    n = 500000,
+    bux = c(0.1, 0.5),
+    buy = c(0.5),
+    bxy = c(0, 0.5),
+    buv = c(0.8, 1),
+    veu = c(1),
+    vev = seq(0, 1, by=0.05),
+    vex = c(1),
+    vey = c(1)
+)
+dim(params)
+
+res <- lapply(1:nrow(params), \(i) {
+    message(i)
+    do.call(simme, params[i,-1])
+}) %>% bind_rows()
+saveRDS(res, file="simme_res.rds")
+```
+
+
+
+```{r}
+library(ggplot2)
+
+res %>% 
+    group_by(method, model, bux, bxy, buv, vev) %>%
+    summarise(se=sd(bhat), bhat=mean(bhat), sig = sum(pval < 0.05)/n(), n=n()) %>%
+    filter(bxy==0 & bux == 0.1 & model != "y ~ x") %>%
+    ggplot(aes(y=bhat, x=vev, colour=as.factor(paste(method, model)))) +
+        geom_line() +
+        facet_grid(method ~ buv)
+```
+
+
+
+```{r}
+res %>% 
+    filter(bxy == 0) %>%
+    group_by(method, model) %>%
+    summarise(se=sd(bhat), bhat=mean(bhat), sig = sum(pval < 0.05)/n(), n=n())
+```
+
+
+
+```{r}
+simme2 <- function(n, bux, buy, bxy, buv, veu, vev, vex, vey) {
+    args <- environment() %>% as.list() %>% as_tibble()
+    nsnp <- 30
+    nsnp_x <- 10
+    G <- matrix(rbinom(nsnp * n, 2, 0.5), n, nsnp)
+    G_x <- matrix(rbinom(nsnp_x * n, 2, 0.5), n, nsnp_x)
+    bgu <- rnorm(nsnp, sd=1.5)
+    bgx <- rnorm(nsnp_x, sd=1.5)
+    eu <- rnorm(n, sd=sqrt(veu))
+    u <- G %*% bgu + eu
+    ev <- rnorm(n, sd=sqrt(vev))
+    v <- u * buv + ev
+    ex <- rnorm(n, sd=sqrt(vex))
+    ey <- rnorm(n, sd=sqrt(vey))
+    x <- G_x %*% bgx + u * bux + ex
+    y <- x * bxy + u * buy + ey
+
+    G <- cbind(G, G_x)
+
+    fr <- function(o, m) {
+        tibble(model = m, bhat = o[2,1], se=o[2,2], pval=o[2,4])
+    }
+    fr0 <- function(o, m) {
+        tibble(model = m, bhat = o[1,1], se=o[1,2], pval=o[1,4])
+    }
+
+    yr <- residuals(lm(y ~ v))
+
+    ols <- bind_rows(
+        summary(lm(y ~ x))$coef %>% fr("y ~ x"),
+        summary(lm(y ~ x + u))$coef %>% fr("y ~ x + u"),
+        summary(lm(y ~ x + v))$coef %>% fr("y ~ x + v"),
+        summary(lm(yr ~ x))$coef %>% fr("yr ~ x")
+    ) %>% mutate(method = "OLS")
+
+    vhat <- gwas(v, G)
+    uhat <- gwas(u, G)
+    xhat <- gwas(x, G)
+    yhat <- gwas(y, G)
+
+    yr <- residuals(lm(yhat$bhat ~ vhat$bhat))
+
+    iv <- bind_rows(
+        summary(lm(yhat$bhat ~ 0 + xhat$bhat, weight=1/yhat$se^2))$coef %>% fr0("y ~ x"),
+        summary(lm(yhat$bhat ~ 0 + xhat$bhat + uhat$bhat, weight=1/yhat$se^2))$coef %>% fr0("y ~ x + u"),
+        summary(lm(yhat$bhat ~ 0 + xhat$bhat + vhat$bhat, weight=1/yhat$se^2))$coef %>% fr0("y ~ x + v"),
+        summary(lm(yr ~ 0 + xhat$bhat, weight=1/yhat$se^2))$coef %>% fr0("yr ~ x")
+    ) %>% mutate(method = "IV")
+
+    return(bind_rows(iv, ols) %>% bind_cols(args))
+}
+
+simme2(100000, 0.2, 0.1, 0, 0.8, 1, 1, 1, 1)
+
+params <- expand.grid(
+    sim = c(1:100),
+    n = 10000,
+    bux = c(2),
+    buy = c(4),
+    bxy = c(0),
+    buv = c(0.8),
+    veu = c(1),
+    vev = seq(0,1,by=0.05),
+    vex = c(1),
+    vey = c(1)
+)
+dim(params)
+
+res2 <- lapply(1:nrow(params), \(i) {
+    message(i)
+    do.call(simmer, params[i,-1])
+}) %>% bind_rows()
+saveRDS(res2, file="simme_res2.rds")
+```
+
+
+```{r}
+res2 %>% 
+    filter(bxy == 0) %>%
+    group_by(method, model) %>%
+    summarise(se=sd(bhat), bhat=mean(bhat), sig = sum(pval < 0.05)/n(), n=n())
+```
+
+
+```{r}
+params <- expand.grid(
+    sim = c(1:1000),
+    n = 10000,
+    bux = c(2),
+    buy = c(4),
+    bxy = c(0, 1),
+    buv = c(0.8),
+    veu = c(1),
+    vev = 5,
+    vex = c(1),
+    vey = c(1)
+)
+dim(params)
+
+res3 <- lapply(1:nrow(params), \(i) {
+    message(i)
+    do.call(simme2, params[i,-1])
+}) %>% bind_rows()
+saveRDS(res3, file="simme_res3.rds")
+```
+
+
+```{r}
+res3 %>% 
+    group_by(bxy, method, model) %>%
+    summarise(se=sd(bhat), bhat=mean(bhat), sig = sum(pval < 0.05)/n(), n=n())
+```
+
+```{r}
+params <- expand.grid(
+    sim = c(1:1000),
+    n = 10000,
+    bux = c(2),
+    buy = c(4),
+    bxy = c(1),
+    buv = c(0.8),
+    veu = c(1),
+    vev = 5,
+    vex = c(1),
+    vey = c(1)
+)
+dim(params)
+
+res4 <- lapply(1:nrow(params), \(i) {
+    message(i)
+    do.call(simme2, params[i,-1])
+}) %>% bind_rows()
+saveRDS(res4, file="simme_res4.rds")
+```
+
+
+```{r}
+res4 %>% 
+    group_by(method, model) %>%
+    summarise(se=sd(bhat), bhat=mean(bhat), sig = sum(pval < 0.05)/n(), n=n())
 ```
 
 ---

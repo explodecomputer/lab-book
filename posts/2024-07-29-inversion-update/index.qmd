@@ -1,0 +1,120 @@
+---
+title: "Removing variables from an inverted matrix"
+author: Gibran Hemani
+date: "2024-07-29"
+categories: []
+---
+
+## Background
+
+Remove variables from an inverted matrix
+
+From https://stats.stackexchange.com/questions/450146/updating-the-inverse-covariance-matrix-after-deleting-the-i-th-column-and-row-of/450186#450186 :
+
+```{r}
+inverse.update <- function(x, i) {
+  a <- x[-i,-i, drop=FALSE]
+  b <- x[-i,i, drop=FALSE]
+  c <- x[i,-i, drop=FALSE]
+  d <- x[i,i]
+  a - b %*% solve(d) %*% c # For production code, should throw an error when d is 0.
+}
+#
+# Example.
+#
+A <- matrix(c(2,-1,0, -1,2,-1, 0,-1,2), 3)
+A.inv <- solve(A)
+i <- 2
+(x.1 <- solve(A[-i,-i]))           # The desired result, directly obtained
+(x.0 <- inverse.update(A.inv, i))  # The result via an update
+```
+
+
+```{r}
+n <- 100
+p <- qr.Q(qr(matrix(rnorm(n^2), n)))
+Sigma <- crossprod(p, p*(n:1))
+Sigma[1:10,1:10]
+```
+
+With just one variable
+
+```{r}
+Sigma.inv <- solve(Sigma)
+
+to_remove <- 10
+a <- solve(Sigma[-to_remove,-to_remove])
+b <- inverse.update(Sigma.inv, to_remove)
+
+cor(c(a),c(b))
+```
+
+With mutiple variables
+
+```{r}
+to_remove <- sample(1:100, 10)
+a <- solve(Sigma[-to_remove,-to_remove])
+b <- inverse.update(Sigma.inv, to_remove)
+cor(c(a), c(b))
+```
+
+## Time complexity
+
+```{r}
+
+fn <- function(n, nrem) {
+    p <- qr.Q(qr(matrix(rnorm(n^2), n)))
+    Sigma <- crossprod(p, p*(n:1))
+    Sigma.inv <- solve(Sigma)
+    to_remove <- sample(1:n, nrem, replace=FALSE)
+    t1 <- Sys.time()
+    a <- solve(Sigma[-to_remove,-to_remove])
+    at <- Sys.time() - t1
+
+    t1 <- Sys.time()
+    b <- inverse.update(Sigma.inv, to_remove)
+    bt <- Sys.time() - t1
+    stopifnot(all.equal(a, b))
+    return(c(at, bt))
+}
+
+fn(1000, 10)
+```
+
+
+```{r}
+
+library(dplyr)
+param <- expand.grid(
+    n = 300,
+    nrem = seq(1, 290, 10),
+    t1=NA,
+    t2=NA
+)
+set.seed(100)
+res <- lapply(1:nrow(param), function(i) {
+    message(i)
+    p <- param[i,]
+    a <- fn(p$n, p$nrem)
+
+    p$t1 <- a[1]
+    p$t2 <- a[2]
+    return(p)
+}) %>% bind_rows()
+
+res$frac_rem <- res$nrem / res$n
+res$frac_time <- as.numeric(res$t2) / as.numeric(res$t1)
+
+plot(res$frac_rem, log(res$frac_time))
+abline(1,0)
+```
+
+
+If you are removing more than 50% of the matrix then this method probably won't help with speed.
+
+
+---
+
+```{r}
+sessionInfo()
+```
