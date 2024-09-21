@@ -1,0 +1,166 @@
+---
+title: "Approx matrix inverse"
+author: Gibran Hemani
+date: "2024-09-07"
+categories: []
+execute: 
+  eval: false
+---
+
+## Background
+
+Improve matrix inversion speed by approximating using eigendecomposition
+
+```python
+def approx_inverse(A, k):
+    # Compute eigenvalues and eigenvectors
+    eigenvalues, eigenvectors = np.linalg.eig(A)
+    
+    # Sort eigenvalues and eigenvectors
+    idx = eigenvalues.argsort()[::-1]
+    eigenvalues = eigenvalues[idx]
+    eigenvectors = eigenvectors[:, idx]
+    
+    # Select top k eigenvalues and eigenvectors
+    eigenvalues_k = eigenvalues[:k]
+    eigenvectors_k = eigenvectors[:, :k]
+    
+    # Compute approximate inverse
+    inv_eigenvalues_k = 1 / eigenvalues_k
+    approx_inv = eigenvectors_k @ np.diag(inv_eigenvalues_k) @ eigenvectors_k.T
+    
+    return approx_inv
+```
+
+```{r}
+approx_inverse <- function(A, k) {
+  # Compute eigenvalues and eigenvectors
+  eig <- eigen(A)
+  
+  # Sort eigenvalues and eigenvectors
+  idx <- order(eig$values, decreasing = TRUE)
+  eigenvalues <- eig$values[idx]
+  eigenvectors <- eig$vectors[, idx]
+  
+  # Select top k eigenvalues and eigenvectors
+  eigenvalues_k <- eigenvalues[1:k]
+  eigenvectors_k <- eigenvectors[, 1:k]
+  
+  # Compute approximate inverse
+  inv_eigenvalues_k <- 1 / eigenvalues_k
+  approx_inv <- eigenvectors_k %*% diag(inv_eigenvalues_k) %*% t(eigenvectors_k)
+  
+  return(approx_inv)
+}
+
+```
+
+
+
+```{r}
+sim_mat <- function(n) {
+  p <- qr.Q(qr(matrix(rnorm(n^2), n)))
+  Sigma <- crossprod(p, p*(n:1))
+  return(Sigma)
+}
+sim_mat(100)[1:10,1:10]
+```
+
+
+```{r}
+
+Sigma <- sim_mat(2000)
+Sigma.inv <- solve(Sigma)
+Sigma.inv.approx <- approx_inverse(Sigma, 10)
+a <- eigen(Sigma)
+cor(c(Sigma.inv), c(Sigma.inv.approx))
+plot(c(Sigma.inv), c(Sigma.inv.approx))
+```
+
+
+```{r}
+install.packages("microbenchmark")
+library(microbenchmark)
+library(dplyr)
+
+fn1 <- function(n, approx) {
+    Sigma <- sim_mat(n)
+    t1 <- Sys.time()
+    Sigma.inv <- solve(Sigma)
+    t1 <- Sys.time() - t1
+    t2 <- Sys.time()
+    Sigma.inv.approx <- approx_inverse(Sigma, approx)
+    t2 <- Sys.time() - t2
+    a <- cor(c(Sigma.inv), c(Sigma.inv.approx))
+    tibble(cor=a, k=approx, time1=t1, time2=t2)
+}
+
+fn1(1000, 10)
+
+
+microbenchmark()
+
+
+param <- expand.grid(
+    n = 
+)
+```
+
+
+Eigendecomposition is the slow part. What about if we do eigendecomposition once and 
+
+
+## 
+
+```{r}
+
+A <- sim_mat(2000)
+
+eig <- eigen(A)
+
+Ainv <- solve(A)
+Ainv2 <- eig$vectors %*% diag(1/eig$values) %*% t(eig$vectors)
+
+cor(c(Ainv), c(Ainv2))
+
+i <- sample(1:2000, 400)
+
+Ainvs <- solve(A[i, i])
+Ainv2s <- eig$vectors[i,] %*% diag(1/eig$values) %*% t(eig$vectors[i,])
+
+cor(c(Ainvs), c(Ainv2s))
+
+plot(c(Ainvs), c(Ainv2s))
+
+plot(c(Ainv), c(Ainv2))
+
+
+
+
+
+
+
+# Sort eigenvalues and eigenvectors
+idx <- order(eig$values, decreasing = TRUE)
+eigenvalues <- eig$values[idx]
+eigenvectors <- eig$vectors[, idx]
+
+# Select top k eigenvalues and eigenvectors
+eigenvalues_k <- eigenvalues[1:k]
+eigenvectors_k <- eigenvectors[, 1:k]
+
+# Compute approximate inverse
+inv_eigenvalues_k <- 1 / eigenvalues_k
+approx_inv <- eigenvectors_k %*% diag(inv_eigenvalues_k) %*% t(eigenvectors_k)
+
+return(approx_inv)
+
+```
+
+
+
+---
+
+```{r}
+sessionInfo()
+```

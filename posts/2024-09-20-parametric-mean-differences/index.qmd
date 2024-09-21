@@ -1,0 +1,54 @@
+---
+title: "Parametric mean differences"
+author: Gibran Hemani
+date: "2024-09-20"
+categories: []
+---
+
+## Background
+
+Testing if the mean selection coefficient amongst SNPs is larger than expected, given a background null distribution. How do we get a beta, standard error and p-value for the mean difference?
+
+Generate data
+
+```{r}
+library(dplyr)
+
+null_draws <- rnorm(10000, mean=3, sd=8)
+true_value <- 12
+hist(null_draws, breaks=100)
+abline(v=true_value, col="red", lwd=5)
+```
+
+Empirical p-value
+
+```{r}
+empirical_p <- sum(true_value < null_draws) / length(null_draws)
+empirical_p
+```
+
+Parametric p-value
+
+```{r}
+
+null_mean <- mean(null_draws)
+null_sd <- sd(null_draws)
+parametric_p <- 1 - pnorm(true_value, mean=null_mean, sd=null_sd)
+parametric_p
+```
+
+beta and standard error
+
+```{r}
+b <- true_value - null_mean
+z <- qnorm(parametric_p, lower.tail=FALSE)
+se <- b/z
+
+tibble(b=b, se=se, parpval=parametric_p, emp_pval=empirical_p)
+```
+
+---
+
+```{r}
+sessionInfo()
+```

@@ -1,0 +1,400 @@
+---
+title: "Conditional summary stats and imputation"
+author: Gibran Hemani
+date: "2024-09-18"
+categories: []
+execute: 
+  eval: false
+---
+
+## Background
+
+Data generating model
+
+$$
+y = Xb + e
+$$
+
+where $y$ is the phenotype, $X$ is the genotype matrix, $b$ is the effect sizes and $e$ is the error term. X is centred to have each column mean zero to avoid need to handle intercept terms.
+
+The expected associations between each variant and y is
+
+$$
+\beta = (X^T X)^{-1} X^T y
+$$
+
+```{r}
+load(url("https://github.com/explodecomputer/lab-book/raw/refs/heads/main/posts/2024-09-18-conditional-summary-stats/1kg_region.rdata"))
+library(MASS)
+library(dplyr)
+
+solve2 <- function(A) {
+    eig <- eigen(A)
+    eig$values <- 1 / eig$values
+    return(eig$vectors %*% diag(eig$values) %*% t(eig$vectors))
+}
+
+solve3 <- function(A, lambda=1e-6) {
+    solve(A + diag(nrow(A)) * lambda)
+}
+
+sim_mat <- function(n) {
+  p <- qr.Q(qr(matrix(rnorm(n^2), n)))
+  Sigma <- crossprod(p, p*(n:1))
+  v <- diag(Sigma)
+  Sigma <- diag(1/sqrt(v)) %*% Sigma %*% diag(1/sqrt(v))
+  v <- v / max(v) / 2
+  af <- (1 + sqrt(1-2*v)) / 2
+  return(list(R=Sigma, af=af))
+}
+# sim_mat(100)[[1]][1:10,1:10]
+
+
+simulate_ss <- function(X, af, ncause, sigmag, seed=1234) {
+    set.seed(seed)
+    nsnp <- length(af)
+    nid <- nrow(X)
+    b <- rep(0, nsnp)
+    b[sample(1:nsnp, ncause)] <- rnorm(ncause, sd=sigmag)
+
+    e <- rnorm(nid)
+    y <- X %*% b + e 
+    print(mean(y))
+
+    betahat <- sapply(1:nsnp, \(i) {cov(X[,i], y) / var(X[,i])})
+    se <- sapply(1:nsnp, \(i) {sqrt(var(y) / (var(X[,i] * sqrt(nid))))})
+    zhat <- betahat/se
+    pval <- 2 * pnorm(-abs(zhat))
+
+    betaexp <- MASS::ginv(t(X) %*% X) %*% t(X) %*% y
+    # betaexp <- solve3(t(X) %*% X) %*% t(X) %*% y
+    return(tibble(betahat, betaexp, b, se, zhat, pval, af))
+}
+
+X <- rbind(X, X, X, X)
+
+ss <- simulate_ss(X, af, 20, 0.1)
+
+plot(ss$betahat)
+plot(ss$betaexp)
+```
+
+```{r}
+plot(ss$betaexp, ss$betahat)
+```
+
+This is equivalent to
+
+$$
+\beta = D^{-1} R D b
+$$
+
+where $D$ is a diagonal matrix with the diagonal elements being the variance of the columns of $X$, $R$ is the correlation matrix of $X$ and $b$ is a vector of true effect sizes. Expect that $b$ is quite sparse, and can be estimated from finemapping methods.
+
+```{r}
+D <- diag(2 * af * (1 - af))
+Di <- diag(1 / diag(D))
+R <- cor(X)
+ss$betahat2 <- sqrt(Di) %*% R %*% D %*% ss$b
+plot(ss$betahat2, ss$betaexp)
+```
+
+```{r}
+
+```
+
+$$
+\beta = D^{-1} R D b
+$$
+
+where $D$ is a diagonal matrix with the diagonal elements being the variance of the columns of $X$, $R$ is the correlation matrix of $X$ and $b$ is a vector of true effect sizes. Expect that $b$ is quite sparse, and can be estimated from finemapping methods.
+
+If there are $K$ causal variants, we would like to obtain $K$ versions of the summary statistics where each $k$th version is obtained by removing the effects of all other causal variants.
+
+$$
+\hat{b}_{(v)} = D_{(v)} R^{-1}_{(v)} D^{-1}_{(v)} \beta_{(v)}
+$$
+
+where $\hat{b}_{(v)}$ is the vector true causal effect estimates for the $K$ causal variants only.
+
+So the region-wide associations generated from all causal variants can be converted into a set of $K$ regional associations, where each represents the causal effect of one variant and with all other causal effects removed.
+
+$$
+\hat{b}_{(k)} = \beta - \hat{b}_{(v)}
+$$
+
+
+
+
+
+```{r}
+sim_mat <- function(n, nid) {
+  p <- qr.Q(qr(matrix(rnorm(n^2), n)))
+  Sigma <- crossprod(p, p*(n:1))
+  v <- diag(Sigma)
+  Sigma <- diag(1/sqrt(v)) %*% Sigma %*% diag(1/sqrt(v))
+  v <- v / max(v) / 2
+  af <- (1 + sqrt(1-2*v)) / 2
+  X <- mvtnorm::rmvnorm(nid, rep(0, n), Sigma)
+  return(list(X=X, R=Sigma, af=af))
+}
+
+m <- sim_mat(100, 500)
+X <- m$X
+
+b <- rep(0, ncol(X))
+b[sample(1:ncol(X), 3)] <- rnorm(3, sd=10)
+y <- X %*% b + rnorm(nrow(X))
+b
+bexp <- solve(t(X) %*% X) %*% t(X) %*% y
+plot(bexp)
+
+bhat <- sapply(1:ncol(X), \(i) {cov(X[,i], y) / var(X[,i])})
+plot(bhat)
+
+plot(bhat ~ bexp)
+
+R <- cor(X)
+R[1:10,1:10]
+
+D <- diag(apply(X, 2, var))
+
+plot(
+    c(sqrt(D) %*% R %*% sqrt(D))*(nrow(X)-1), 
+    c(t(X) %*% X)
+)
+
+plot(
+    c(t(X) %*% y),
+    bhat %*% sqrt(D) * (nrow(X)-1)
+)
+
+Xi <- solve(t(X) %*% X)
+
+Ri <- solve(R)
+
+
+
+
+
+
+
+
+# sim_mat(100)[[1]][1:10,1:10]
+
+
+
+```
+
+
+I want there to be 3 causal variants. 
+
+I will create summary statistics for all variants.
+Then SS for each variant removed.
+
+I want to recapitulate each variant removed.
+
+
+```{r}
+m <- sim_mat(100, 500)
+X <- m$X
+b <- rep(0, ncol(X))
+b[sample(1:ncol(X), 3)] <- rnorm(3, sd=10)
+e <- rnorm(nrow(X))
+y <- X %*% b + e
+
+# Generate summary stats for all variants
+bhat <- sapply(1:ncol(X), \(i) {cov(X[,i], y) / var(X[,i])})
+
+# Expected summary stats
+D <- diag(apply(X, 2, var))
+Di <- diag(1 / diag(D))
+R <- cor(X)
+bexp <- Di %*% R %*% D %*% b
+
+# Generate summary stats for each variant on its own
+ind <- which(b != 0)
+bhatcond <- lapply(ind, \(i) {
+    bk <- b[i]
+    b <- rep(0, ncol(X))
+    b[i] <- bk
+    y <- X %*% b + e
+    bhat <- sapply(1:ncol(X), \(i) {cov(X[,i], y) / var(X[,i])})
+    return(bhat)
+})
+
+bhatcondl <- lapply(1:length(bhatcond), \(i) {
+    tibble(b=bhatcond[[i]], i, pos=1:length(b))
+}) %>% bind_rows() 
+
+bhatcondl %>% ggplot(aes(x=pos, y=b)) + geom_point() + facet_grid(i ~ .)
+
+# simulate summary stats excluding each variant
+bcond <- lapply(seq_along(ind), \(i) {
+    bt <- b
+    bt[ind[i]] <- 0
+    bsub <- Di %*% R %*% D %*% bt
+    bhat - bsub
+})
+
+bcondl <- lapply(1:length(bcond), \(i) {
+    tibble(b=bcond[[i]], i, pos=1:length(b), what="bcond")
+}) %>% bind_rows() 
+
+bcondl %>% ggplot(aes(x=pos, y=b)) + geom_point() + facet_grid(i ~ .)
+
+inner_join(bhatcondl, bcondl, by=c("i", "pos")) %>% ggplot(aes(x=b.x, y=b.y)) + geom_point() + geom_abline() + facet_grid(i ~ .)
+
+
+lapply(seq_along(ind), \(i) {
+    cor(bhatcond[[i]], bcond[[i]])
+})
+```
+
+
+Do it again with genotype matrix
+
+```{r}
+load(url("https://github.com/explodecomputer/lab-book/raw/refs/heads/main/posts/2024-09-18-conditional-summary-stats/1kg_region.rdata"))
+
+b <- rep(0, ncol(X))
+b[sample(1:ncol(X), 3)] <- rnorm(3, sd=10)
+e <- rnorm(nrow(X))
+y <- X %*% b + e
+
+# Generate summary stats for all variants
+bhat <- sapply(1:ncol(X), \(i) {cov(X[,i], y) / var(X[,i])})
+plot(bhat)
+
+# Expected summary stats
+D <- diag(apply(X, 2, var))
+Di <- diag(1 / diag(D))
+R <- cor(X)
+bexp <- sqrt(Di) %*% R %*% sqrt(D) %*% b
+plot(bexp)
+
+plot(bhat ~ bexp)
+
+# Generate summary stats for each variant on its own
+ind <- which(b != 0)
+bhatcond <- lapply(ind, \(i) {
+    bk <- b[i]
+    b <- rep(0, ncol(X))
+    b[i] <- bk
+    y <- X %*% b + e
+    bhat <- sapply(1:ncol(X), \(i) {cov(X[,i], y) / var(X[,i])})
+    return(bhat)
+})
+
+bhatcondl <- lapply(1:length(bhatcond), \(i) {
+    tibble(b=bhatcond[[i]], i, pos=1:length(b))
+}) %>% bind_rows() 
+
+bhatcondl %>% ggplot(aes(x=pos, y=b)) + geom_point() + facet_grid(i ~ .)
+
+# simulate summary stats excluding each variant
+bcond <- lapply(seq_along(ind), \(i) {
+    bt <- b
+    bt[ind[i]] <- 0
+    bsub <- sqrt(Di) %*% R %*% sqrt(D) %*% bt
+    bhat - bsub
+})
+
+bcondl <- lapply(1:length(bcond), \(i) {
+    tibble(b=bcond[[i]], i, pos=1:length(b), what="bcond")
+}) %>% bind_rows() 
+
+bcondl %>% ggplot(aes(x=pos, y=b)) + geom_point() + facet_grid(i ~ .)
+
+inner_join(bhatcondl, bcondl, by=c("i", "pos")) %>% ggplot(aes(x=b.x, y=b.y)) + geom_point() + geom_abline() + facet_grid(i ~ .)
+
+
+lapply(seq_along(ind), \(i) {
+    cor(bhatcond[[i]], bcond[[i]])
+})
+```
+
+
+
+```{r}
+generate_marginals <- function(bhat, R, af, index) {
+    v <- 2 * af * (1 - af)
+    D <- diag(sqrt(v))
+    Di <- diag(1 / diag(D))
+
+    if(length(index) == 1) {
+        bhat2 <- bhat[index]
+    } else {
+        bhat2 <- (D[index,index] %*% MASS::ginv(R[index,index]) %*% Di[index,index] %*% bhat[index]) %>% drop()
+    }
+    b2 <- rep(0, nsnp)
+    b2[index] <- bhat2
+
+    bcond <- lapply(seq_along(index), \(i) {
+        bt <- b2
+        bt[ind[i]] <- 0
+        bsub <- (sqrt(Di) %*% R %*% sqrt(D) %*% bt) %>% drop()
+        bhat - bsub
+    })
+    return(bcond)
+}
+
+bcond <- generate_marginals(bhat, R, af, which(b != 0))
+
+bcondl <- lapply(1:length(bcond), \(i) {
+    tibble(b=bcond[[i]], i, pos=1:length(b), what="bcond")
+}) %>% bind_rows() 
+
+bcondl %>% ggplot(aes(x=pos, y=b)) + geom_point() + facet_grid(i ~ .)
+
+inner_join(bhatcondl, bcondl, by=c("i", "pos")) %>% ggplot(aes(x=b.x, y=b.y)) + geom_point() + geom_abline() + facet_grid(i ~ .)
+
+
+```
+
+
+
+---
+
+
+
+## 
+
+
+
+## True
+
+sstrue <- lapply(1:length(i), \(j) {
+    bb <- ba
+    bb[i[-j]] <- 0
+    print(which(bb != 0))
+    beta_ld <- as.numeric(diag(1/xvar) %*% R %*% diag(xvar) %*% bb)
+    tibble(j, beta_ld, pos = 1:length(beta_ld))
+}) %>% bind_rows()
+
+sstrue
+
+ggplot(sstrue, aes(x = pos, y=abs(beta_ld))) +
+geom_point()  +
+facet_grid(j ~ .)
+
+cor(sstrue$beta_ld, ss$bhj)
+
+inner_join(sstrue, ss, by=c("j", "pos")) %>% 
+    ggplot(aes(x=(beta_ld), y=(bhj))) + geom_point() + geom_abline() + facet_grid(j ~ .)
+
+
+
+
+
+
+
+
+
+
+
+---
+
+```{r}
+sessionInfo()
+```

@@ -1,0 +1,49 @@
+---
+title: "2024-08-22-parse-sample-sizes"
+author: Gibran Hemani
+date: "`r Sys.Date()`"
+categories: []
+---
+
+## Background
+
+```{r}
+library(dplyr)
+
+fn <- function(x) {
+    # Remove commas from numbers
+    b <- gsub("(\\d+),(?=\\d+)", "\\1", x, perl = TRUE) %>% 
+    # Split sample components based on ','
+        strsplit(", ") %>% 
+        {.[[1]]}
+    # Keep components that contain the word 'cases'
+    b1 <- grep("cases", b, value = TRUE)
+    # If none, probably a continuous trait
+    if(length(b1) == 0) {
+        b1 <- b
+    }
+    # Now just extract the numbers from each 'cases' sample component and sum them
+
+    suppressWarnings({
+    b1 %>% 
+        sapply(., \(y) {
+            strsplit(y, " ") %>% 
+            unlist() %>% as.numeric() %>% na.omit() %>% first() %>% as.numeric()
+        }) %>% sum(na.rm=TRUE)
+    })
+}
+
+# Example
+x <- "25,453 European ancestry cases, 58,113 European ancestry controls, 360 cases and controls, PMID:25056061, 6,524 cases, 24,001 controls"
+fn(x)
+
+x <- "360 cases and controls"
+fn(x)
+
+```
+
+---
+
+```{r}
+sessionInfo()
+```
