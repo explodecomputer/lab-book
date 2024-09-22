@@ -1,0 +1,199 @@
+---
+title: "Clustering traits"
+author: Gibran Hemani
+date: "2024-09-22"
+categories: []
+execute:
+    eval: false
+---
+
+## Background
+
+
+```{r}
+library(ieugwasr)
+library(dplyr)
+library(data.table)
+library(lsa)
+
+get_clusts <- function(cs, th) {
+    l <- list()
+    m <- apply(cs, 1, \(x) sum(x > th))
+    o <- order(m[m > 1])
+    if(length(o) == 0) return(tibble(index = 1:nrow(cs), matches = 1:nrow(cs)))
+    for(i in o) {
+        x <- which(cs[i,] > th)
+        if(length(x) > 0) {
+            l[[i]] <- tibble(index = i, matches = x)
+            cs[x, x] <- 0
+        }
+        if(all(cs == 0)) break
+    }
+    l <- bind_rows(l)
+    stopifnot(length(l$matches) == length(unique(l$matches)))
+    return(l)
+}
+
+special_characters <- function(x) {
+    sc <- c("\\[", "\\]", "+", "-", ":", "[0-9]")
+    sapply(sc, \(y) {
+        grepl(y, x)
+    }) %>% {sum(.) > 2}
+}
+
+run_with_retry <- function(x, ntries=3) {
+    result <- NULL
+    url <- paste0("http://vectology-api.mrcieu.ac.uk/encodeText?qtext=", URLencode(x))
+    for (i in 1:ntries) {
+        result <- try(httr::content(httr::POST(url, encode="json")) %>% unlist() %>% {.[-1]} %>% as.numeric())
+        if (!inherits(result, "try-error")) {
+            break
+        } else {
+            result <- NULL
+        }
+    }
+    return(result)
+}
+
+cluster_traits <- function(d) {
+    if(nrow(d) == 1) {
+        d$index_id <- d$id
+        return(d)
+    }
+
+    tr <- d$trait
+
+    # Identify technical trait names e.g. metabolites, genes etc
+    sc <- sapply(tr, special_characters)
+    dsc <- d[sc,]
+    dsc$index_id <- dsc$id
+    d <- subset(d, !sc)
+    if(nrow(d) == 0) {
+        NULL
+    } else if(nrow(d) == 1) {
+        d$index_id <- d$id
+    } else {
+        tr <- d$trait
+
+        # Use vectology to try to cluster traits
+        cs <- sapply(tr, run_with_retry) %>% lsa::cosine()
+        csc <- get_clusts(cs, 0.95)
+
+        # Create a new vector which is the index_id for the cluster (this can be updated later)
+        d$idn <- 1:nrow(d)
+        csc <- left_join(csc, d %>% select(idn, index_id=id), by=c("index"="idn")) %>% left_join(d %>% select(idn, match_id=id), by=c("matches"="idn"))
+
+        d <- left_join(d, csc %>% select(match_id, index_id), by=c("id"="match_id"))
+    }
+    d <- bind_rows(d, dsc)
+    d <- d %>% 
+        ungroup() %>%
+        group_by(index_id) %>% 
+        arrange(desc(ncase), desc(sample_size)) %>%
+        mutate(priority = as.numeric(row_number()==1), index_id2=first(id)) %>% 
+        ungroup() %>%
+        mutate(index_id=index_id2) %>% select(-index_id2)
+
+    return(d)
+}
+
+a <- gwasinfo()
+
+b <- subset(a, grepl("ebi-a", id)) %>% filter(population=="European")
+b
+
+gcat <- fread("~/Downloads/gwas_catalog_v1.0.2.1-studies_r2024-03-11.tsv")
+
+gcat$sa2 <- paste0("ebi-a-", gcat$`STUDY ACCESSION`)
+
+table(b$id %in% gcat$sa2)
+
+b <- left_join(b, select(gcat, sa2, MAPPED_TRAIT, MAPPED_TRAIT_URI, LINK), by=c("id"="sa2"))
+dim(b)
+
+table(duplicated(b$MAPPED_TRAIT_URI))
+
+table(table(b$MAPPED_TRAIT_URI))
+
+b %>% group_by(MAPPED_TRAIT, LINK) %>% summarise(n=dplyr::n()) %>% arrange(desc(n)) %>% filter(n != 1) %>% as.data.frame %>% write.csv("ebi-a-duplicates.csv", row.names=FALSE)
+
+# Cluster traits by
+# - EFO term
+# - Trait name (fuzzy matching)
+# - Ancestry
+# - Sex
+# - Study type (note)
+
+
+
+cl <- b %>% group_by(MAPPED_TRAIT, sex, population, note) %>%
+    arrange(desc(ncase), desc(sample_size)) %>%
+    mutate(priority = as.numeric(row_number()==1)) %>%
+    select(priority, MAPPED_TRAIT, sex, population, note, trait, sample_size, ncase, ncontrol, everything())
+
+cl2 <- cl %>% group_split() %>% lapply(., \(x) {
+    print(nrow(x))
+    cluster_traits(x)
+})
+
+d <- cl %>% group_split() %>% {.[[21]]}
+
+d %>% cluster_traits
+
+
+
+
+Which of the following traits are synonymous with each other? Provide the result in json format, with each element being a list of synonymous traits.
+
+- hypertension 
+- systolic blood pressure
+- high blood pressure
+- cigarettes per day 
+- smoking heaviness 
+- smoking initiation
+- Triglyceride levels 
+- Triglycerides 
+- Triglyceride levels (UKB data field 30870) 
+- Triglycerides 
+- Triglycerides 
+- Triglyceride levels 
+[
+  ["Triglyceride levels", "Triglycerides", "Triglyceride levels (UKB data field 30870)"]
+]
+
+
+
+
+cl <- b %>% group_by(MAPPED_TRAIT, sex, population, note) %>%
+    arrange(desc(ncase), desc(sample_size)) %>%
+    mutate(priority = as.numeric(row_number()==1)) %>%
+    select(priority, MAPPED_TRAIT, sex, population, note, trait, sample_size, ncase, ncontrol, everything())
+
+
+cl %>% write.csv("ebi-a-clustered.csv", row.names=FALSE)
+
+hclust(cl)
+
+cl %>% glimpse
+
+ %>%
+    arrange
+
+
+
+
+
+
+
+
+
+
+# The largest sample size
+# Most recent
+```
+
+---
+
+```{r}
+sessionInfo()
+```
