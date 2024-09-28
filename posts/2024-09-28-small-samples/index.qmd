@@ -1,0 +1,201 @@
+---
+title: "Meta analysis including small samples"
+author: Gibran Hemani
+date: "2024-09-28"
+categories: []
+---
+
+## Background
+
+Does meta analysis with very small samples lead to bias?
+
+- Simulate a regression
+- Split the data into different size groups and meta analyse the groups
+- Compare the meta-analysis results to the full analysis
+- Does smaller group size lead to bias?
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+ivw <- function(betas, ses) {
+  weights <- 1 / ses^2
+  beta <- sum(weights * betas) / sum(weights)
+  se <- 1 / sqrt(sum(weights))
+  return(c(beta, se))
+}
+```
+
+
+```{r}
+
+fast_assoc <- function(y, x) {
+	index <- is.finite(y) & is.finite(x)
+	n <- sum(index)
+	y <- y[index]
+	x <- x[index]
+	vx <- var(x)
+	bhat <- stats::cov(y, x) / vx
+	ahat <- mean(y) - bhat * mean(x)
+	# fitted <- ahat + x * bhat
+	# residuals <- y - fitted
+	# SSR <- sum((residuals - mean(residuals))^2)
+	# SSF <- sum((fitted - mean(fitted))^2)
+
+	rsq <- (bhat * vx)^2 / (vx * var(y))
+	fval <- rsq * (n-2) / (1-rsq)
+	tval <- sqrt(fval)
+	se <- abs(bhat / tval)
+
+	# Fval <- (SSF) / (SSR/(n-2))
+	# pval <- pf(Fval, 1, n-2, lowe=F)
+	# p <- stats::pf(fval, 1, n-2, lower.tail=FALSE)
+	return(list(
+		ahat=ahat, bhat=bhat, se=se, fval=fval, n=n
+	))
+}
+
+sim <- function(n, nbreak, beta, af) {
+    g <- rbinom(n, 2, af)
+    y <- g * beta + rnorm(n)
+    full <- summary(lm(y ~ g))
+    breaks <- cut(1:n, breaks=nbreak)
+    r <- lapply(levels(breaks), \(l) {
+        y <- y[breaks == l]
+        g <- g[breaks == l]
+        if(length(unique(g)) == 1) return(NULL)
+        a <- fast_assoc(y, g)
+        tibble(
+            beta = a$bhat,
+            se = a$se
+        )
+    }) %>% bind_rows()
+    meta <- ivw(r$beta, r$se)
+    tibble(
+        n=n, nbreak=nbreak, beta=beta, af=af,
+        bhat=c(full$coefficients[2, 1], meta[1]),
+        se=c(full$coefficients[2, 2], meta[2]),
+        what=c("full", "meta")
+    )
+}
+sim(10000, 1000, 0.2, 0.5)
+
+```
+
+
+```{r}
+param <- expand.grid(
+    n = 10000,
+    nbreak = c(10, 100, 1000),
+    beta = c(0, 0.2),
+    af = c(0.1, 0.5),
+    nsim = 1:30
+)
+dim(param)
+```
+
+```{r}
+res <- lapply(1:nrow(param), \(i) {
+    sim(param$n[i], param$nbreak[i], param$beta[i], param$af[i]) %>% mutate(sim=param$nsim[i])
+}) %>% bind_rows()
+```
+
+```{r}
+ggplot(res, aes(x=as.factor(nbreak), y=bhat, color=what)) +
+    geom_boxplot() +
+    facet_grid(beta ~ af, labeller=label_both)
+```
+
+```{r}
+resw <- pivot_wider(res, names_from=what, values_from=c(bhat, se))
+ggplot(resw, aes(x=bhat_full, y=bhat_meta)) +
+geom_point() +
+facet_wrap(~beta + af + nbreak, scale="free", labeller=label_both) +
+geom_abline(slope=1, intercept=0)
+```
+
+
+## Try again with just continuous data
+
+```{r}
+sim2 <- function(n, nbreak, beta) {
+    g <- rnorm(n)
+    y <- g * beta + rnorm(n)
+    full <- summary(lm(y ~ g))
+    breaks <- cut(1:n, breaks=nbreak)
+    r <- lapply(levels(breaks), \(l) {
+        y <- y[breaks == l]
+        g <- g[breaks == l]
+        if(length(unique(g)) == 1) return(NULL)
+        a <- fast_assoc(y, g)
+        tibble(
+            beta = a$bhat,
+            se = a$se
+        )
+    }) %>% bind_rows()
+    meta <- ivw(r$beta, r$se)
+    tibble(
+        n=n, nbreak=nbreak, beta=beta,
+        bhat=c(full$coefficients[2, 1], meta[1]),
+        se=c(full$coefficients[2, 2], meta[2]),
+        what=c("full", "meta")
+    )
+}
+sim2(10000, 1000, 0.2)
+sim2(10000, 100, 0.2)
+sim2(10000, 10, 0.2)
+```
+
+```{r}
+param2 <- expand.grid(
+    n = 10000,
+    nbreak = c(10, 100, 1000),
+    beta = c(0, 0.2),
+    nsim = 1:100
+)
+dim(param2)
+```
+
+```{r}
+res2 <- lapply(1:nrow(param2), \(i) {
+    sim2(param2$n[i], param2$nbreak[i], param2$beta[i]) %>% mutate(sim=param2$nsim[i])
+}) %>% bind_rows()
+```
+
+```{r}
+resw <- pivot_wider(res2, names_from=what, values_from=c(bhat, se))
+ggplot(resw, aes(x=bhat_full, y=bhat_meta)) +
+geom_point() +
+facet_wrap(~beta + nbreak, scale="free", labeller=label_both) +
+geom_abline(slope=1, intercept=0) +
+geom_smooth(method="lm")
+```
+
+```{r}
+ggplot(resw, aes(x=se_full, y=se_meta)) +
+geom_point() +
+facet_wrap(~beta + nbreak, scale="free", labeller=label_both) +
+geom_abline(slope=1, intercept=0) +
+geom_smooth(method="lm")
+```
+
+```{r}
+res2 %>% 
+    mutate(pval = pnorm(abs(bhat)/se, low=F)) %>%
+    filter(beta == 0) %>%
+    group_by(nbreak, what) %>%
+    summarise(power = sum(pval < 0.05)/n(), n=n())
+```
+
+
+## Summary
+
+- No bias
+- The effects are not identical and become more noisy as the sample size decreases. 
+- The standard error is under estimated for the meta analysis as the sample sizes decrease, which leads to slight elevation of type 1 error. 
+
+---
+
+```{r}
+sessionInfo()
+```

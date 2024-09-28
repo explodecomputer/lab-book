@@ -1,0 +1,72 @@
+---
+title: "Liftover gwasvcf"
+author: Gibran Hemani
+date: "2024-09-25"
+categories: []
+---
+
+## Background
+
+Need an efficient way to liftover gwas-vcf files from hg19 to hg38. First tried picard:
+
+```bash
+~/bin/java/jdk-23/bin/java -jar ~/bin/picard.jar CreateSequenceDictionary -R hg38.fa.gz -O hg38.dict
+
+java -jar picard.jar 
+      R=reference.fasta \ 
+      O=reference.dict
+
+~/bin/java/jdk-23/bin/java -jar ~/bin/picard.jar LiftoverVcf \
+     -I ieu-a-2.vcf.gz \
+     -O lifted_over.vcf \
+     -CHAIN hg19ToHg38.over.chain.gz \
+     -REJECT rejected_variants.vcf \
+     -R hg38.fa.gz
+```
+
+This left no lifted variants - probably because the chromosome names weren't matching. bcftools +liftover option seems to be much more reliable
+
+```bash
+# Install bcftools http://samtools.github.io/bcftools/howtos/install.html
+# Download plugin binaries https://software.broadinstitute.org/software/score/
+export BCFTOOLS_PLUGINS=/path/to/bcftools-plugins && bcftools +liftover
+# Download hg19.fa
+wget https://genvisis.umn.edu/rsrc/Genome/hg19/hg19.fa
+# Download hg38.fa
+wget https://genvisis.umn.edu/rsrc/Genome/hg38/hg38.fa
+# Download chain file
+wget https://hgdownload.soe.ucsc.edu/gbdb/hg19/liftOver/hg19ToHg38.over.chain.gz
+
+# Example gwas-vcf file
+wget https://gwas.mrcieu.ac.uk/files/ieu-a-2/ieu-a-2.vcf.gz
+
+# Example liftover
+bcftools +liftover --no-version -Ou ieu-a-2.vcf.gz -- \
+  -s hs37d5.fa \
+  -f hg38.fa \
+  -c hg19ToHg38.over.chain.gz \
+  --reject ieu-a-2-reject.vcf.gz \
+  --reject-type z |
+  bcftools sort -Oz -o ieu-a-2-hg38.vcf.gz -W=tbi
+
+
+
+export BCFTOOLS_PLUGINS=~/bin/bcftools-plugins
+bcftools
+
+bcftools +liftover --no-version -Ou ieu-a-2.vcf.gz -- \
+  -s hs37d5.fa \
+  -f hg38.fa \
+  -c hg19ToHg38.over.chain.gz \
+  --reject reject.vcf.gz \
+  --reject-type z |
+  bcftools sort -Oz -o ieu-a-2_hg38.vcf.gz -W=tbi
+```
+
+It did 2m variants in about 1 minute.
+
+---
+
+```{r}
+sessionInfo()
+```
