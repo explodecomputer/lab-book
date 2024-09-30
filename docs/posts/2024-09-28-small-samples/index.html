@@ -274,8 +274,8 @@ Attaching package: 'dplyr'</code></pre>
 <pre><code># A tibble: 2 × 7
       n nbreak  beta    af  bhat     se what 
   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;
-1 10000   1000   0.2   0.5 0.198 0.0143 full 
-2 10000   1000   0.2   0.5 0.205 0.0131 meta </code></pre>
+1 10000   1000   0.2   0.5 0.243 0.0143 full 
+2 10000   1000   0.2   0.5 0.243 0.0134 meta </code></pre>
 </div>
 </div>
 <div class="cell">
@@ -354,24 +354,24 @@ Attaching package: 'dplyr'</code></pre>
 <pre><code># A tibble: 2 × 6
       n nbreak  beta  bhat      se what 
   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;
-1 10000   1000   0.2 0.197 0.00980 full 
-2 10000   1000   0.2 0.209 0.00899 meta </code></pre>
+1 10000   1000   0.2 0.196 0.00999 full 
+2 10000   1000   0.2 0.192 0.00914 meta </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sim2</span>(<span class="dv">10000</span>, <span class="dv">100</span>, <span class="fl">0.2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 6
       n nbreak  beta  bhat      se what 
   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;
-1 10000    100   0.2 0.170 0.0100  full 
-2 10000    100   0.2 0.171 0.00997 meta </code></pre>
+1 10000    100   0.2 0.195 0.00999 full 
+2 10000    100   0.2 0.196 0.00995 meta </code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sim2</span>(<span class="dv">10000</span>, <span class="dv">10</span>, <span class="fl">0.2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 6
       n nbreak  beta  bhat     se what 
   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;
-1 10000     10   0.2 0.194 0.0101 full 
-2 10000     10   0.2 0.193 0.0101 meta </code></pre>
+1 10000     10   0.2 0.202 0.0100 full 
+2 10000     10   0.2 0.202 0.0100 meta </code></pre>
 </div>
 </div>
 <div class="cell">
@@ -441,12 +441,104 @@ Attaching package: 'dplyr'</code></pre>
 # Groups:   nbreak [3]
   nbreak what  power     n
    &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt; &lt;int&gt;
-1     10 full   0.03   100
-2     10 meta   0.03   100
+1     10 full   0.06   100
+2     10 meta   0.06   100
 3    100 full   0.1    100
-4    100 meta   0.11   100
-5   1000 full   0.1    100
-6   1000 meta   0.26   100</code></pre>
+4    100 meta   0.08   100
+5   1000 full   0.07   100
+6   1000 meta   0.21   100</code></pre>
+</div>
+</div>
+</section>
+<section id="simulate-one-small-study" class="level2">
+<h2 class="anchored" data-anchor-id="simulate-one-small-study">Simulate one small study</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>sim3 <span class="ot">&lt;-</span> <span class="cf">function</span>(n, prop, beta, af) {</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    g <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="dv">2</span>, af)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> g <span class="sc">*</span> beta <span class="sc">+</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    s1 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>(n<span class="sc">*</span>prop)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    s2 <span class="ot">&lt;-</span> (<span class="dv">1</span><span class="sc">:</span>n)[<span class="sc">-</span>s1]</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    s3 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    r <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">list</span>(s1, s2, s3), \(s) {</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>        y <span class="ot">&lt;-</span> y[s]</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>        g <span class="ot">&lt;-</span> g[s]</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span>(<span class="fu">length</span>(<span class="fu">unique</span>(g)) <span class="sc">==</span> <span class="dv">1</span>) <span class="fu">return</span>(<span class="cn">NULL</span>)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>        a <span class="ot">&lt;-</span> <span class="fu">fast_assoc</span>(y, g)</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">bhat =</span> a<span class="sc">$</span>bhat,</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>            <span class="at">se =</span> a<span class="sc">$</span>se,</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">ns =</span> <span class="fu">length</span>(y)</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>    }) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>() <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">what=</span><span class="fu">c</span>(<span class="st">"p"</span>, <span class="st">"q"</span>, <span class="st">"full"</span>))</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>    meta <span class="ot">&lt;-</span> <span class="fu">ivw</span>(r<span class="sc">$</span>bhat[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>], r<span class="sc">$</span>se[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>])</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>    r <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(r, <span class="fu">tibble</span>(<span class="at">bhat =</span> meta[<span class="dv">1</span>], <span class="at">se =</span> meta[<span class="dv">2</span>], <span class="at">ns =</span> n, <span class="at">what=</span><span class="st">"meta"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">n=</span>n, <span class="at">prop=</span>prop, <span class="at">beta=</span>beta, <span class="at">af=</span>af)</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(r)</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a><span class="fu">sim3</span>(<span class="dv">10000</span>, <span class="fl">0.01</span>, <span class="fl">0.2</span>, <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 8
+   bhat     se    ns what      n  prop  beta    af
+  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 0.153 0.147    100 p     10000  0.01   0.2   0.5
+2 0.205 0.0144  9900 q     10000  0.01   0.2   0.5
+3 0.204 0.0143 10000 full  10000  0.01   0.2   0.5
+4 0.204 0.0143 10000 meta  10000  0.01   0.2   0.5</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>param3 <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="dv">100000</span>,</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">prop =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.001</span>),</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">beta =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.2</span>),</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">af =</span> <span class="fu">c</span>(<span class="fl">0.1</span>),</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">nsim =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(param3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 400   5</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>res3 <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(param3), \(i) {</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sim3</span>(param3<span class="sc">$</span>n[i], param3<span class="sc">$</span>prop[i], param3<span class="sc">$</span>beta[i], param3<span class="sc">$</span>af[i]) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">sim=</span>param3<span class="sc">$</span>nsim[i])</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>}) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>resw <span class="ot">&lt;-</span> res3 <span class="sc">%&gt;%</span> </span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(what <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"full"</span>, <span class="st">"meta"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_wider</span>(<span class="at">names_from=</span>what, <span class="at">values_from=</span><span class="fu">c</span>(bhat, se))</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(resw, <span class="fu">aes</span>(<span class="at">x=</span>bhat_full, <span class="at">y=</span>bhat_meta)) <span class="sc">+</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="fu">facet_wrap</span>(<span class="sc">~</span>beta <span class="sc">+</span> prop, <span class="at">scale=</span><span class="st">"free"</span>, <span class="at">labeller=</span>label_both) <span class="sc">+</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_abline</span>(<span class="at">slope=</span><span class="dv">1</span>, <span class="at">intercept=</span><span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">"lm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(resw, <span class="fu">aes</span>(<span class="at">x=</span>se_full, <span class="at">y=</span>se_meta)) <span class="sc">+</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="fu">facet_wrap</span>(<span class="sc">~</span>beta <span class="sc">+</span> prop, <span class="at">scale=</span><span class="st">"free"</span>, <span class="at">labeller=</span>label_both) <span class="sc">+</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_abline</span>(<span class="at">slope=</span><span class="dv">1</span>, <span class="at">intercept=</span><span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">"lm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -454,12 +546,13 @@ Attaching package: 'dplyr'</code></pre>
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
 <ul>
 <li>No bias</li>
-<li>The effects are not identical and become more noisy as the sample size decreases.</li>
-<li>The standard error is under estimated for the meta analysis as the sample sizes decrease, which leads to slight elevation of type 1 error.</li>
+<li>For many small studies, the effects are not identical and become more noisy as the sample size decreases.</li>
+<li>For many small studies, the standard error is under estimated for the meta analysis as the sample sizes decrease, which leads to slight elevation of type 1 error.</li>
+<li>For a single small study there is negligible impact on bias or type 1 error.</li>
 </ul>
 <hr>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.1 (2024-06-14)
 Platform: aarch64-apple-darwin20

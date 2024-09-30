@@ -187,12 +187,77 @@ res2 %>%
     summarise(power = sum(pval < 0.05)/n(), n=n())
 ```
 
+## Simulate one small study
+
+```{r}
+sim3 <- function(n, prop, beta, af) {
+    g <- rbinom(n, 2, af)
+    y <- g * beta + rnorm(n)
+
+    s1 <- 1:(n*prop)
+    s2 <- (1:n)[-s1]
+    s3 <- 1:n
+    r <- lapply(list(s1, s2, s3), \(s) {
+        y <- y[s]
+        g <- g[s]
+        if(length(unique(g)) == 1) return(NULL)
+        a <- fast_assoc(y, g)
+        tibble(
+            bhat = a$bhat,
+            se = a$se,
+            ns = length(y)
+        )
+    }) %>% bind_rows() %>% mutate(what=c("p", "q", "full"))
+
+    meta <- ivw(r$bhat[1:2], r$se[1:2])
+    r <- bind_rows(r, tibble(bhat = meta[1], se = meta[2], ns = n, what="meta")) %>%
+        mutate(n=n, prop=prop, beta=beta, af=af)
+    return(r)
+}
+sim3(10000, 0.01, 0.2, 0.5)
+```
+
+
+```{r}
+param3 <- expand.grid(
+    n = 100000,
+    prop = c(0.1, 0.001),
+    beta = c(0, 0.2),
+    af = c(0.1),
+    nsim = 1:100
+)
+dim(param3)
+
+res3 <- lapply(1:nrow(param3), \(i) {
+    sim3(param3$n[i], param3$prop[i], param3$beta[i], param3$af[i]) %>% mutate(sim=param3$nsim[i])
+}) %>% bind_rows()
+
+resw <- res3 %>% 
+    filter(what %in% c("full", "meta")) %>%
+    pivot_wider(names_from=what, values_from=c(bhat, se))
+
+ggplot(resw, aes(x=bhat_full, y=bhat_meta)) +
+geom_point() +
+facet_wrap(~beta + prop, scale="free", labeller=label_both) +
+geom_abline(slope=1, intercept=0) +
+geom_smooth(method="lm")
+```
+
+
+```{r}
+ggplot(resw, aes(x=se_full, y=se_meta)) +
+geom_point() +
+facet_wrap(~beta + prop, scale="free", labeller=label_both) +
+geom_abline(slope=1, intercept=0) +
+geom_smooth(method="lm")
+```
 
 ## Summary
 
 - No bias
-- The effects are not identical and become more noisy as the sample size decreases. 
-- The standard error is under estimated for the meta analysis as the sample sizes decrease, which leads to slight elevation of type 1 error. 
+- For many small studies, the effects are not identical and become more noisy as the sample size decreases. 
+- For many small studies, the standard error is under estimated for the meta analysis as the sample sizes decrease, which leads to slight elevation of type 1 error. 
+- For a single small study there is negligible impact on bias or type 1 error.
 
 ---
 
