@@ -15,9 +15,9 @@ Generate families with polygenic effects plus null rare variants. Allow for asso
 ## Simulations
 
 ```{r}
-
 library(dplyr)
 library(MASS)
+library(kinship2)
 
 generate_assortment <- function(m, f, rho) {
     stopifnot(length(m) == length(f))
@@ -30,22 +30,18 @@ generate_assortment <- function(m, f, rho) {
     return(tibble(m = m_order[rm], f=f_order[rf]))
 }
 
-
-make_families <- function(betas, nfam, h2, rho) {
+make_families <- function(betas, nfam, h2, rho, nrare=1000, ncommon=1000) {
     npoly <- length(betas)
+    # Generate poly variants
     g_mother1 <- sapply(1:npoly, \(i) rbinom(nfam, 1, 0.5))
     g_mother2 <- sapply(1:npoly, \(i) rbinom(nfam, 1, 0.5))
     g_father1 <- sapply(1:npoly, \(i) rbinom(nfam, 1, 0.5))
     g_father2 <- sapply(1:npoly, \(i) rbinom(nfam, 1, 0.5))
-    g_mother1 <- cbind(diag(nfam), g_mother1)
-    g_mother2 <- cbind(matrix(0, nfam, nfam), g_mother2)
-    g_father1 <- cbind(diag(nfam), g_father1)
-    g_father2 <- cbind(matrix(0, nfam, nfam), g_father2)
 
-    prs_mother <- (g_mother1[,(nfam+1):ncol(g_mother1)] + g_mother2[,(nfam+1):ncol(g_mother2)]) %*% betas
-    prs_father <- (g_father1[,(nfam+1):ncol(g_father1)] + g_father2[,(nfam+1):ncol(g_father2)]) %*% betas
-    y_mother <- scale(prs_mother) + rnorm(nfam, 0, sqrt(1 - h2))
-    y_father <- scale(prs_father) + rnorm(nfam, 0, sqrt(1 - h2))
+    prs_mother <- (g_mother1[,1:ncol(g_mother1)] + g_mother2[,1:ncol(g_mother2)]) %*% betas
+    prs_father <- (g_father1[,1:ncol(g_father1)] + g_father2[,1:ncol(g_father2)]) %*% betas
+    y_mother <- scale(prs_mother) * sqrt(h2) + rnorm(nfam, 0, sqrt(1 - h2))
+    y_father <- scale(prs_father) * sqrt(h2) + rnorm(nfam, 0, sqrt(1 - h2))
 
     m <- generate_assortment(y_mother, y_father, rho)
     g_mother1 <- g_mother1[m$m,]
@@ -56,23 +52,65 @@ make_families <- function(betas, nfam, h2, rho) {
     y_father <- y_father[m$f]
     prs_mother <- prs_mother[m$m]
     prs_father <- prs_father[m$f]
-    return(list(g_mother1 = g_mother1, g_mother2 = g_mother2, g_father1 = g_father1, g_father2 = g_father2, x = tibble(y_mother, y_father, prs_mother, prs_father)))
+
+
+    # Generate rare variants
+    g_mother1 <- cbind(g_mother1, matrix(0, nfam, nrare))
+    g_mother2 <- cbind(g_mother2, matrix(0, nfam, nrare))
+    g_father1 <- cbind(g_father1, matrix(0, nfam, nrare))
+    g_father2 <- cbind(g_father2, matrix(0, nfam, nrare))
+
+    # Find highest family
+    i <- which.max(y_mother + y_father)
+    g_mother1[i, (npoly+1):ncol(g_mother1)] <- 1
+    g_father1[i, (npoly+1):ncol(g_mother1)] <- 1
+
+    # Common variants
+    g_mother1 <- cbind(g_mother1, sapply(1:ncommon, \(i) rbinom(nfam, 1, 0.5)))
+    g_mother2 <- cbind(g_mother2, sapply(1:ncommon, \(i) rbinom(nfam, 1, 0.5)))
+    g_father1 <- cbind(g_father1, sapply(1:ncommon, \(i) rbinom(nfam, 1, 0.5)))
+    g_father2 <- cbind(g_father2, sapply(1:ncommon, \(i) rbinom(nfam, 1, 0.5)))
+
+    pedm <- tibble(
+            generation=1,
+            id=paste(generation, 1:nfam, "mother"),
+            sex = 2,
+            motherid="0",
+            fatherid="0"
+        )[m$m,]
+    pedf <- tibble(
+            generation=1,
+            id=paste(generation, 1:nfam, "father"),
+            sex = 1,
+            motherid="0",
+            fatherid="0"
+        )[m$f,]
+
+    ped <- bind_rows(pedm, pedf)
+    ped$prs <- c(prs_mother, prs_father)
+    ped$y <- c(y_mother, y_father)
+    map <- tibble(snp=1:ncol(g_mother1), what=c(rep("prs", npoly), rep("rare", nrare), rep("common", ncommon)))
+    return(list(ped = ped, g_mother1 = g_mother1, g_mother2 = g_mother2, g_father1 = g_father1, g_father2 = g_father2, x = tibble(id_mother = pedm$id, id_father = pedf$id, y_mother, y_father, prs_mother, prs_father), map = map))
 }
-
-betas <- rnorm(100)
-dat <- make_families(betas = betas, nfam = 100, nchild = 100, h2 = 0.8, rho = 0.4, ngen = 100)
-
-str(dat)
-cor(dat$x$y_mother, dat$x$y_father)
-cor(dat$x$y_mother, dat$x$prs_mother)^2
 ```
 
 
 ```{r}
-
-create_child <- function(dat, betas, h2, rho) {
+create_child <- function(dat, betas, h2, rho, reset_rare = FALSE) {
     nfam <- nrow(dat$x)
     nsnp <- ncol(dat$g_mother1)
+
+    if(reset_rare) {
+        vind <- subset(dat$map, what == "rare")$snp
+        fid <- which.max(dat$x$y_mother + dat$x$y_father)
+        dat$g_mother1[1:nfam, vind] <- 0
+        dat$g_mother2[1:nfam, vind] <- 0
+        dat$g_father1[1:nfam, vind] <- 0
+        dat$g_father2[1:nfam, vind] <- 0
+        dat$g_mother1[fid, 1:nfam] <- 1
+        dat$g_father1[fid, 1:nfam] <- 1
+    }
+
     sib1_m <- matrix(0, nfam, nsnp)
     sib1_f <- matrix(0, nfam, nsnp)
     sib2_m <- matrix(0, nfam, nsnp)
@@ -92,10 +130,11 @@ create_child <- function(dat, betas, h2, rho) {
         sib2_f[!ind, i] <- dat$g_father2[!ind, i]
     }
 
-    prs_sib1 <- (sib1_m[,(nfam+1):nsnp] + sib1_f[,(nfam+1):nsnp]) %*% betas
-    prs_sib2 <- (sib2_m[,(nfam+1):nsnp] + sib2_f[,(nfam+1):nsnp]) %*% betas
-    y_sib1 <- scale(prs_sib1) + rnorm(nfam, 0, sqrt(1 - h2))
-    y_sib2 <- scale(prs_sib2) + rnorm(nfam, 0, sqrt(1 - h2))
+    vind <- subset(dat$map, what == "prs")$snp
+    prs_sib1 <- (sib1_m[,vind] + sib1_f[,vind]) %*% betas
+    prs_sib2 <- (sib2_m[,vind] + sib2_f[,vind]) %*% betas
+    y_sib1 <- scale(prs_sib1) * sqrt(h2) + rnorm(nfam, 0, sqrt(1 - h2))
+    y_sib2 <- scale(prs_sib2) * sqrt(h2) + rnorm(nfam, 0, sqrt(1 - h2))
 
 
     # This doesn't exclude inbreeding
@@ -108,38 +147,496 @@ create_child <- function(dat, betas, h2, rho) {
     y_sib2 <- y_sib2[m$f]
     prs_sib1 <- prs_sib1[m$m]
     prs_sib2 <- prs_sib2[m$f]
-    return(list(g_mother1 = sib1_m, g_mother2 = sib1_f, g_father1 = sib2_m, g_father2 = sib2_f, x = tibble(y_mother=y_sib1, y_father=y_sib2, prs_mother=prs_sib1, prs_father=prs_sib2)))
+
+    gen <- max(dat$ped$generation) + 1
+    pedl <- subset(dat$ped, generation == gen-1)
+    ped_m <- tibble(
+            generation = gen,
+            id = paste(generation, 1:nfam, "mother"),
+            sex = 2,
+            motherid = pedl$id[1:nfam],
+            fatherid = pedl$id[(nfam+1):(2*nfam)]
+        )[m$m,]
+    ped_f <- tibble(
+            generation = gen,
+            id = paste(generation, 1:nfam, "father"),
+            sex = 1,
+            motherid = pedl$id[1:nfam],
+            fatherid = pedl$id[(nfam+1):(2*nfam)]
+        )[m$f,]
+    ped_m$prs <- prs_sib1
+    ped_f$prs <- prs_sib2
+    ped_m$y <- y_sib1
+    ped_f$y <- y_sib2
+    ped <- bind_rows(dat$ped, ped_m, ped_f)
+
+    return(list(ped = ped, g_mother1 = sib1_m, g_mother2 = sib1_f, g_father1 = sib2_m, g_father2 = sib2_f, x = tibble(id_mother = ped_m$id, id_father = ped_f$id, y_mother=y_sib1, y_father=y_sib2, prs_mother=prs_sib1, prs_father=prs_sib2), map = dat$map))
 }
-
-dat2 <- create_child(dat, betas, h2 = 0.8, rho = 0.4)
-str(dat2)
-cor(dat2$x$y_mother, dat2$x$y_father)
-cor(dat2$x$prs_mother, dat2$x$prs_father)
-cor(dat2$x$y_mother, dat2$x$prs_mother)^2
-```
-
-
-```{r}
-betas <- rnorm(100)
-dat <- make_families(betas = betas, nfam = 100, h2 = 0.8, rho = 0.4)
-for(i in 1:10) {
-    dat <- create_child(dat, betas, h2 = 0.8, rho = 0.4)
-}
-```
-
-
-```{r}
 
 collapse_dat <- function(dat) {
     g_mother <- dat$g_mother1 + dat$g_mother2
     g_father <- dat$g_father1 + dat$g_father2
     g <- rbind(g_mother, g_father)
-    x <- tibble(y = c(dat$x$y_mother, dat$x$y_father), prs = c(dat$x$prs_mother, dat$x$prs_father))
-    return(list(g = g, x = x))
+    x <- tibble(id = c(dat$x$id_mother, dat$x$id_father), y = c(dat$x$y_mother, dat$x$y_father), prs = c(dat$x$prs_mother, dat$x$prs_father))
+    dat$map$af <- colSums(g) / (2*nrow(g))
+    return(list(g = g, x = x, map = dat$map))
 }
 
-dat2 <- collapse_dat(dat)
+make_ped <- function(dat, gen=NULL) {
+    if(!is.null(gen)) {
+        dat$ped <- subset(dat$ped, generation %in% gen)
+        mingen <- min(gen)
+        dat$ped$motherid[dat$ped$generation == mingen] <- 0
+        dat$ped$fatherid[dat$ped$generation == mingen] <- 0
+    }
+    pedigree(id=dat$ped$id, dadid=dat$ped$fatherid, momid=dat$ped$motherid, sex=dat$ped$sex, missid="0")
+}
 ```
+
+```{r}
+betas <- rnorm(100)
+dat <- make_families(betas = betas, nfam = 1000, h2 = 0.8, rho = 0.4)
+
+str(dat)
+cor(dat$x$y_mother, dat$x$y_father)
+cor(dat$x$y_mother, dat$x$prs_mother)^2
+
+dat2 <- create_child(dat, betas, h2 = 0.8, rho = 0.4, reset_rare = FALSE)
+str(dat2)
+cor(dat2$x$y_mother, dat2$x$y_father)
+cor(dat2$x$prs_mother, dat2$x$prs_father)
+cor(dat2$x$y_mother, dat2$x$prs_mother)^2
+table(dat2$g_mother1[,1:100] + dat2$g_mother2[,1:100])
+table(dat2$g_father1[,1:100] + dat2$g_father2[,1:100])
+
+var(dat$x$y_mother)
+var(dat$x$y_father)
+
+ped <- make_ped(dat2, 1)
+
+datc <- collapse_dat(dat)
+str(datc)
+plot(datc$map$af)
+
+datc2 <- collapse_dat(dat2)
+str(datc2)
+plot(datc2$map$af)
+```
+
+```{r}
+dat3 <- create_child(dat2, betas, h2 = 0.8, rho = 0.4, reset_rare = FALSE)
+datc3 <- collapse_dat(dat3)
+plot(datc3$map$af)
+
+dat4 <- create_child(dat3, betas, h2 = 0.8, rho = 0.4, reset_rare = FALSE)
+datc4 <- collapse_dat(dat4)
+plot(datc4$map$af)
+```
+
+Null
+
+```{r}
+betas <- rnorm(100)
+dat <- make_families(betas = betas, nfam = 100, h2 = 0, rho = 0)
+
+str(dat)
+cor(dat$x$y_mother, dat$x$y_father)
+cor(dat$x$y_mother, dat$x$prs_mother)^2
+
+dat2 <- create_child(dat, betas, h2 = 0, rho = 0, reset_rare = TRUE)
+str(dat2)
+cor(dat2$x$y_mother, dat2$x$y_father)
+cor(dat2$x$prs_mother, dat2$x$prs_father)
+cor(dat2$x$y_mother, dat2$x$prs_mother)^2
+table(dat2$g_mother1[,1:100] + dat2$g_mother2[,1:100])
+table(dat2$g_father1[,1:100] + dat2$g_father2[,1:100])
+
+```
+
+Check pedigree
+
+```{r}
+temp <- inner_join(
+    tibble(mid = dat$ped$id[1:100], y = dat$x$y_mother),
+    tibble(mid = dat2$ped$motherid[201:300], y2 = dat2$x$y_mother)
+)
+cor(temp$y, temp$y2)
+```
+
+```{r}
+p <- dat2$ped
+temp <- inner_join(
+    subset(p, generation == 1),
+    subset(p, generation == 2),
+    by=c("id"="motherid")
+) %>% filter(!duplicated(id))
+temp
+cor(temp$y.x, temp$y.y)
+```
+
+
+Check kinship
+
+```{r}
+kin <- kinship(ped)
+kin[1:10,1:10]
+table(kin[lower.tri(kin)])
+```
+
+
+```{r}
+mean_cor_rare_prs <- function(datc, wh="rare") {
+    g <- datc$g
+    prs <- datc$x$prs
+    rare <- g[,subset(datc$map, what == wh)$snp]
+    print(dim(rare))
+    rare <- rare[, colSums(rare) > 0]
+    print(dim(rare))
+    cor(rare, prs)
+}
+
+mean_cor_rare_prs(datc4) %>% hist(breaks=100)
+```
+
+
+```{r}
+betas <- rnorm(100)
+dat <- make_families(betas, nfam = 2000, h2 = 0.8, rho = 0.4, nrare=10000)
+l1 <- list()
+for(i in 1:8) {
+    dat <- create_child(dat, betas, h2 = 0.8, rho = 0.4, reset_rare = FALSE)
+    l1[[i]] <- 
+        bind_rows(
+            tibble(gen=i, rsq=mean_cor_rare_prs(collapse_dat(dat), wh="rare")^2, h2=0.8, rho=0.4) %>% mutate(what="rare"),
+            tibble(gen=i, rsq=mean_cor_rare_prs(collapse_dat(dat), wh="common")^2, h2=0.8, rho=0.4) %>% mutate(what="common")
+        )
+}
+l1 <- bind_rows(l1)
+
+ggplot(l1, aes(x=as.factor(gen), y=rsq)) + geom_violin(aes(fill=what)) + geom_smooth(aes(x=gen, colour=what), method="loess", se=FALSE)
+ggplot(l1, aes(x=as.factor(gen), y=rsq)) + geom_boxplot(aes(fill=what))
+
+    geom_line(aes(colour=as.factor(h2), linetype=as.factor(rho)))
+
+
+l2 <- list()
+for(i in 1:8) {
+    dat <- create_child(dat, betas, h2 = 0.4, rho = 0.4, reset_rare = FALSE)
+    l[[i]] <- tibble(gen=i, rsq=mean_cor_rare_prs(collapse_dat(dat))^2, h2=0.8, rho=0.4)
+}
+l2 <- bind_rows(l)
+
+
+rare_prs_cor_sim <- function(nsnp, nfam, h2, rho, nrare, rep=NULL) {
+    betas <- rnorm(nsnp)
+    dat <- make_families(betas = betas, nfam = nfam, h2 = h2, rho = rho, nrare = nrare)
+    l <- list()
+    for(i in 1:8) {
+        dat <- create_child(dat, betas, h2 = h2, rho = rho, reset_rare = FALSE)
+        l[[i]] <- tibble(gen=i, rsq=mean_cor_rare_prs(collapse_dat(dat))^2 %>% drop, h2=h2, rho=rho)
+    }
+    l <- bind_rows(l)
+    return(l)
+}
+l <- rare_prs_cor_sim(500, 2000, 0.8, 0.4, 1000)
+param <- expand.grid(h2=c(0, 0.8, 0.4), nsnp=500, rho=c(0, 0.4, 0.8), nfam=c(2000), nrare=c(10000), rep=1:5)
+l <- pmap(param, rare_prs_cor_sim, .progress=TRUE)
+l <- bind_rows(l)
+save(l, file="rare_prs_cor_sim.RData")
+
+
+
+library(ggplot2)
+library(dplyr)
+ggplot(l, aes(x=as.factor(gen), y=rsq)) + geom_violin(aes(fill=as.factor(h2), colour=as.factor(rho)))
+
+
+l2 <- group_by(l, h2, rho, gen) %>% summarise(rsq=mean(rsq), n=n())
+ggplot(l2, aes(x=gen, y=rsq)) + 
+    geom_line(aes(colour=as.factor(h2), linetype=as.factor(rho)))
+
+ggplot(l2, aes(x=h2, y=rsq)) + 
+    geom_line(aes(colour=as.factor(gen), linetype=as.factor(rho))) +
+    facet_grid(.~rho)
+
+
+```
+
+```{r}
+
+```
+
+
+
+```{r}
+
+qqplot <- function(pvector, pl=FALSE) {
+    pvector <- pvector[!is.na(pvector) & !is.nan(pvector) & !is.null(pvector) & is.finite(pvector) & pvector<1 & pvector>0]
+    o <- -log10(sort(pvector, decreasing=FALSE))
+    e <- -log10(ppoints(length(pvector)))
+    cs <- qchisq(1-pvector, 1)
+    lambda <- median(cs, na.rm=TRUE) / qchisq(0.5, 1)
+    if(pl)
+    {
+        plot(e, o, xlab = "Expected", ylab = "Observed")
+        abline(0, 1)
+    }
+    return(lambda)
+}
+```
+
+
+```{r}
+betas <- rnorm(100)
+dat <- make_families(betas = betas, nfam = 1000, h2 = 0, rho = 0)
+for(i in 1:30) {
+    dat <- create_child(dat, betas, h2 = 0, rho = 0)
+}
+str(dat)
+datc <- collapse_dat(dat)
+str(datc)
+```
+
+
+```{r}
+ped <- make_ped(dat, 20:30)
+ped
+kin <- kinship(ped)
+keepids <- subset(dat$ped, generation == 30)$id
+kin <- kin[keepids, keepids] * 2
+hist(kin[lower.tri(kin)][kin[lower.tri(kin)] > 0.05], breaks=100)
+```
+
+
+```{r}
+freq <- collapse_dat(dat)
+hist(freq$af, breaks=100)
+
+gr <- gwas(freq$x$prs, freq$g)
+gr %>% group_by(af < 0.1) %>% summarise(min_p=min(pval, na.rm=T), n=sum(!is.na(pval)))
+```
+
+
+```{r}
+qqplot(gr[1:1000,]$pval)
+```
+
+
+prune for relatedness
+
+```{r}
+
+kin_prune <- function(k, thresh) {
+    diag(k) <- 0
+    k[k > thresh] <- 1
+    k[k < thresh] <- 0
+    k[1:10,1:10]
+    kincount <- rowSums(k)
+    summary(kincount)
+    rem <- c()
+    rem <- c(rem, which.max(kincount))
+    k[rem,] <- 0
+    k[,rem] <- 0
+    kincount <- rowSums(k)
+    summary(kincount)
+
+    sum(kincount)
+    while(sum(kincount) > 0) {
+        i <- which.max(kincount)[1]
+        k[i,] <- 0
+        k[,i] <- 0
+        rem <- c(rem, i)
+        kincount <- rowSums(k)
+    }
+    return(rem)
+}
+
+rem1 <- kin_prune(kin, 0.1)
+length(rem1)
+
+rem <- kin_prune(kin, 0.5)
+length(rem)
+
+gr <- gwas(freq$x$y, freq$g)
+qqplot(gr$p)
+
+gr <- gwas(freq$x$y, freq$g)
+qqplot(gr$p)
+
+```
+
+
+```{r}
+whole_sim <- function(nfam, nsnp, ngen, h2, rho, thresh, nrare=1000, ncommon=1000) {
+    betas <- rnorm(nsnp)
+    message("Founders")
+    dat <- make_families(betas = betas, nfam = nfam, h2 = h2, rho = rho, nrare=nrare, ncommon=ncommon)
+    message("Children")
+    for(i in 1:ngen) {
+        dat <- create_child(dat, betas, h2 = h2, rho = rho)
+    }
+    message(cor(dat$x$y_mother, dat$x$y_father))
+    message(cor(dat$x$y_mother, dat$x$prs_mother))
+    datc <- collapse_dat(dat)
+    message("Kinships")
+    ped <- make_ped(dat, (ngen-2):ngen)
+    kin <- kinship(ped)
+    keepids <- subset(dat$ped, generation == ngen)$id
+    kin <- kin[keepids, keepids] * 2
+    message("Pruning")
+    rem <- kin_prune(kin, thresh)
+    message(length(rem), " to remove")
+    message("GWAS")
+    gry <- gwas(datc$x$y[-rem], datc$g[-rem,]) %>% mutate(out="y", what=dat$map$what)
+    grprs <- gwas(datc$x$prs[-rem], datc$g[-rem,]) %>% mutate(out="prs", what=dat$map$what)
+    gr <- bind_rows(gry, grprs) 
+    s <- gr %>%
+        group_by(out, what) %>%
+        summarise(nsnp=sum(!is.na(pval)), minp=min(pval, na.rm=TRUE), lambda=qqplot(pval), nid=n[1])
+    return(list(s=s, gr=gr))
+}
+
+o1 <- whole_sim(2000, 1000, 6, 0.8, 0.4, 0.1, 5000)
+o2 <- whole_sim(2000, 1000, 4, 0, 0, 0.1)
+o1$s
+o2$s
+
+subset(o1$gr, what=="rare" & out=="prs")$pval %>% hist
+
+```
+
+
+
+```{r}
+k <- greedy_remove_relateds(kin, 0.05)
+k %>% table
+
+kin2 <- kin[k, k]
+hist(kin2[lower.tri(kin2)], breaks=100)
+summary(kin2[lower.tri(kin2)])
+
+
+```
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+```{r}
+
+greedy_remove_relateds <- function(m, thresh) {
+    n <- nrow(m)
+    keep <- rep(TRUE, n)
+
+    diag(m) <- 0
+
+    b <- tibble(
+        id=1:n,
+        rel=sapply(1:n, \(i) sum(m[i,] > thresh))
+    ) %>%
+    filter(rel > 0)
+
+    if(nrow(b) == 0) {
+        return(keep)
+    }
+
+    b <- slice_max(b, n=1, order_by=rel)[1,]
+
+    while(nrow(b) > 0) {
+        message(nrow(b))
+        keep[b$id[1]] <- FALSE
+        m[b$id[1],] <- 0
+        m[,b$id[1]] <- 0
+        b <- tibble(
+            id=1:n,
+            rel=sapply(1:n, \(i) sum(m[i,] > thresh) - 1)
+        ) %>% arrange(desc(rel)) %>%
+        filter(rel > 0)
+    }
+    return(keep)
+}
+
+greedy_remove_relateds(kin, 0.2)
+
+prune_correlation_matrix <- function(cor_matrix, threshold) {
+  n <- nrow(cor_matrix)
+  
+  # Initialize variables
+  best_kept <- 1:n
+  best_size <- n
+  
+  # Helper function to check if a subset of rows meets the threshold criteria
+  check_subset <- function(subset) {
+    sub_matrix <- cor_matrix[subset, subset]
+    all(sub_matrix[upper.tri(sub_matrix)] <= threshold)
+  }
+  
+  # Recursive function to find the optimal subset
+  find_optimal_subset <- function(current_subset, remaining) {
+    if (length(current_subset) < best_size && check_subset(current_subset)) {
+      best_kept <<- current_subset
+      best_size <<- length(current_subset)
+      message(best_size)
+    }
+    
+    if (length(remaining) == 0 || length(current_subset) + 1 >= best_size) {
+      return()
+    }
+    
+    for (i in seq_along(remaining)) {
+      find_optimal_subset(c(current_subset, remaining[i]), remaining[-seq_len(i)])
+    }
+  }
+  
+  # Start the recursive search
+  find_optimal_subset(c(), 1:n)
+  
+  # Return the rows to be kept
+  return(best_kept)
+}
+
+
+cor_matrix <- matrix(c(1, 0.7, 0.8, 
+                       0.7, 1, 0.6, 
+                       0.8, 0.6, 1), nrow=3, ncol=3)
+threshold <- 0.7
+
+kept_rows <- prune_correlation_matrix(cor_matrix, threshold)
+print(kept_rows)
+
+k2 <- prune_correlation_matrix(kin, 0.05)
+k2
+
+```
+
+
+```{r}
+fastAssoc(dat$x$prs, dat$g)
+
+```
+
+
+```{r}
+
+
+dat2 <- collapse_dat(dat)
+str(dat2)
+colSums(dat2$g) / (2*nrow(dat2$g))
+```
+
+
+find relatives
+
 
 ```{r}
 collapse_dat2 <- function(l) {
@@ -178,12 +675,12 @@ fastAssoc <- function(y, x) {
 	# pval <- pf(Fval, 1, n-2, lowe=F)
 	p <- pf(fval, 1, n-2, lowe=F)
 	return(list(
-		ahat=ahat, bhat=bhat, se=se, fval=fval, pval=p, af = af
+		ahat=ahat, bhat=bhat, se=se, fval=fval, pval=p, af = af, n=n
 	))
 }
 
 gwas <- function(y, g) {
-	out <- matrix(0, ncol(g), 6)
+	out <- matrix(0, ncol(g), 7)
 	for(i in 1:ncol(g))
 	{
 		o <- fastAssoc(y, g[,i])
@@ -459,6 +956,7 @@ sessionInfo()
 
 ## Other stuff
 
+```{r}
 library(dplyr)
 library(MASS)
 library(ggplot2)
@@ -720,3 +1218,5 @@ o <- lapply(1:nrow(param), \(i) {
     message(i)
     fam_sim(param$ngen[i], param$nfam[i], param$npoly[i], param$h2[i], param$rho[i])
 }) %>% bind_rows()
+```
+
