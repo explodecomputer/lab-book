@@ -2,6 +2,8 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/2024-11-01-bootstrap-example/index.html",
+      "/posts/2024-10-28-read-write-speeds/index.html",
       "/posts/2024-09-28-small-samples/index.html",
       "/posts/2024-09-25-liftover-gwasvcf/index.html",
       "/posts/2024-09-22-clustering-traits/index.html",

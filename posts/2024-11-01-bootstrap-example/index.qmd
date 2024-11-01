@@ -1,0 +1,108 @@
+---
+title: "Bootstrap p-values example"
+author: Gibran Hemani
+date: "2024-11-01"
+categories: []
+---
+
+## Background
+
+Example of using bootstrapping to get p-values
+
+This function 
+
+- Simulates some data
+- Gets the linear regression p-value
+- Gets the bootstrap p-value
+
+```{r}
+library(dplyr)
+library(purrr)
+
+#' Simulate simple dataset and compare p-values from linear regression and bootstrap
+#' 
+#' @param n Number of observations
+#' @param b True effect size
+#' @param nboot Number of bootstrap samples
+#' @param sim Simulation number
+#' 
+#' 
+#' @return A tibble with p-values
+boot_sim <- function(n, b, nboot, sim=1) {
+    # Simple simulation of y being influenced by x
+    x <- rnorm(n)
+    y <- rnorm(n) + b * x
+
+    # Linear model
+    mod <- summary(lm(y ~ x))
+    bhat <- mod$coefficients[2, 1]
+    pval <- mod$coefficients[2, 4]
+
+    # Get p-value using bootstrap
+    # Generate a null distribution of the slope
+    # Do this by resampling x
+    bboot <- numeric(nboot)
+    for(i in 1:nboot) {
+        x1 <- sample(x)
+        bboot[i] <- lm(y ~ x1)$coefficients[2]
+    }
+
+    # This is a non-parametric p-value
+    pvalboot_nonpara <- sum(abs(bboot) > abs(b)) / nboot
+
+    # This is a parametric p-value
+    pvalboot_para <- pnorm(bhat, mean=mean(bboot), sd=sd(bboot), low=F)
+
+    # Compare parametric pval, non para pval and linear model pval
+    tibble(
+        b=b,
+        n=n,
+        sim=sim,
+        nboot=nboot,
+        pval = pval,
+        pvalboot_nonpara = pvalboot_nonpara,
+        pvalboot_para = pvalboot_para
+    )
+}
+```
+
+
+Example run of this simulation
+
+```{r}
+boot_sim(1000, 0.3, 1000)
+```
+
+To evaluate performance do it over a range of simulation values
+
+```{r}
+param <- expand.grid(
+    n = c(100, 1000, 10000),
+    b = c(0.1, 0.3, 0.5),
+    nboot = c(1000),
+    sim=1:10
+)
+```
+
+
+Run the simulation over the parameter grid
+
+```{r}
+o <- pmap(param, boot_sim) %>% bind_rows()
+```
+
+
+Compare the p-values
+
+
+```{r}
+plot(-log10(o$pval), -log10(o$pvalboot_para))
+abline(0, 1)
+```
+
+
+---
+
+```{r}
+sessionInfo()
+```
