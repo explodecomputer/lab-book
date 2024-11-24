@@ -220,9 +220,16 @@ window.Quarto = {
 </section>
 <section id="simulation-setup" class="level2">
 <h2 class="anchored" data-anchor-id="simulation-setup">Simulation setup</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(metafor)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># library(rms)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>The simulation is based on the following model:</p>
 <p><span class="math display">\[
-y_i = \beta_0 g + \beta_1 g_i \times a_i + \beta_2 g_i \times a_i^2 + \beta_3 g_i \times a_i^3 + e_i
+y_i = \alpha + \beta_0 g_i + \beta_1 g_i a_i + \beta_2 g_i a_i^2 + \beta_3 g_i a_i^3 + e_i
 \]</span></p>
 <p>where <span class="math inline">\(y_i\)</span> is the phenotype of individual <span class="math inline">\(i\)</span>, <span class="math inline">\(g_i\)</span> is the genotype, <span class="math inline">\(a_i\)</span> is the age normalised to have range <span class="math inline">\((-1,1)\)</span>, and <span class="math inline">\(e_i\)</span> is the error term.</p>
 <p>The simulation is based on the following steps:</p>
@@ -231,104 +238,47 @@ y_i = \beta_0 g + \beta_1 g_i \times a_i + \beta_2 g_i \times a_i^2 + \beta_3 g_
 <li>Generate a set of individuals with age, genotype, and error terms</li>
 </ol>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'dplyr'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:stats':
-
-    filter, lag</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:base':
-
-    intersect, setdiff, setequal, union</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(metafor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: Matrix</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: metadat</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: numDeriv</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Loading the 'metafor' package (version 4.6-0). For an
-introduction to the package please type: help(metafor)</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rms)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: Hmisc</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'Hmisc'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:dplyr':
-
-    src, summarize</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:base':
-
-    format.pval, units</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'rms'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following object is masked from 'package:metafor':
-
-    vif</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>simdat <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n=</span><span class="dv">500000</span>, b0, b1, b2, b3) { </span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    nage <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="dv">40</span><span class="sc">:</span><span class="dv">70</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    coef <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">age =</span> <span class="dv">40</span><span class="sc">:</span><span class="dv">70</span>,</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">length.out=</span>nage),</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">bxage =</span> x<span class="sc">^</span><span class="dv">3</span> <span class="sc">*</span> b3 <span class="sc">+</span> x<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> b2 <span class="sc">+</span> x <span class="sc">*</span> b1 <span class="sc">+</span> b0</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    dat <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">age =</span> <span class="fu">runif</span>(n, <span class="dv">40</span>, <span class="dv">70</span>) <span class="sc">%&gt;%</span> round,</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">g =</span> <span class="fu">rbinom</span>(n, <span class="dv">2</span>, <span class="fl">0.5</span>),</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">e =</span> <span class="fu">rnorm</span>(n)</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(age) <span class="sc">%&gt;%</span></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">do</span>({</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>            a <span class="ot">&lt;-</span> <span class="fu">subset</span>(coef, age <span class="sc">==</span> .<span class="sc">$</span>age[<span class="dv">1</span>])</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>            <span class="fu">mutate</span>(., <span class="at">prs =</span> a<span class="sc">$</span>bxage <span class="sc">*</span> g, <span class="at">y =</span> prs <span class="sc">+</span> e)</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>        })</span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">dat=</span>dat, <span class="at">coef=</span>coef))</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>simdat <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n=</span><span class="dv">500000</span>, b0, b1, b2, b3) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    nage <span class="ot">&lt;-</span> <span class="fu">length</span>(<span class="dv">40</span><span class="sc">:</span><span class="dv">70</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    coef <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">age =</span> <span class="dv">40</span><span class="sc">:</span><span class="dv">70</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="at">length.out=</span>nage),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">bxage =</span> x<span class="sc">^</span><span class="dv">3</span> <span class="sc">*</span> b3 <span class="sc">+</span> x<span class="sc">^</span><span class="dv">2</span> <span class="sc">*</span> b2 <span class="sc">+</span> x <span class="sc">*</span> b1 <span class="sc">+</span> b0</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    dat <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">age =</span> <span class="fu">runif</span>(n, <span class="dv">40</span>, <span class="dv">70</span>) <span class="sc">%&gt;%</span> round,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">g =</span> <span class="fu">rbinom</span>(n, <span class="dv">2</span>, <span class="fl">0.5</span>),</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">e =</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(age) <span class="sc">%&gt;%</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">do</span>({</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>            a <span class="ot">&lt;-</span> <span class="fu">subset</span>(coef, age <span class="sc">==</span> .<span class="sc">$</span>age[<span class="dv">1</span>])</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>            <span class="fu">mutate</span>(., <span class="at">prs =</span> a<span class="sc">$</span>bxage <span class="sc">*</span> g, <span class="at">y =</span> prs <span class="sc">+</span> e)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">dat=</span>dat, <span class="at">coef=</span>coef))</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>An example of the simulation with <strong>no interaction</strong>:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simdat</span>(<span class="dv">500000</span>, <span class="fl">0.02</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>sim</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simdat</span>(<span class="dv">500000</span>, <span class="fl">0.02</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>sim</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>$dat
 # A tibble: 500,000 × 5
 # Groups:   age [31]
      age     g       e   prs       y
    &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
- 1    40     0 -0.777   0    -0.777 
- 2    40     1 -0.154   0.02 -0.134 
- 3    40     1  0.217   0.02  0.237 
- 4    40     2  1.32    0.04  1.36  
- 5    40     1  0.554   0.02  0.574 
- 6    40     2 -0.739   0.04 -0.699 
- 7    40     2  1.67    0.04  1.71  
- 8    40     1  0.226   0.02  0.246 
- 9    40     0 -0.388   0    -0.388 
-10    40     0  0.0369  0     0.0369
+ 1    40     2 -0.272   0.04 -0.232 
+ 2    40     0 -2.08    0    -2.08  
+ 3    40     0  0.490   0     0.490 
+ 4    40     0 -0.279   0    -0.279 
+ 5    40     1 -0.583   0.02 -0.563 
+ 6    40     2  0.583   0.04  0.623 
+ 7    40     2 -0.621   0.04 -0.581 
+ 8    40     1 -0.0662  0.02 -0.0462
+ 9    40     1  1.87    0.02  1.89  
+10    40     2  2.66    0.04  2.70  
 # ℹ 499,990 more rows
 
 $coef
@@ -359,65 +309,43 @@ $coef
 \]</span></p>
 <p>An example of the model fit is shown below:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>sumstats <span class="ot">&lt;-</span> <span class="cf">function</span>(dat) {</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># split dat into 2 year age bins</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    dat <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">agebin =</span> <span class="fu">round</span>(age <span class="sc">/</span> <span class="dv">2</span>) <span class="sc">*</span> <span class="dv">2</span>)</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    ss <span class="ot">&lt;-</span> <span class="fu">group_by</span>(dat, agebin) <span class="sc">%&gt;%</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">do</span>({</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>            a <span class="ot">&lt;-</span> <span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> g, <span class="at">data=</span>.))</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>            <span class="fu">tibble</span>(</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">agebin =</span> .<span class="sc">$</span>agebin[<span class="dv">1</span>],</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">beta =</span> a<span class="sc">$</span>coefficients[<span class="dv">2</span>, <span class="dv">1</span>],</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>                <span class="at">se =</span> a<span class="sc">$</span>coefficients[<span class="dv">2</span>, <span class="dv">2</span>]</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>        })</span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(ss)</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>plot_gxage <span class="ot">&lt;-</span> <span class="cf">function</span>(sim) {</span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    ss <span class="ot">&lt;-</span> <span class="fu">sumstats</span>(sim<span class="sc">$</span>dat)</span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    m2 <span class="ot">&lt;-</span> <span class="fu">rma.uni</span>(<span class="at">yi=</span>beta, <span class="at">sei=</span>se, <span class="at">mods =</span> <span class="sc">~</span> <span class="fu">poly</span>(agebin, <span class="at">degree=</span><span class="dv">3</span>, <span class="at">raw=</span><span class="cn">TRUE</span>), <span class="at">data=</span>ss)</span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>    coefs <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>        <span class="at">method=</span><span class="st">"metareg"</span>,</span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>        <span class="at">poly=</span><span class="dv">0</span><span class="sc">:</span><span class="dv">3</span>,</span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>        <span class="at">b =</span> m2<span class="sc">$</span>beta[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>        <span class="at">se =</span> m2<span class="sc">$</span>se[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>        <span class="at">pval =</span> m2<span class="sc">$</span>pval[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>    sav <span class="ot">&lt;-</span> <span class="fu">predict</span>(m2, <span class="at">newmods=</span><span class="fu">unname</span>(<span class="fu">poly</span>(ss<span class="sc">$</span>agebin, <span class="at">degree=</span><span class="dv">3</span>, <span class="at">raw=</span><span class="cn">TRUE</span>))) <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">agebin=</span>ss<span class="sc">$</span>agebin)</span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(pred <span class="sc">~</span> agebin, <span class="at">data=</span>sav, <span class="at">type=</span><span class="st">"l"</span>)</span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lines</span>(ci.lb <span class="sc">~</span> agebin, <span class="at">data=</span>sav, <span class="at">type=</span><span class="st">"l"</span>, <span class="at">lty=</span><span class="dv">2</span>)</span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lines</span>(ci.ub <span class="sc">~</span> agebin, <span class="at">data=</span>sav, <span class="at">type=</span><span class="st">"l"</span>, <span class="at">lty=</span><span class="dv">2</span>)</span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lines</span>(bxage <span class="sc">~</span> age, sim<span class="sc">$</span>coef, <span class="at">col=</span><span class="st">"red"</span>)</span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">points</span>(beta <span class="sc">~</span> agebin, <span class="at">data=</span>ss, <span class="at">pch=</span><span class="dv">16</span>, <span class="at">cex=</span><span class="fl">0.01</span><span class="sc">/</span>ss<span class="sc">$</span>se)</span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(coefs)</span>
-<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_gxage</span>(sim)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 4 × 5
-  method   poly           b         se   pval
-  &lt;chr&gt;   &lt;int&gt;       &lt;dbl&gt;      &lt;dbl&gt;  &lt;dbl&gt;
-1 metareg     0  1.10       0.588      0.0618
-2 metareg     1 -0.0603     0.0331     0.0684
-3 metareg     2  0.00112    0.000612   0.0685
-4 metareg     3 -0.00000683 0.00000372 0.0667</code></pre>
-</div>
-</div>
-<p>The red line is the true genotype x age coefficient, and the black line is the estimated effect of the genotype on the phenotype with age. Dotted lines are the confidence intervals.</p>
-<p>In this example there is no heterogeneity in the effect of the genotype on the phenotype with age, so the confidence intervals of the polynomial fit are very wide.</p>
-<p>Example <strong>with interaction</strong>:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simdat</span>(<span class="dv">500000</span>, <span class="dv">0</span>, <span class="fl">0.02</span>, <span class="fl">0.02</span>, <span class="fl">0.02</span>)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_gxage</span>(sim)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>sumstats <span class="ot">&lt;-</span> <span class="cf">function</span>(dat) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># split dat into 2 year age bins</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># dat &lt;- dat %&gt;% mutate(agebin = round(age / 2) * 2)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    dat<span class="sc">$</span>agebin <span class="ot">&lt;-</span> <span class="fu">round</span>(dat<span class="sc">$</span>age)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    ss <span class="ot">&lt;-</span> <span class="fu">group_by</span>(dat, agebin) <span class="sc">%&gt;%</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">do</span>({</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>            a <span class="ot">&lt;-</span> <span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> g, <span class="at">data=</span>.))</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>            <span class="fu">tibble</span>(</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">agebin =</span> .<span class="sc">$</span>agebin[<span class="dv">1</span>],</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>                <span class="at">beta =</span> a<span class="sc">$</span>coefficients[<span class="dv">2</span>, <span class="dv">1</span>],</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>                <span class="at">se =</span> a<span class="sc">$</span>coefficients[<span class="dv">2</span>, <span class="dv">2</span>]</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        })</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(ss)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>plot_gxage <span class="ot">&lt;-</span> <span class="cf">function</span>(sim) {</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    ss <span class="ot">&lt;-</span> <span class="fu">sumstats</span>(sim<span class="sc">$</span>dat)</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    m2 <span class="ot">&lt;-</span> <span class="fu">rma.uni</span>(<span class="at">yi=</span>beta, <span class="at">sei=</span>se, <span class="at">mods =</span> <span class="sc">~</span> <span class="fu">poly</span>(agebin, <span class="at">degree=</span><span class="dv">3</span>, <span class="at">raw=</span><span class="cn">TRUE</span>), <span class="at">data=</span>ss)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    coefs <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>        <span class="at">method=</span><span class="st">"metareg"</span>,</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        <span class="at">poly=</span><span class="dv">0</span><span class="sc">:</span><span class="dv">3</span>,</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        <span class="at">b =</span> m2<span class="sc">$</span>beta[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="at">se =</span> m2<span class="sc">$</span>se[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>],</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        <span class="at">pval =</span> m2<span class="sc">$</span>pval[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    sav <span class="ot">&lt;-</span> <span class="fu">predict</span>(m2, <span class="at">newmods=</span><span class="fu">unname</span>(<span class="fu">poly</span>(ss<span class="sc">$</span>agebin, <span class="at">degree=</span><span class="dv">3</span>, <span class="at">raw=</span><span class="cn">TRUE</span>))) <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">agebin=</span>ss<span class="sc">$</span>agebin)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(pred <span class="sc">~</span> agebin, <span class="at">data=</span>sav, <span class="at">type=</span><span class="st">"l"</span>)</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lines</span>(ci.lb <span class="sc">~</span> agebin, <span class="at">data=</span>sav, <span class="at">type=</span><span class="st">"l"</span>, <span class="at">lty=</span><span class="dv">2</span>)</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lines</span>(ci.ub <span class="sc">~</span> agebin, <span class="at">data=</span>sav, <span class="at">type=</span><span class="st">"l"</span>, <span class="at">lty=</span><span class="dv">2</span>)</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lines</span>(bxage <span class="sc">~</span> age, sim<span class="sc">$</span>coef, <span class="at">col=</span><span class="st">"red"</span>)</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">points</span>(beta <span class="sc">~</span> agebin, <span class="at">data=</span>ss, <span class="at">pch=</span><span class="dv">16</span>, <span class="at">cex=</span><span class="fl">0.01</span><span class="sc">/</span>ss<span class="sc">$</span>se)</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(coefs)</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_gxage</span>(sim)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -429,10 +357,33 @@ $coef
 <pre><code># A tibble: 4 × 5
   method   poly            b         se  pval
   &lt;chr&gt;   &lt;int&gt;        &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;
-1 metareg     0  0.0960      0.624      0.878
-2 metareg     1 -0.00273     0.0351     0.938
-3 metareg     2 -0.0000340   0.000650   0.958
-4 metareg     3  0.000000948 0.00000395 0.811</code></pre>
+1 metareg     0  0.170       0.688      0.805
+2 metareg     1 -0.00786     0.0385     0.838
+3 metareg     2  0.000129    0.000708   0.855
+4 metareg     3 -0.000000644 0.00000429 0.881</code></pre>
+</div>
+</div>
+<p>The red line is the true genotype x age coefficient, and the black line is the estimated effect of the genotype on the phenotype with age. Dotted lines are the confidence intervals.</p>
+<p>In this example there is no heterogeneity in the effect of the genotype on the phenotype with age, so the confidence intervals of the polynomial fit are very wide.</p>
+<p>Example <strong>with interaction</strong>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">simdat</span>(<span class="dv">500000</span>, <span class="dv">0</span>, <span class="fl">0.02</span>, <span class="fl">0.02</span>, <span class="fl">0.02</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_gxage</span>(sim)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 5
+  method   poly          b         se    pval
+  &lt;chr&gt;   &lt;int&gt;      &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;
+1 metareg     0 -1.62      0.621      0.00895
+2 metareg     1  0.0901    0.0347     0.00946
+3 metareg     2 -0.00167   0.000638   0.00897
+4 metareg     3  0.0000103 0.00000386 0.00749</code></pre>
 </div>
 </div>
 <p>Now the confidence intervals are much narrower, and the true effect of the genotype on the phenotype with age is captured by the polynomial fit.</p>
@@ -452,163 +403,107 @@ $coef
 <li>Polynomial G x age interaction</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>estimation <span class="ot">&lt;-</span> <span class="cf">function</span>(dat) {</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    ss <span class="ot">&lt;-</span> <span class="fu">sumstats</span>(dat)</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    m1 <span class="ot">&lt;-</span> <span class="fu">rma.uni</span>(<span class="at">yi=</span>ss<span class="sc">$</span>beta, <span class="at">sei=</span>ss<span class="sc">$</span>se, <span class="at">method=</span><span class="st">"FE"</span>)</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    m2 <span class="ot">&lt;-</span> <span class="fu">rma.uni</span>(<span class="at">yi=</span>beta, <span class="at">sei=</span>se, <span class="at">mods =</span> <span class="sc">~</span> <span class="fu">poly</span>(agebin, <span class="at">degree=</span><span class="dv">3</span>), <span class="at">data=</span>ss)</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    m6 <span class="ot">&lt;-</span> <span class="fu">rma</span>(<span class="at">yi=</span>beta, <span class="at">sei=</span>se, <span class="at">mods =</span> <span class="sc">~</span> <span class="fu">rcs</span>(agebin, <span class="dv">4</span>), <span class="at">data=</span>ss)</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    m7 <span class="ot">&lt;-</span> <span class="fu">rma</span>(<span class="at">yi=</span>beta, <span class="at">sei=</span>se, <span class="at">mods =</span> <span class="sc">~</span> agebin, <span class="at">data=</span>ss)</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compare against individual level models</span></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    m3 <span class="ot">&lt;-</span> <span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> g <span class="sc">*</span> <span class="fu">poly</span>(age, <span class="dv">3</span>), <span class="at">data=</span>dat))</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    m4 <span class="ot">&lt;-</span> <span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> g, <span class="at">data=</span>dat))</span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    m5 <span class="ot">&lt;-</span> <span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> g <span class="sc">*</span> age, <span class="at">data=</span>dat))</span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    m8 <span class="ot">&lt;-</span> <span class="fu">summary</span>(<span class="fu">lm</span>(y <span class="sc">~</span> g <span class="sc">+</span> <span class="fu">rcs</span>(age, <span class="dv">4</span>), <span class="at">data=</span>dat))</span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bind_rows</span>(</span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(<span class="at">method=</span><span class="st">"heterogeneity"</span>, <span class="at">Q=</span>m1<span class="sc">$</span>QE, <span class="at">pval=</span>m1<span class="sc">$</span>QEp),</span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>            <span class="at">method=</span><span class="st">"meta_poly"</span>,</span>
-<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>            <span class="at">poly=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,</span>
-<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>            <span class="at">b =</span> m2<span class="sc">$</span>beta[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>            <span class="at">se =</span> m2<span class="sc">$</span>se[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>            <span class="at">pval =</span> m2<span class="sc">$</span>pval[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>]</span>
-<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
-<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>            <span class="at">method=</span><span class="st">"meta_rcs"</span>,</span>
-<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>            <span class="at">poly=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,</span>
-<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>            <span class="at">b =</span> m6<span class="sc">$</span>beta[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>            <span class="at">se =</span> m6<span class="sc">$</span>se[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>],</span>
-<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>            <span class="at">pval =</span> m6<span class="sc">$</span>pval[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>]</span>
-<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
-<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>            <span class="at">method=</span><span class="st">"meta_linear"</span>,</span>
-<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a>            <span class="at">poly=</span><span class="dv">1</span>,</span>
-<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a>            <span class="at">b =</span> m7<span class="sc">$</span>beta[<span class="dv">2</span>],</span>
-<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a>            <span class="at">se =</span> m7<span class="sc">$</span>se[<span class="dv">2</span>],</span>
-<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a>            <span class="at">pval =</span> m7<span class="sc">$</span>pval[<span class="dv">2</span>]</span>
-<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
-<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a>            <span class="at">method=</span><span class="st">"ind_poly"</span>,</span>
-<span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a>            <span class="at">poly=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,</span>
-<span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a>            <span class="at">b =</span> m3<span class="sc">$</span>coef[<span class="dv">5</span><span class="sc">:</span><span class="dv">7</span>, <span class="dv">1</span>],</span>
-<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a>            <span class="at">se =</span> m3<span class="sc">$</span>coef[<span class="dv">5</span><span class="sc">:</span><span class="dv">7</span>, <span class="dv">2</span>],</span>
-<span id="cb24-42"><a href="#cb24-42" aria-hidden="true" tabindex="-1"></a>            <span class="at">pval =</span> m3<span class="sc">$</span>coef[<span class="dv">5</span><span class="sc">:</span><span class="dv">7</span>, <span class="dv">4</span>]</span>
-<span id="cb24-43"><a href="#cb24-43" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb24-44"><a href="#cb24-44" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
-<span id="cb24-45"><a href="#cb24-45" aria-hidden="true" tabindex="-1"></a>            <span class="at">method=</span><span class="st">"ind_linear"</span>,</span>
-<span id="cb24-46"><a href="#cb24-46" aria-hidden="true" tabindex="-1"></a>            <span class="at">poly=</span><span class="dv">1</span>,</span>
-<span id="cb24-47"><a href="#cb24-47" aria-hidden="true" tabindex="-1"></a>            <span class="at">b =</span> m5<span class="sc">$</span>coef[<span class="dv">4</span>, <span class="dv">1</span>],</span>
-<span id="cb24-48"><a href="#cb24-48" aria-hidden="true" tabindex="-1"></a>            <span class="at">se =</span> m5<span class="sc">$</span>coef[<span class="dv">4</span>, <span class="dv">2</span>],</span>
-<span id="cb24-49"><a href="#cb24-49" aria-hidden="true" tabindex="-1"></a>            <span class="at">pval =</span> m5<span class="sc">$</span>coef[<span class="dv">4</span>, <span class="dv">4</span>]</span>
-<span id="cb24-50"><a href="#cb24-50" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb24-51"><a href="#cb24-51" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
-<span id="cb24-52"><a href="#cb24-52" aria-hidden="true" tabindex="-1"></a>            <span class="at">method=</span><span class="st">"ind_rcs"</span>,</span>
-<span id="cb24-53"><a href="#cb24-53" aria-hidden="true" tabindex="-1"></a>            <span class="at">poly=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,</span>
-<span id="cb24-54"><a href="#cb24-54" aria-hidden="true" tabindex="-1"></a>            <span class="at">b =</span> m8<span class="sc">$</span>coef[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span>],</span>
-<span id="cb24-55"><a href="#cb24-55" aria-hidden="true" tabindex="-1"></a>            <span class="at">se =</span> m8<span class="sc">$</span>coef[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">2</span>],</span>
-<span id="cb24-56"><a href="#cb24-56" aria-hidden="true" tabindex="-1"></a>            <span class="at">pval =</span> m8<span class="sc">$</span>coef[<span class="dv">2</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">4</span>]</span>
-<span id="cb24-57"><a href="#cb24-57" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb24-58"><a href="#cb24-58" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
-<span id="cb24-59"><a href="#cb24-59" aria-hidden="true" tabindex="-1"></a>            <span class="at">method=</span><span class="st">"main"</span>,</span>
-<span id="cb24-60"><a href="#cb24-60" aria-hidden="true" tabindex="-1"></a>            <span class="at">b =</span> m4<span class="sc">$</span>coefficients[<span class="dv">2</span>, <span class="dv">1</span>],</span>
-<span id="cb24-61"><a href="#cb24-61" aria-hidden="true" tabindex="-1"></a>            <span class="at">se =</span> m4<span class="sc">$</span>coefficients[<span class="dv">2</span>, <span class="dv">2</span>],</span>
-<span id="cb24-62"><a href="#cb24-62" aria-hidden="true" tabindex="-1"></a>            <span class="at">pval =</span> m4<span class="sc">$</span>coefficients[<span class="dv">2</span>, <span class="dv">4</span>]</span>
-<span id="cb24-63"><a href="#cb24-63" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb24-64"><a href="#cb24-64" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb24-65"><a href="#cb24-65" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb24-66"><a href="#cb24-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-67"><a href="#cb24-67" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to run whole simulation</span></span>
-<span id="cb24-68"><a href="#cb24-68" aria-hidden="true" tabindex="-1"></a>run_sim <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">b0=</span><span class="dv">0</span>, <span class="at">b1=</span><span class="dv">0</span>, <span class="at">b2=</span><span class="dv">0</span>, <span class="at">b3=</span><span class="dv">0</span>, <span class="at">n=</span><span class="dv">500000</span>, <span class="at">sim=</span><span class="dv">1</span>) {</span>
-<span id="cb24-69"><a href="#cb24-69" aria-hidden="true" tabindex="-1"></a>    args <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="fu">environment</span>()) <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>()</span>
-<span id="cb24-70"><a href="#cb24-70" aria-hidden="true" tabindex="-1"></a>    sim <span class="ot">&lt;-</span> <span class="fu">simdat</span>(n, b0, b1, b2, b3)</span>
-<span id="cb24-71"><a href="#cb24-71" aria-hidden="true" tabindex="-1"></a>    est <span class="ot">&lt;-</span> <span class="fu">estimation</span>(sim<span class="sc">$</span>dat)</span>
-<span id="cb24-72"><a href="#cb24-72" aria-hidden="true" tabindex="-1"></a>    est <span class="ot">&lt;-</span> <span class="fu">bind_cols</span>(est, <span class="fu">as_tibble</span>(args))</span>
-<span id="cb24-73"><a href="#cb24-73" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(est)</span>
-<span id="cb24-74"><a href="#cb24-74" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb24-75"><a href="#cb24-75" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-76"><a href="#cb24-76" aria-hidden="true" tabindex="-1"></a><span class="co"># Example</span></span>
-<span id="cb24-77"><a href="#cb24-77" aria-hidden="true" tabindex="-1"></a><span class="fu">run_sim</span>(<span class="fl">0.02</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>estimation <span class="ot">&lt;-</span> <span class="cf">function</span>(dat) {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    ss <span class="ot">&lt;-</span> <span class="fu">sumstats</span>(dat)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    m1 <span class="ot">&lt;-</span> <span class="fu">rma.uni</span>(<span class="at">yi=</span>ss<span class="sc">$</span>beta, <span class="at">sei=</span>ss<span class="sc">$</span>se, <span class="at">method=</span><span class="st">"FE"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    m2 <span class="ot">&lt;-</span> <span class="fu">rma.uni</span>(<span class="at">yi=</span>beta, <span class="at">sei=</span>se, <span class="at">mods =</span> <span class="sc">~</span> <span class="fu">poly</span>(agebin, <span class="at">degree=</span><span class="dv">3</span>), <span class="at">data=</span>ss, <span class="at">method=</span><span class="st">"FE"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># m6 &lt;- rma(yi=beta, sei=se, mods = ~ rcs(agebin, 4), data=ss)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    m7 <span class="ot">&lt;-</span> <span class="fu">rma</span>(<span class="at">yi=</span>beta, <span class="at">sei=</span>se, <span class="at">mods =</span> <span class="sc">~</span> agebin, <span class="at">data=</span>ss, <span class="at">method=</span><span class="st">"FE"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compare against individual level models</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    modpval <span class="ot">&lt;-</span> <span class="cf">function</span>(mod) { <span class="fu">pf</span>(mod<span class="sc">$</span>fstat[<span class="dv">1</span>], mod<span class="sc">$</span>fstat[<span class="dv">2</span>], mod<span class="sc">$</span>fstat[<span class="dv">3</span>], <span class="at">lower.tail=</span><span class="cn">FALSE</span>) }</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    reducedmod <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> g, <span class="at">data=</span>dat)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    m5 <span class="ot">&lt;-</span> <span class="fu">anova</span>(reducedmod, <span class="fu">lm</span>(y <span class="sc">~</span> g <span class="sc">*</span> age, <span class="at">data=</span>dat))</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    m3 <span class="ot">&lt;-</span> <span class="fu">anova</span>(reducedmod, <span class="fu">lm</span>(y <span class="sc">~</span> g <span class="sc">*</span> <span class="fu">poly</span>(age, <span class="dv">3</span>), <span class="at">data=</span>dat))</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># m8 &lt;- anova(reducedmod, lm(y ~ g * rcs(age, 4), data=dat))</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    m9 <span class="ot">&lt;-</span> <span class="fu">anova</span>(reducedmod, <span class="fu">lm</span>(y <span class="sc">~</span> g <span class="sc">*</span> <span class="fu">as.factor</span>(age), <span class="at">data=</span>dat))</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bind_rows</span>(</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(<span class="at">method=</span><span class="st">"main"</span>, <span class="at">pval=</span><span class="fu">summary</span>(reducedmod)<span class="sc">$</span>coefficients[<span class="dv">2</span>, <span class="dv">4</span>]),</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(<span class="at">method=</span><span class="st">"ind_linear"</span>, <span class="at">pval=</span>m5<span class="sc">$</span>P[<span class="dv">2</span>]),</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(<span class="at">method=</span><span class="st">"ind_poly"</span>, <span class="at">pval=</span>m3<span class="sc">$</span>P[<span class="dv">2</span>]),</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># tibble(method="ind_rcs", pval=m8$P[2]),</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(<span class="at">method=</span><span class="st">"ind_full"</span>, <span class="at">pval=</span>m9<span class="sc">$</span>P[<span class="dv">2</span>]),</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(<span class="at">method=</span><span class="st">"heterogeneity"</span>, <span class="at">Q=</span>m1<span class="sc">$</span>QE, <span class="at">pval=</span>m1<span class="sc">$</span>QEp),</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(<span class="at">method=</span><span class="st">"meta_linear"</span>, <span class="at">Q=</span>m7<span class="sc">$</span>QM, <span class="at">pval=</span>m7<span class="sc">$</span>QMp),</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(<span class="at">method=</span><span class="st">"meta_poly"</span>, <span class="at">Q=</span>m2<span class="sc">$</span>QM, <span class="at">pval=</span>m2<span class="sc">$</span>QMp),</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>        <span class="co"># tibble(method="meta_rcs", Q=m6$QM, pval=m6$QMp),</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to run whole simulation</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>run_sim <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">b0=</span><span class="dv">0</span>, <span class="at">b1=</span><span class="dv">0</span>, <span class="at">b2=</span><span class="dv">0</span>, <span class="at">b3=</span><span class="dv">0</span>, <span class="at">n=</span><span class="dv">500000</span>, <span class="at">sim=</span><span class="dv">1</span>) {</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    args <span class="ot">&lt;-</span> <span class="fu">as.list</span>(<span class="fu">environment</span>()) <span class="sc">%&gt;%</span> <span class="fu">as_tibble</span>()</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    sim <span class="ot">&lt;-</span> <span class="fu">simdat</span>(n, b0, b1, b2, b3)</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    est <span class="ot">&lt;-</span> <span class="fu">estimation</span>(sim<span class="sc">$</span>dat)</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    est <span class="ot">&lt;-</span> <span class="fu">bind_cols</span>(est, <span class="fu">as_tibble</span>(args))</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(est)</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Example</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a><span class="fu">run_sim</span>(<span class="fl">0.02</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 16 × 12
-   method       Q     pval  poly        b       se    b0    b1    b2    b3     n
-   &lt;chr&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
- 1 heterog…  70.1 4.21e- 9    NA NA       NA        0.02     0     0  0.05   5e5
- 2 meta_po…  NA   3.41e-13     1  0.0667   9.17e-3  0.02     0     0  0.05   5e5
- 3 meta_po…  NA   4.50e- 1     2  0.00705  9.34e-3  0.02     0     0  0.05   5e5
- 4 meta_po…  NA   5.07e- 3     3  0.0264   9.41e-3  0.02     0     0  0.05   5e5
- 5 meta_rcs  NA   8.52e- 4     1  0.00302  9.05e-4  0.02     0     0  0.05   5e5
- 6 meta_rcs  NA   2.19e- 2     2 -0.0161   7.03e-3  0.02     0     0  0.05   5e5
- 7 meta_rcs  NA   1.90e- 2     3  0.0255   1.09e-2  0.02     0     0  0.05   5e5
- 8 meta_li…  NA   2.60e-10     1  0.00169  2.67e-4  0.02     0     0  0.05   5e5
- 9 ind_poly  NA   5.07e- 1     1  1.15     1.73e+0  0.02     0     0  0.05   5e5
-10 ind_poly  NA   6.26e-13     2 10.2      1.41e+0  0.02     0     0  0.05   5e5
-11 ind_poly  NA   4.32e- 1     3  1.11     1.41e+0  0.02     0     0  0.05   5e5
-12 ind_lin…  NA   6.07e-13     1  0.00166  2.30e-4  0.02     0     0  0.05   5e5
-13 ind_rcs   NA   2.94e-21     1  0.0189   2.00e-3  0.02     0     0  0.05   5e5
-14 ind_rcs   NA   1.55e-12     2  0.00577  8.16e-4  0.02     0     0  0.05   5e5
-15 ind_rcs   NA   4.43e- 7     3 -0.0151   2.99e-3  0.02     0     0  0.05   5e5
-16 main      NA   4.22e-21    NA  0.0188   2.00e-3  0.02     0     0  0.05   5e5
-# ℹ 1 more variable: sim &lt;dbl&gt;</code></pre>
+<pre><code># A tibble: 7 × 9
+  method            pval     Q    b0    b1    b2    b3      n   sim
+  &lt;chr&gt;            &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
+1 main          2.35e-22  NA    0.02     0     0  0.05 500000     1
+2 ind_linear    9.66e-47  NA    0.02     0     0  0.05 500000     1
+3 ind_poly      4.80e-52  NA    0.02     0     0  0.05 500000     1
+4 ind_full      1.41e-36  NA    0.02     0     0  0.05 500000     1
+5 heterogeneity 7.75e-14 127.   0.02     0     0  0.05 500000     1
+6 meta_linear   4.26e-19  79.7  0.02     0     0  0.05 500000     1
+7 meta_poly     7.25e-19  87.6  0.02     0     0  0.05 500000     1</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">simdat</span>(<span class="dv">500000</span>, <span class="fl">0.02</span>, <span class="dv">0</span>, <span class="fl">0.02</span>, <span class="fl">0.05</span>)<span class="sc">$</span>dat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Do this over a range of scenarios (this was run on HPC in parallel)</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(furrr)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>param <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">c</span>(<span class="dv">300000</span>),</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">b0 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.02</span>),</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">b1 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.02</span>),</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">b2 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.02</span>, <span class="fl">0.02</span>),</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">b3 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.02</span>, <span class="fl">0.02</span>),</span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">sim=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">200</span></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plan</span>(<span class="fu">multicore</span>(<span class="at">workers=</span><span class="dv">50</span>))</span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>opt <span class="ot">&lt;-</span> <span class="fu">furrr_options</span>(<span class="at">seed=</span><span class="cn">TRUE</span>)</span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">future_pmap</span>(param, run_sim, <span class="at">.progress=</span><span class="cn">TRUE</span>, <span class="at">.options=</span>opt) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(res, <span class="st">"sim.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(furrr)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>param <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">n =</span> <span class="fu">c</span>(<span class="dv">300000</span>),</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">b0 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.02</span>),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">b1 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.02</span>),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">b2 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.02</span>, <span class="fl">0.02</span>),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">b3 =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="sc">-</span><span class="fl">0.02</span>, <span class="fl">0.02</span>),</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">sim=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">200</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plan</span>(<span class="fu">multicore</span>(<span class="at">workers=</span><span class="dv">50</span>))</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>opt <span class="ot">&lt;-</span> <span class="fu">furrr_options</span>(<span class="at">seed=</span><span class="cn">TRUE</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">future_pmap</span>(param, run_sim, <span class="at">.progress=</span><span class="cn">TRUE</span>, <span class="at">.options=</span>opt) <span class="sc">%&gt;%</span> <span class="fu">bind_rows</span>()</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(res, <span class="st">"sim.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="results" class="level2">
 <h2 class="anchored" data-anchor-id="results">Results</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"sim.rds"</span>)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>ress <span class="ot">&lt;-</span> res <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(n, b0, b1, b2, b3, sim, method) <span class="sc">%&gt;%</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">minp=</span><span class="fu">min</span>(pval)) <span class="sc">%&gt;%</span> <span class="fu">ungroup</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>`summarise()` has grouped output by 'n', 'b0', 'b1', 'b2', 'b3', 'sim'. You can
-override using the `.groups` argument.</code></pre>
+<pre><code>here() starts at /Users/gh13047/repo/lab-book</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(<span class="st">"posts/2024-11-23-age-interaction-power/sim.rds"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><strong>First check false discovery rates</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>ress <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(<span class="at">main =</span> b0 <span class="sc">!=</span> <span class="dv">0</span>, <span class="at">gxage =</span> (b1 <span class="sc">!=</span> <span class="dv">0</span> <span class="sc">|</span> b2 <span class="sc">!=</span> <span class="dv">0</span> <span class="sc">|</span> b3 <span class="sc">!=</span> <span class="dv">0</span>), method) <span class="sc">%&gt;%</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">power=</span><span class="fu">mean</span>(minp <span class="sc">&lt;</span> <span class="fl">0.05</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span>gxage)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>res <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(<span class="at">main =</span> b0 <span class="sc">!=</span> <span class="dv">0</span>, <span class="at">gxage =</span> (b1 <span class="sc">!=</span> <span class="dv">0</span> <span class="sc">|</span> b2 <span class="sc">!=</span> <span class="dv">0</span> <span class="sc">|</span> b3 <span class="sc">!=</span> <span class="dv">0</span>), method) <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">power=</span><span class="fu">mean</span>(pval <span class="sc">&lt;</span> <span class="fl">0.05</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span>gxage) <span class="sc">%&gt;%</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>method, <span class="at">y=</span>power, <span class="at">fill=</span>main)) <span class="sc">+</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="at">stat=</span><span class="st">"identity"</span>, <span class="at">position=</span><span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept=</span><span class="fl">0.05</span>, <span class="at">linetype=</span><span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">y=</span><span class="st">"False discovery rate"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`summarise()` has grouped output by 'main', 'gxage'. You can override using the
 `.groups` argument.</code></pre>
 </div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 12 × 4
-# Groups:   main, gxage [2]
-   main  gxage method        power
-   &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt;         &lt;dbl&gt;
- 1 FALSE FALSE heterogeneity 0.055
- 2 FALSE FALSE ind_linear    0.035
- 3 FALSE FALSE ind_poly      0.13 
- 4 FALSE FALSE main          0.065
- 5 FALSE FALSE meta_linear   0.03 
- 6 FALSE FALSE meta_poly     0.1  
- 7 TRUE  FALSE heterogeneity 0.06 
- 8 TRUE  FALSE ind_linear    0.035
- 9 TRUE  FALSE ind_poly      0.08 
-10 TRUE  FALSE main          1    
-11 TRUE  FALSE meta_linear   0.02 
-12 TRUE  FALSE meta_poly     0.09 </code></pre>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Model names:</p>
@@ -616,10 +511,12 @@ override using the `.groups` argument.</code></pre>
 <li><code>main</code> = Individual level main effect of genotype with no interaction estimation</li>
 <li><code>ind_linear</code> = Individual level G x age with linear interaction</li>
 <li><code>ind_poly</code> = Individual level G x age with polynomial interaction</li>
+<li><code>ind_full</code> = Individual level G x age with age as a categorical variable</li>
 <li><code>heterogeneity</code> = Cochran’s Q statistic for age-stratified summary statistics</li>
 <li><code>meta_linear</code> = Meta-regression for age-stratified summary statistics using linear interaction</li>
 <li><code>meta_poly</code> = Meta-regression for age-stratified summary statistics using polynomial interaction</li>
 </ul>
+<p>Note that all models are wrt</p>
 <p>Summary:</p>
 <ul>
 <li>Heterogeneity has well controlled type 1 error when there is a main effect and when there is no main effect</li>
@@ -628,40 +525,32 @@ override using the `.groups` argument.</code></pre>
 </ul>
 <p><strong>Check power</strong></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>ress <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(<span class="at">main =</span> b0 <span class="sc">!=</span> <span class="dv">0</span>, <span class="at">gxage =</span> (b1 <span class="sc">!=</span> <span class="dv">0</span> <span class="sc">|</span> b2 <span class="sc">!=</span> <span class="dv">0</span> <span class="sc">|</span> b3 <span class="sc">!=</span> <span class="dv">0</span>), method) <span class="sc">%&gt;%</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">power=</span><span class="fu">mean</span>(minp <span class="sc">&lt;</span> <span class="fl">0.05</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(gxage)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>res <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(<span class="at">main =</span> b0 <span class="sc">!=</span> <span class="dv">0</span>, <span class="at">gxage =</span> (b1 <span class="sc">!=</span> <span class="dv">0</span> <span class="sc">|</span> b2 <span class="sc">!=</span> <span class="dv">0</span> <span class="sc">|</span> b3 <span class="sc">!=</span> <span class="dv">0</span>), method) <span class="sc">%&gt;%</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">power=</span><span class="fu">mean</span>(pval <span class="sc">&lt;</span> <span class="fl">0.05</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(gxage) <span class="sc">%&gt;%</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>method, <span class="at">y=</span>power, <span class="at">fill=</span>main)) <span class="sc">+</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>(<span class="at">stat=</span><span class="st">"identity"</span>, <span class="at">position=</span><span class="st">"dodge"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`summarise()` has grouped output by 'main', 'gxage'. You can override using the
 `.groups` argument.</code></pre>
 </div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 12 × 4
-# Groups:   main, gxage [2]
-   main  gxage method        power
-   &lt;lgl&gt; &lt;lgl&gt; &lt;chr&gt;         &lt;dbl&gt;
- 1 FALSE TRUE  heterogeneity 0.615
- 2 FALSE TRUE  ind_linear    0.712
- 3 FALSE TRUE  ind_poly      0.860
- 4 FALSE TRUE  main          0.53 
- 5 FALSE TRUE  meta_linear   0.640
- 6 FALSE TRUE  meta_poly     0.835
- 7 TRUE  TRUE  heterogeneity 0.629
- 8 TRUE  TRUE  ind_linear    0.714
- 9 TRUE  TRUE  ind_poly      0.872
-10 TRUE  TRUE  main          1.00 
-11 TRUE  TRUE  meta_linear   0.643
-12 TRUE  TRUE  meta_poly     0.85 </code></pre>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>Summary:</p>
 <ul>
-<li>Detecting G x age using <code>heterogeneity</code> (Cochran’s Q) is reasonably powered ut has lower power than other approaches</li>
-<li>Individual models have slightly higher power than meta-regression models</li>
+<li>Detecting G x age using <code>heterogeneity</code> (Cochran’s Q) is reasonably powered but has lower power than other approaches</li>
+<li>Individual models have higher power than meta-regression models</li>
 </ul>
 <hr>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>R version 4.4.1 (2024-06-14)
 Platform: aarch64-apple-darwin20
@@ -681,27 +570,21 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] rms_6.8-2           Hmisc_5.2-0         metafor_4.6-0      
+[1] here_1.0.1          ggplot2_3.5.1       metafor_4.6-0      
 [4] numDeriv_2016.8-1.1 metadat_1.2-0       Matrix_1.7-0       
 [7] dplyr_1.1.4        
 
 loaded via a namespace (and not attached):
- [1] gtable_0.3.6       xfun_0.48          ggplot2_3.5.1      htmlwidgets_1.6.4 
- [5] lattice_0.22-6     mathjaxr_1.6-0     vctrs_0.6.5        tools_4.4.1       
- [9] generics_0.1.3     sandwich_3.1-1     tibble_3.2.1       fansi_1.0.6       
-[13] cluster_2.1.6      pkgconfig_2.0.3    data.table_1.16.2  checkmate_2.3.2   
-[17] lifecycle_1.0.4    compiler_4.4.1     stringr_1.5.1      MatrixModels_0.5-3
-[21] munsell_0.5.1      codetools_0.2-20   SparseM_1.84-2     quantreg_5.99     
-[25] htmltools_0.5.8.1  yaml_2.3.10        htmlTable_2.4.3    Formula_1.2-5     
-[29] pillar_1.9.0       MASS_7.3-60.2      rpart_4.1.23       multcomp_1.4-26   
-[33] nlme_3.1-164       tidyselect_1.2.1   digest_0.6.37      polspline_1.1.25  
-[37] mvtnorm_1.2-5      stringi_1.8.4      splines_4.4.1      fastmap_1.2.0     
-[41] grid_4.4.1         colorspace_2.1-1   cli_3.6.3          magrittr_2.0.3    
-[45] base64enc_0.1-3    survival_3.6-4     utf8_1.2.4         TH.data_1.1-2     
-[49] withr_3.0.2        foreign_0.8-86     scales_1.3.0       backports_1.5.0   
-[53] rmarkdown_2.27     nnet_7.3-19        gridExtra_2.3      zoo_1.8-12        
-[57] evaluate_1.0.1     knitr_1.48         rlang_1.1.4        glue_1.8.0        
-[61] rstudioapi_0.16.0  jsonlite_1.8.9     R6_2.5.1          </code></pre>
+ [1] gtable_0.3.6      jsonlite_1.8.9    compiler_4.4.1    tidyselect_1.2.1 
+ [5] scales_1.3.0      yaml_2.3.10       fastmap_1.2.0     lattice_0.22-6   
+ [9] R6_2.5.1          labeling_0.4.3    generics_0.1.3    knitr_1.48       
+[13] htmlwidgets_1.6.4 tibble_3.2.1      rprojroot_2.0.4   munsell_0.5.1    
+[17] pillar_1.9.0      rlang_1.1.4       utf8_1.2.4        mathjaxr_1.6-0   
+[21] xfun_0.48         cli_3.6.3         withr_3.0.2       magrittr_2.0.3   
+[25] digest_0.6.37     grid_4.4.1        lifecycle_1.0.4   nlme_3.1-164     
+[29] vctrs_0.6.5       evaluate_1.0.1    glue_1.8.0        farver_2.1.2     
+[33] fansi_1.0.6       colorspace_2.1-1  rmarkdown_2.27    tools_4.4.1      
+[37] pkgconfig_2.0.3   htmltools_0.5.8.1</code></pre>
 </div>
 </div>
 
