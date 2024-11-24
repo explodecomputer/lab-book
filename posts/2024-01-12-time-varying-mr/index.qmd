@@ -1,7 +1,7 @@
 ---
-title: "2024-01-12-time-varying-mr"
+title: "Time varying MR"
 author: Gibran Hemani
-date: "`r Sys.Date()`"
+date: "2024-01-12"
 categories: []
 ---
 

@@ -14,6 +14,7 @@
       "/posts/2024-09-18-conditional-summary-stats/index.html",
       "/posts/2024-09-07-approx-matrix-inverse/index.html",
       "/posts/2024-08-30-grm-lookups/index.html",
+      "/posts/2024-08-22-parse-sample-sizes/index.html",
       "/posts/2024-07-29-inversion-update/index.html",
       "/posts/2024-07-11-ols-bias/index.html",
       "/posts/2024-06-25-z-to-beta/index.html",
@@ -28,6 +29,7 @@
       "/posts/2024-02-23-selection-families/index.html",
       "/posts/2024-02-21-cancer-prevalence-differences/index.html",
       "/posts/2024-02-11-modal-coloc/index.html",
+      "/posts/2024-01-12-time-varying-mr/index.html",
       "/posts/2024-01-04-clocks-mqtls/index.html",
       "/posts/2023-12-08-diff-vuln-susc/index.html",
       "/posts/2023-12-06-rsq/index.html",
@@ -72,9 +74,7 @@
       "/posts/2022-08-12-correlated-snps/index.html",
       "/posts/2022-07-24-case-control-power/index.html",
       "/posts/2022-05-08-prs-vs-ivw/index.html",
-      "/posts/2022-01-09-did-models-confounding/index.html",
-      "/posts/2024-08-22-parse-sample-sizes/index.html",
-      "/posts/2024-01-12-time-varying-mr/index.html"
+      "/posts/2022-01-09-did-models-confounding/index.html"
     ]
   }
 ]
