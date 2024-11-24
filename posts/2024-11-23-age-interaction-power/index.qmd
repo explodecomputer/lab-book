@@ -1,0 +1,292 @@
+---
+title: "Power of G x age interactions"
+author: Gibran Hemani
+date: "2024-11-23"
+categories: []
+---
+
+## Background
+
+Individual level analysis versus age-stratified GWAS to detect GxAge interactions
+
+## Simulation setup
+
+
+The simulation is based on the following model:
+
+$$
+y_i = \beta_0 g + \beta_1 g_i \times a_i + \beta_2 g_i \times a_i^2 + \beta_3 g_i \times a_i^3 + e_i
+$$
+
+where $y_i$ is the phenotype of individual $i$, $g_i$ is the genotype, $a_i$ is the age normalised to have range $(-1,1)$, and $e_i$ is the error term. 
+
+The simulation is based on the following steps:
+
+1. Generate a set of coefficients for the age polynomial
+2. Generate a set of individuals with age, genotype, and error terms
+
+```{r}
+library(dplyr)
+library(metafor)
+library(rms)
+
+simdat <- function(n=500000, b0, b1, b2, b3) { 
+    nage <- length(40:70)
+    coef <- tibble(
+        age = 40:70,
+        x = seq(-1, 1, length.out=nage),
+        bxage = x^3 * b3 + x^2 * b2 + x * b1 + b0
+    )
+
+    dat <- tibble(
+        age = runif(n, 40, 70) %>% round,
+        g = rbinom(n, 2, 0.5),
+        e = rnorm(n)
+    ) %>% group_by(age) %>%
+        do({
+            a <- subset(coef, age == .$age[1])
+            mutate(., prs = a$bxage * g, y = prs + e)
+        })
+
+    return(list(dat=dat, coef=coef))
+}
+```
+
+An example of the simulation with **no interaction**:
+
+```{r}
+sim <- simdat(500000, 0.02, 0, 0, 0)
+sim
+```
+
+Estimation is performed by 
+
+1. generating summary statistics for 2-year age bins
+2. estimating the effects of the genotype on the phenotype in each age bin using a simple linear model
+3. performing a polynomial meta regression of 
+
+$$
+\beta_{age} \sim age + age^2 + age^3
+$$
+
+An example of the model fit is shown below:
+
+```{r}
+sumstats <- function(dat) {
+    # split dat into 2 year age bins
+    dat <- dat %>% mutate(agebin = round(age / 2) * 2)
+    ss <- group_by(dat, agebin) %>%
+        do({
+            a <- summary(lm(y ~ g, data=.))
+            tibble(
+                agebin = .$agebin[1],
+                beta = a$coefficients[2, 1],
+                se = a$coefficients[2, 2]
+            )
+        })
+    return(ss)
+
+}
+
+plot_gxage <- function(sim) {
+    ss <- sumstats(sim$dat)
+    m2 <- rma.uni(yi=beta, sei=se, mods = ~ poly(agebin, degree=3, raw=TRUE), data=ss)
+    coefs <- tibble(
+        method="metareg",
+        poly=0:3,
+        b = m2$beta[1:4],
+        se = m2$se[1:4],
+        pval = m2$pval[1:4]
+    )
+    sav <- predict(m2, newmods=unname(poly(ss$agebin, degree=3, raw=TRUE))) %>% as_tibble() %>% mutate(agebin=ss$agebin)
+    plot(pred ~ agebin, data=sav, type="l")
+    lines(ci.lb ~ agebin, data=sav, type="l", lty=2)
+    lines(ci.ub ~ agebin, data=sav, type="l", lty=2)
+    lines(bxage ~ age, sim$coef, col="red")
+    points(beta ~ agebin, data=ss, pch=16, cex=0.01/ss$se)
+    return(coefs)
+}
+
+plot_gxage(sim)
+```
+
+The red line is the true genotype x age coefficient, and the black line is the estimated effect of the genotype on the phenotype with age. Dotted lines are the confidence intervals.
+
+In this example there is no heterogeneity in the effect of the genotype on the phenotype with age, so the confidence intervals of the polynomial fit are very wide.
+
+Example **with interaction**:
+
+```{r}
+sim <- simdat(500000, 0, 0.02, 0.02, 0.02)
+plot_gxage(sim)
+```
+
+Now the confidence intervals are much narrower, and the true effect of the genotype on the phenotype with age is captured by the polynomial fit.
+
+## Performance simulations
+
+Evaluate power and type 2 error of different approaches to detect G x age interactions. Approaches using age-stratified summary statistics:
+
+- Cochran's Q statistic
+- Meta-regression with simple linear model
+- Meta-regression with polynomial terms
+
+Approaches using individual level data across all ages:
+
+- Main effect of genotype (no interaction)
+- Linear G x age interaction
+- Polynomial G x age interaction
+
+```{r}
+estimation <- function(dat) {
+    ss <- sumstats(dat)
+    m1 <- rma.uni(yi=ss$beta, sei=ss$se, method="FE")
+    m2 <- rma.uni(yi=beta, sei=se, mods = ~ poly(agebin, degree=3), data=ss)
+    m6 <- rma(yi=beta, sei=se, mods = ~ rcs(agebin, 4), data=ss)
+    m7 <- rma(yi=beta, sei=se, mods = ~ agebin, data=ss)
+
+    # Compare against individual level models
+    m3 <- summary(lm(y ~ g * poly(age, 3), data=dat))
+    m4 <- summary(lm(y ~ g, data=dat))
+    m5 <- summary(lm(y ~ g * age, data=dat))
+    m8 <- summary(lm(y ~ g + rcs(age, 4), data=dat))
+
+    bind_rows(
+        tibble(method="heterogeneity", Q=m1$QE, pval=m1$QEp),
+        tibble(
+            method="meta_poly",
+            poly=1:3,
+            b = m2$beta[2:4],
+            se = m2$se[2:4],
+            pval = m2$pval[2:4]
+        ),
+        tibble(
+            method="meta_rcs",
+            poly=1:3,
+            b = m6$beta[2:4],
+            se = m6$se[2:4],
+            pval = m6$pval[2:4]
+        ),
+        tibble(
+            method="meta_linear",
+            poly=1,
+            b = m7$beta[2],
+            se = m7$se[2],
+            pval = m7$pval[2]
+        ),
+        tibble(
+            method="ind_poly",
+            poly=1:3,
+            b = m3$coef[5:7, 1],
+            se = m3$coef[5:7, 2],
+            pval = m3$coef[5:7, 4]
+        ),
+        tibble(
+            method="ind_linear",
+            poly=1,
+            b = m5$coef[4, 1],
+            se = m5$coef[4, 2],
+            pval = m5$coef[4, 4]
+        ),
+        tibble(
+            method="ind_rcs",
+            poly=1:3,
+            b = m8$coef[2:4, 1],
+            se = m8$coef[2:4, 2],
+            pval = m8$coef[2:4, 4]
+        ),
+        tibble(
+            method="main",
+            b = m4$coefficients[2, 1],
+            se = m4$coefficients[2, 2],
+            pval = m4$coefficients[2, 4]
+        )
+    )
+}
+
+# Function to run whole simulation
+run_sim <- function(b0=0, b1=0, b2=0, b3=0, n=500000, sim=1) {
+    args <- as.list(environment()) %>% as_tibble()
+    sim <- simdat(n, b0, b1, b2, b3)
+    est <- estimation(sim$dat)
+    est <- bind_cols(est, as_tibble(args))
+    return(est)
+}
+
+# Example
+run_sim(0.02, 0, 0, 0.05)
+```
+
+Do this over a range of scenarios (this was run on HPC in parallel)
+
+```{r, eval=FALSE}
+library(furrr)
+param <- expand.grid(
+    n = c(300000),
+    b0 = c(0, -0.02),
+    b1 = c(0, 0.02),
+    b2 = c(0, -0.02, 0.02),
+    b3 = c(0, -0.02, 0.02),
+    sim=1:200
+)
+
+plan(multicore(workers=50))
+opt <- furrr_options(seed=TRUE)
+res <- future_pmap(param, run_sim, .progress=TRUE, .options=opt) %>% bind_rows()
+
+saveRDS(res, "sim.rds")
+```
+
+
+## Results
+
+```{r}
+res <- readRDS("sim.rds")
+
+ress <- res %>% group_by(n, b0, b1, b2, b3, sim, method) %>%
+    summarise(minp=min(pval)) %>% ungroup()
+```
+
+
+**First check false discovery rates**
+
+```{r}
+ress %>% group_by(main = b0 != 0, gxage = (b1 != 0 | b2 != 0 | b3 != 0), method) %>%
+    summarise(power=mean(minp < 0.05)) %>%
+    filter(!gxage)
+```
+
+Model names:
+
+- `main` = Individual level main effect of genotype with no interaction estimation
+- `ind_linear` = Individual level G x age with linear interaction
+- `ind_poly` = Individual level G x age with polynomial interaction
+- `heterogeneity` = Cochran's Q statistic for age-stratified summary statistics
+- `meta_linear` = Meta-regression for age-stratified summary statistics using linear interaction
+- `meta_poly` = Meta-regression for age-stratified summary statistics using polynomial interaction
+
+Summary:
+
+- Heterogeneity has well controlled type 1 error when there is a main effect and when there is no main effect
+- individual level and meta regression linear models both have well controlled type 1 error when there is no interaction
+- individual level and meta regression polynomial models both have inflated type 1 error when there is no interaction (due to overfitting)
+
+**Check power**
+
+```{r}
+ress %>% group_by(main = b0 != 0, gxage = (b1 != 0 | b2 != 0 | b3 != 0), method) %>%
+    summarise(power=mean(minp < 0.05)) %>%
+    filter(gxage)
+```
+
+Summary:
+
+- Detecting G x age using `heterogeneity` (Cochran's Q) is reasonably powered ut has lower power than other approaches
+- Individual models have slightly higher power than meta-regression models
+
+
+---
+
+```{r}
+sessionInfo()
+```

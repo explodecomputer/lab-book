@@ -1,0 +1,185 @@
+---
+title: "Collider bias interactions"
+author: Gibran Hemani
+date: "2024-11-02"
+categories: []
+execute: 
+    eval: false
+
+---
+
+## Background
+
+```{r}
+library(dplyr)
+library(purrr)
+library(ggplot2)
+
+n <- 1000000
+g1 <- rbinom(n, 2, 0.4) %>% scale(scale=FALSE)
+g2 <- rbinom(n, 2, 0.4) %>% scale(scale=FALSE)
+g3 <- rbinom(n, 2, 0.4) %>% scale(scale=FALSE)
+u <- rnorm(n)
+e1 <- rnorm(n)
+e2 <- rnorm(n)
+bmi <- g1 + g2 + u + e1
+cancer_liability <- u + bmi + g3 + e2
+cancer <- rbinom(n, 1, plogis(cancer_liability-3))
+```
+
+
+```{r}
+table(cancer)
+```
+
+```{r}
+summary(glm(cancer ~ bmi + u))
+```
+
+```{r}
+summary(lm(bmi ~ g1))
+summary(lm(bmi ~ g1, subset=cancer==1))
+summary(lm(bmi ~ g1, subset=cancer==0))
+```
+
+
+```{r}
+summary(lm(bmi ~ g1 * cancer))
+```
+
+
+```{r}
+sim <- function(nid, beta_u1, beta_u2, beta_x=1, beta_g1=1, beta_g2=1, beta_g3=1, p1=0.4, p2=0.4, p3=0.4, ve1=1, ve2=1, intercept=-3, sim=1, scale=c("additive", "log-additive")[1], transform=TRUE) {
+  out <- c(as.list(environment())) %>% as_tibble()
+
+  g1 <- rbinom(nid, 2, p1) %>% scale(scale=FALSE)
+  g2 <- rbinom(nid, 2, p2) %>% scale(scale=FALSE)
+  g3 <- rbinom(nid, 2, p3) %>% scale(scale=FALSE)
+  u <- rnorm(nid)
+  e1 <- rnorm(nid, sd=sqrt(ve1))
+  e2 <- rnorm(nid, sd=sqrt(ve2))
+  if(scale=="additive") {
+    bmi <- g1 * beta_g1 + g2 * beta_g2 + u * beta_u1 + e1
+  } else if(scale == "log-additive") {
+    bmi <- exp(g1 * beta_g1) * exp(g2 * beta_g2) * exp(u * beta_u1) * exp(e1)
+  } else {
+    stop("scale must be additive or log-additive")
+  }
+  
+  if(scale == "additive") {
+    cancer_liability <- intercept + u * beta_u2 + bmi * beta_x + g3 * beta_g3 + e2
+  } else if(scale == "log-additive") {
+    cancer_liability <- exp(intercept) * exp(u * beta_u2) * exp(bmi * beta_x) * exp(g3 * beta_g3) * exp(e2)
+  } else {
+    stop("scale must be additive or log-additive")
+  }
+  
+  cancer <- rbinom(nid, 1, plogis(cancer_liability))
+  
+  if(transform) {
+    bmi <- log(bmi)
+  }
+  
+  mod1 <- summary(lm(bmi ~ g1))
+  mod2 <- summary(lm(bmi ~ g1, subset=cancer == 0))
+  mod3 <- summary(lm(bmi ~ g1, subset=cancer == 1))
+  mod4 <- summary(lm(bmi ~ g3 * cancer))
+  
+  o <- tibble(
+    model = c(
+    "mod1",
+    "mod2",
+    "mod3",
+    "mod4_main",
+    "mod4_gxe"
+  ),
+  bhat = c(
+    mod1$coef[2,1],
+    mod2$coef[2,1],
+    mod3$coef[2,1],
+    mod4$coef[2,1],
+    mod4$coef[4,1]
+  )
+  )
+  o <- bind_cols(o, out)
+  
+  dat <- tibble(g1, g2, g3, u, bmi, cancer)
+  
+  return(list(o=o, dat=dat))
+}
+
+```
+
+```{r}
+  sim(100000, 1, 1, scale="log-additive")$dat %>% {hist(log(.$bmi))}
+```
+
+
+```{r}
+param <- expand.grid(
+  n=100000,
+  beta_u1 = c(0, 1),
+  beta_u2 = c(0, 1),
+  beta_g2 = c(0, 1),
+  beta_g3 = c(0, 1),
+  beta_x = c(0, 1),
+  sim=1:10
+)
+```
+
+
+```{r}
+res <- pmap(param, sim) %>% bind_rows()
+```
+
+
+```{r}
+ggplot(res %>% filter(beta_g3 == 0 & !grepl("mod4", model)), aes(x=as.factor(beta_g2), y=bhat)) +
+  geom_boxplot(aes(fill=model, colour=as.factor(beta_x))) +
+  facet_grid(beta_u1 ~ beta_u2, labeller = label_both)
+```
+
+
+The bias in bhat_g1bmi|c is based on all ancestors of bmi when conditioning on cancer status
+
+```{r}
+d <- sim(100000, beta_u1=0, beta_u2=0, beta_g3=0, ve1=0, beta_g2=0)$dat
+summary(lm(g1 ~ g2, d, subset=d$cancer == 1))
+summary(lm(bmi ~ g1, d, subset=d$cancer == 0))
+summary(lm(bmi ~ g1, d))
+```
+
+
+
+```{r}
+n <- 10000
+g1 <- rnorm(n)
+g2 <- rnorm(n)
+g3 <- rnorm(n)
+e <- rnorm(n)
+
+x <- g1 + g2 + g3 + e
+y <- rbinom(n, 1, plogis(x))
+```
+
+
+
+```{r}
+sim(10000, 1, 1, scale="log-additive", transform=FALSE)[["o"]]
+sim(10000, 1, 1, scale="log-additive", transform=TRUE)[["o"]]
+sim(10000, 1, 1, scale="additive", transform=FALSE)[["o"]]
+sim(10000, 1, 1, scale="additive", transform=TRUE)[["o"]]
+```
+
+
+```{r}
+log(-1)
+```
+
+
+
+---
+
+```{r}
+sessionInfo()
+```
