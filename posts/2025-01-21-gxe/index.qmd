@@ -1,0 +1,58 @@
+---
+title: "Estimating environmental factor using GxE interaction"
+author: Gibran Hemani
+date: "2025-01-21"
+categories: []
+---
+
+## Background
+
+Is it possible to estimate the environmental factor using the GxE interaction term? In this model the genetic effect is masked unless individuals experience a particular environment. Stratifying individuals by different levels of environmental exposure will give different marginal genetic effects. Can the influence of the environment be recovered from this?
+
+## Initial simulation
+
+```{r}
+library(purrr)
+library(ggplot2)
+```
+
+
+```{r}
+fn <- function(n, bap, bm, bi, sim=1) {
+    args <- list(n=n, bap=bap, bm=bm, bi=bi, sim=sim) %>% as_tibble()
+    ap <- rbinom(n, 2, 0.5) / 2
+    g <- rbinom(n, 2, 0.3)
+
+    l <- ap * bap + g * ap * bi + rnorm(n)
+    copd <- rbinom(n, 1, plogis(l))
+    bhat <- glm(copd ~ g * ap, family="binomial")$coef[4]
+    args$bhat <- bhat
+    return(args)
+}
+fn(100000, 0.3, 0.1, 0.5)
+```
+
+
+```{r}
+param <- expand.grid(
+    n=100000,
+    bap=c(0.1, 0.3, 0.5),
+    bm=c(0, 0.1),
+    bi=c(0.1, 0.3, 0.5),
+    sim=1:5
+)
+res <- pmap(param, fn)
+```
+
+```{r}
+res %>% 
+    bind_rows() %>%
+    ggplot(aes(bap, bhat, color=factor(bi))) +
+    geom_point()
+```
+
+---
+
+```{r}
+sessionInfo()
+```
