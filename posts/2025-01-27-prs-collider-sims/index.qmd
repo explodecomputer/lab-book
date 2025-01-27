@@ -1,0 +1,80 @@
+---
+title: "2025-01-27-prs-collider-sims"
+author: Gibran Hemani
+date: "`r Sys.Date()`"
+categories: []
+---
+
+## Background
+
+Observed that GIANT BMI PRS associated with BMI in UKB with b=1.1 and in colorectal cancer cases with b=0.7. Can this be induced just from non-confounded collider bias of the variants becoming correlated withing the sample:
+
+
+```{r}
+library(dplyr)
+n <- 1000000
+
+
+# 1. simulate population with 10 snps, and the snps have betas on BMI
+# 2. BMI has an influence on X incidence
+# 3. U has an influence on X incidence and X progression
+
+
+
+G <- sapply(1:10, function(i) rbinom(n, 2, 0.3))
+dim(G)
+b_g_bmi <- rnorm(10, 0, 0.1)
+
+bmi <- G %*% b_g_bmi + rnorm(n, 0, 1)
+u <- rnorm(n)
+b_u_x <- 0.5
+X <- rbinom(n, 1, plogis(-2 + 0.2 * bmi + b_u_x * u))
+
+table(X)
+
+b_u_p <- 0.5
+P <- u * b_u_p + rnorm(n)
+
+
+library(simulateGP)
+
+bhat_controls <- gwas(bmi[X == 0], G[X == 0, ])
+summary(lm(bhat_controls$bhat ~ b_g_bmi))
+
+bhat_cases <- gwas(bmi[X == 1], G[X == 1, ])
+summary(lm(bhat_cases$bhat ~ b_g_bmi))
+
+
+cor_controls <- cor(G[X == 0, ])
+cor_all <- cor(G)
+cor_cases <- cor(G[X == 1,])
+
+mean(cor_controls[lower.tri(cor_controls)]^2)
+mean(cor_cases[lower.tri(cor_controls)]^2)
+mean(cor_all[lower.tri(cor_controls)]^2)
+
+
+
+mean(cor(G[]))
+
+
+
+
+
+
+a <- rnorm(1000, mean=0)
+pchisq(sum(a^2), 1000, lower.tail = FALSE)
+
+a <- rnorm(1000, mean=0.6)
+pchisq(sum(a^2), 1000, lower.tail = FALSE)
+
+a <- rnorm(1000, sd=0.1)
+pchisq(sum(a^2), 1000, lower.tail = FALSE)
+```
+
+
+---
+
+```{r}
+sessionInfo()
+```
