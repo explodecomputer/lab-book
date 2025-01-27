@@ -1,0 +1,47 @@
+---
+title: "2025-01-23-correlated-se"
+author: Gibran Hemani
+date: "`r Sys.Date()`"
+categories: []
+---
+
+## Background
+
+The standard error in a region is 
+
+$$
+cov(\hat{\beta}) = S \rho S
+$$
+
+where $S$ is the diagonal matrix of standard errors, $\rho$ is the LD correlation matrix.
+
+Quite slow to calculate, how to speed it up?
+
+
+```{r}
+library(randcorr)
+library(exvatools)
+library(microbenchmark)
+
+rho <- randcorr(2000)
+hist(rho)
+
+S <- diag(runif(2000))
+
+se1 <- S %*% rho %*% S
+se2 <- multd(dmult(S, rho), S)
+
+cor(c(se1), c(se2))
+```
+
+
+```{r}
+microbenchmark(se1 <- S %*% rho %*% S, se2 <- multd(dmult(S, rho), S), times = 5)
+```
+
+
+---
+
+```{r}
+sessionInfo()
+```

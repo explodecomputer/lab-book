@@ -1,0 +1,100 @@
+---
+title: "2025-01-21-clustering-prs"
+author: Gibran Hemani
+date: "`r Sys.Date()`"
+categories: []
+---
+
+## Background
+
+If a trait is a composite of different sub-traits then is it possible to recover those sub-traits by identifying clustering variants into scores and then clustering scores?
+
+
+```{r}
+library(dplyr)
+library(simulateGP)
+
+
+n <- 100000
+nclust <- 5
+nsnp_per_trait <- 10
+ntrait_per_clust <- 10
+
+make_cluster <- function(n, nsnp_per_trait, ntrait_per_clust) {
+    
+    G <- list()
+    for(i in 1:ntrait_per_clust) {
+        g <- matrix(rbinom(n * nsnp_per_trait, 2, 0.3), nrow=n)
+        G[[i]] <- g
+        trait <- scale(g) %*% rnorm(nsnp_per_trait)
+        if(i == 1) {
+            trait_all <- trait
+        } else {
+            trait_all <- cbind(trait_all, trait)
+        }
+    }
+    G <- do.call(cbind, G)
+
+    return(list(G=G, T=trait_all))
+}
+
+make_disease <- function(n, nclust, nsnp_per_trait, ntrait_per_clust) {
+    
+    L <- list()
+    for(i in 1:nclust) {
+        L[[i]] <- make_cluster(n, nsnp_per_trait, ntrait_per_clust)
+    }
+    
+    T <- lapply(L, \(x) x$T) %>% do.call(cbind, .)
+    D <- tibble(
+        liability = as.matrix(T) %*% rnorm(ncol(T)) %>% drop(),
+        disease = rbinom(n, 1, plogis(liability))
+    )
+    G <- lapply(L, \(x) x$G) %>% do.call(cbind, .)
+    return(list(G=G, T=T, D=D))
+}
+
+gwas <- function(y, g) {
+    (cov(y, g) / apply(g, 2, var)) %>% drop()
+}
+
+make_effects_matrix <- function(dat) {
+    o <- lapply(1:ncol(dat$T), \(i) {
+        simulateGP::gwas(dat$T[,i], dat$G)$fval
+    }) %>% do.call(cbind, .)
+    return(o)
+}
+
+```
+
+
+
+```{r}
+
+dat <- make_disease(n, nclust, nsnp_per_trait, ntrait_per_clust=1)
+effects_matrix <- make_effects_matrix(dat)
+
+dim(effects_matrix)
+dim(gwas(dat$D$disease, dat$G))
+effects_matrix[1:5, 1:5]
+o[1:5, 1:5]
+
+a <- princomp(sqrt(effects_matrix))
+s <- a$scores
+s[s < 0] <- NA
+
+plot(s[,1], s[,3], col=dat$D$disease+1)
+
+
+
+str(dat)
+table(dat$D$disease)
+
+
+```
+
+---
+
+```{r}
+sessionInfo()
+```
