@@ -19,6 +19,7 @@ library(dplyr)
 library(simulateGP)
 library(TwoSampleMR)
 library(purrr)
+library(furrr)
 library(ggplot2)
 ```
 
@@ -34,6 +35,12 @@ y <- x * 0.5 + rnorm(n)
 # MR using both SNPs, treating as if they are independent
 get_effs(x, y, g) %>% mr(method="mr_ivw") %>% str
 ```
+
+```{r}
+get_effs(x, y, g) %>% str
+get_effs(x, y, g) %>% mr_singlesnp()
+```
+
 
 ```{r}
 # MR using just the causal SNP
@@ -52,7 +59,8 @@ param <- expand.grid(
 param$sim <- 1:nrow(param)
 dim(param)
 
-res <- map(1:nrow(param), \(i){
+plan(multicore, workers=7)
+res <- future_map(1:nrow(param), \(i){
     g <- correlated_binomial(param$n[i], p1=0.5, p2=0.5, rho=sqrt(param$r2[i]))
     # x caused by just snp 1
     x <- g[,1] * param$bgx[i] + rnorm(n)
@@ -68,7 +76,6 @@ res <- map(1:nrow(param), \(i){
 Standard errors across all scenarios
 
 ```{r}
-
 ggplot(res, aes(x=r2, y=se)) +
 geom_point(aes(colour=as.factor(nsnp))) +
 geom_line(aes(colour=as.factor(nsnp))) +
@@ -83,6 +90,7 @@ geom_point(aes(colour=as.factor(nsnp))) +
 geom_line(aes(colour=as.factor(nsnp))) +
 facet_grid(bgx ~ bxy, labeller=label_both)
 ```
+
 
 Look at just one
 
@@ -110,6 +118,371 @@ get_effs(x, y, g) %>% mr(method="mr_ivw") %>% str
 ```{r}
 get_effs(x, y, g[,1, drop=F]) %>% mr(method=c("mr_ivw", "mr_wald_ratio")) %>% str
 ```
+
+
+
+
+
+FDR
+
+```{r}
+param <- expand.grid(
+    r2=c(seq(0, 0.2, by=0.01)),
+    bgx=seq(0, 0.2, by=0.2),
+    bxy=seq(0),
+    n=10000,
+    rep=1:1000
+)
+param$sim <- 1:nrow(param)
+dim(param)
+
+plan(multicore, workers=7)
+res <- future_map(1:nrow(param), \(i){
+    g <- correlated_binomial(param$n[i], p1=0.5, p2=0.5, rho=sqrt(param$r2[i]))
+    # x caused by just snp 1
+    x <- g[,1] * param$bgx[i] + rnorm(n)
+    y <- x * param$bxy[i] + rnorm(n)
+
+    bind_rows(
+        get_effs(x, y, g) %>% {suppressMessages(mr(., method="mr_ivw"))},
+        get_effs(x, y, g[,1, drop=F]) %>% {suppressMessages(mr(., method="mr_wald_ratio"))}
+    ) %>% mutate(sim=param$sim[i]) %>% return()
+}) %>% bind_rows %>% inner_join(param, ., by="sim")
+```
+
+
+```{r}
+param <- expand.grid(
+    r2=c(seq(0.3, 1, by=0.05)),
+    bgx=seq(0, 0.2, by=0.2),
+    bxy=seq(0),
+    n=10000,
+    rep=1:1000
+)
+param$sim <- 1:nrow(param)
+dim(param)
+
+plan(multicore, workers=7)
+res2 <- future_map(1:nrow(param), \(i){
+    g <- correlated_binomial(param$n[i], p1=0.5, p2=0.5, rho=sqrt(param$r2[i]))
+    # x caused by just snp 1
+    x <- g[,1] * param$bgx[i] + rnorm(n)
+    y <- x * param$bxy[i] + rnorm(n)
+
+    bind_rows(
+        get_effs(x, y, g) %>% {suppressMessages(mr(., method="mr_ivw"))},
+        get_effs(x, y, g[,1, drop=F]) %>% {suppressMessages(mr(., method="mr_wald_ratio"))}
+    ) %>% mutate(sim=param$sim[i]) %>% return()
+}) %>% bind_rows %>% inner_join(param, ., by="sim")
+
+
+```
+
+
+
+
+
+```{r}
+res %>% group_by(r2, bxy, nsnp) %>% summarise(fdr=mean(pval < 0.05)) %>%
+filter(bxy == 0) %>%
+ggplot(., aes(x=r2, y=fdr)) +
+geom_point(aes(colour=as.factor(nsnp))) +
+geom_line(aes(colour=as.factor(nsnp))) +
+facet_grid(. ~ bxy, labeller=label_both, scale="free_y")
+```
+
+
+
+## Multiple variants
+
+```{r}
+sim <- function(n, r2, bgx, bxy, ninst) {
+
+    dat <- lapply(1:ninst, \(i) {
+        g <- correlated_binomial(n, p1=0.5, p2=0.5, rho=sqrt(r2))
+        x <- g[,1] * bgx + rnorm(n)
+        y <- x * bxy + rnorm(n)
+        e <- get_effs(x, y, g)
+        e$inst <- 1:2
+        return(e)
+    }) %>% bind_rows()
+
+    bind_rows(
+        mr(dat, method=c("mr_wald_ratio", "mr_ivw")) %>% mutate(inst="Causal+Tagging"),
+        mr(dat %>% filter(SNP == 1), method=c("mr_wald_ratio", "mr_ivw")) %>% mutate(inst="Causal")
+    )
+}
+
+sim(100000, 0.5, 0.2, 0, 1)
+```
+
+
+
+
+```{r}
+sim2 <- function(n, r2, bgx, bmx, bxy, p1, p2, rep=1, sim=1) {
+    args <- c(as.list(environment())) %>% as_tibble()
+    g <- tryCatch(correlated_binomial(n, p1=p1, p2=p2, rho=sqrt(r2)), error=function(e) return(NULL))
+    if(is.null(g)) return(NULL)
+    x <- g[,1] * bgx + g[,2] * bmx + rnorm(n)
+    y <- x * bxy + rnorm(n)
+    e <- get_effs(x, y, g)
+    r <- bind_rows(
+        mr(e %>% filter(SNP == 1), method=c("mr_wald_ratio", "mr_ivw")) %>% mutate(inst="Causal"),
+        mr(e %>% filter(SNP == 2), method=c("mr_wald_ratio", "mr_ivw")) %>% mutate(inst="Tagging")
+    )
+    r <- bind_cols(r, args)
+    r$cR <- sqrt(p1*(1-p1)/(p2*(1-p2))*r2)
+    return(r)
+}
+
+sim2(100000, 0.5, 0.2, 0.1, 0, 0.5, 0.5)
+
+param <- expand.grid(
+    n=c(1000, 10000),
+    bgx=c(0.2),
+    bmx=c(0, 0.1),
+    bxy=c(0, 0.2),
+    r2=seq(0, 0.5, by=0.1),
+    p1=c(0.1, 0.5),
+    p2=c(0.1, 0.5),
+    rep=1:10
+)
+param$sim <- 1:nrow(param)
+r <- pmap(param, sim2) %>% bind_rows()
+
+dim(r)
+head(r)
+
+r1 <- r %>% filter(inst=="Causal")
+r2 <- r %>% filter(inst=="Tagging")
+rw <- inner_join(r1, r2, by="sim")
+
+str(rw)
+
+plot(rw$se.x, rw$se.y)
+
+ggplot(rw, aes(x=se.x, y=se.y)) +
+geom_point(aes(colour=r2.x)) +
+geom_abline(slope=1, intercept=0) +
+geom_smooth(method=lm) +
+ylim(0, 20) +
+facet_grid(I(p1.x-p2.x) ~ bmx.x, labeller=label_both, scale="free_y")
+
+```
+
+
+
+
+```{r}
+p1 <- 0.5
+p2 <- 0.2
+n <- 100000
+bgx <- 0.05
+bmx <- 0
+bxy <- 0
+r2 <- 0.1
+
+g <- tryCatch(correlated_binomial(n, p1=p1, p2=p2, rho=sqrt(r2)), error=function(e) return(NULL))
+x <- g[,1] * bgx + g[,2] * bmx + rnorm(n)
+y <- x * bxy + rnorm(n)
+
+
+e <- get_effs(x, y, g)
+e %>% str
+
+r <- bind_rows(
+    mr(e %>% filter(SNP == 1), method=c("mr_wald_ratio", "mr_ivw")) %>% mutate(inst="Causal"),
+    mr(e %>% filter(SNP == 2), method=c("mr_wald_ratio", "mr_ivw")) %>% mutate(inst="Tagging")
+)
+
+sqrt(var(x) / (n * var(g[,1])))
+sqrt(var(y) / (n * var(g[,1])))
+
+summary(lm(y ~ g[,1]))
+
+sqrt(var(x) / (n * var(g[,2])))
+sqrt(var(y) / (n * var(g[,2])))
+
+mr(e[1,])
+
+sqrt(var(y) / (n * var(g[,1]))) / e$beta.exposure[1]
+
+mr(e[2,])
+
+sqrt(var(y) / (n * var(g[,2]))) / e$beta.exposure[2]
+
+sqrt(var(y) / (n * var(g[,2]))) / e$beta.exposure[2]
+
+cR <- sd(g[,1])/sd(g[,2]) * cor(g[,1], g[,2])
+
+sqrt(var(y) / (n * var(g[,2]))) / (e$beta.exposure[1] * cR)
+
+e$se.outcome[2] / (sd(g[,1])/sd(g[,2]))
+
+e$se.outcome[1] * (sd(g[,1])/sd(g[,2])) / (e$beta.exposure[1] * cR)
+
+e$se.outcome[1] / (e$beta.exposure[1] * cor(g[,1], g[,2]))
+
+mr(e[1,])$se / cor(g[,1], g[,2])
+
+rw$se.yhat <- rw$se.x / sqrt(rw$r2.x)
+
+plot(rw$se.yhat ~ rw$se.y)
+ggplot(rw, aes(x=se.y, y=se.yhat)) +
+geom_point() +
+geom_abline(slope=1, intercept=0) +
+scale_x_log10() +
+scale_y_log10() +
+facet_grid(bmx.x ~ bxy.x, labeller=label_both, scale="free_y") +
+labs(x="Tagging SNP standard error", y="Expected tagging SNP standard error under the null")
+
+ggsave("metric.png", width=8, height=8)
+
+```
+
+
+Simulations run on ieu-p1:
+
+```{r, eval=FALSE}
+library(dplyr)
+library(simulateGP)
+library(TwoSampleMR)
+library(purrr)
+library(furrr)
+library(ggplot2)
+
+
+param <- expand.grid(
+    r2=seq(0, 0.2, by=0.01),
+    bgx=seq(0, 0.2, by=0.2),
+    bxy=seq(0),
+    n=c(1000, 10000, 100000),
+    rep=1:1000
+)
+param$sim <- 1:nrow(param)
+dim(param)
+
+plan(multicore, workers=40)
+res <- future_map(1:nrow(param), \(i){
+    g <- correlated_binomial(param$n[i], p1=0.5, p2=0.5, rho=sqrt(param$r2[i]))
+    # x caused by just snp 1
+    x <- g[,1] * param$bgx[i] + rnorm(param$n[i])
+    y <- x * param$bxy[i] + rnorm(param$n[i])
+
+    bind_rows(
+        get_effs(x, y, g) %>% {suppressMessages(mr(., method="mr_ivw"))},
+        get_effs(x, y, g[,1, drop=F]) %>% {suppressMessages(mr(., method="mr_wald_ratio"))}
+    ) %>% mutate(sim=param$sim[i]) %>% return()
+}, .progress=TRUE) %>% bind_rows %>% inner_join(param, ., by="sim")
+
+
+param <- expand.grid(
+    r2=c(seq(0.3, 1, by=0.05)),
+    bgx=seq(0, 0.2, by=0.2),
+    bxy=seq(0),
+    n=c(1000, 10000, 100000),
+    rep=1:1000
+)
+param$sim <- 1:nrow(param)
+dim(param)
+
+plan(multicore, workers=40)
+res2 <- future_map(1:nrow(param), \(i){
+    g <- correlated_binomial(param$n[i], p1=0.5, p2=0.5, rho=sqrt(param$r2[i]))
+    # x caused by just snp 1
+    x <- g[,1] * param$bgx[i] + rnorm(param$n[i])
+    y <- x * param$bxy[i] + rnorm(param$n[i])
+
+    bind_rows(
+        get_effs(x, y, g) %>% {suppressMessages(mr(., method="mr_ivw"))},
+        get_effs(x, y, g[,1, drop=F]) %>% {suppressMessages(mr(., method="mr_wald_ratio"))}
+    ) %>% mutate(sim=param$sim[i]) %>% return()
+}, .progress=TRUE) %>% bind_rows %>% inner_join(param, ., by="sim")
+
+res <- bind_rows(res, res2)
+
+
+
+
+res %>% group_by(r2, bxy, bgx, n, nsnp) %>% summarise(fdr=mean(pval < 0.05), nrep=n()) %>%
+filter(bxy == 0) %>%
+ggplot(., aes(x=r2, y=fdr)) +
+geom_point(aes(colour=as.factor(nsnp))) +
+geom_line(aes(colour=as.factor(nsnp))) + 
+geom_hline(yintercept=0.05, linetype="dashed") +
+facet_grid(n ~ bxy, labeller=label_both, scale="free_y")
+
+
+res %>% group_by(r2, bxy, bgx, n, nsnp) %>% summarise(fdr=mean(pval < 0.05), nrep=n()) %>%
+mutate(snps=ifelse(nsnp==1, "Causal", "Causal + Tagging")) %>%
+filter(bxy == 0) %>%
+ggplot(., aes(x=r2, y=fdr)) +
+geom_point(aes(colour=as.factor(snps))) +
+geom_smooth(aes(colour=as.factor(snps)), se=FALSE) + 
+geom_hline(yintercept=0.05, linetype="dashed") +
+facet_grid(n ~ bgx, labeller=label_both, scale="free_y") +
+labs(x="LD (R-square) between causal and tagging variants", y="False discovery rate", colour="SNPs included")
+
+ggsave("mr_fdr.png", width=10, height=10)
+saveRDS(res, file="mr_fdr.rds")
+
+
+
+sim <- function(n, r2, bgx, bxy, ninst, rep=1) {
+
+    args <- list(n=n, r2=r2, bgx=bgx, bxy=bxy, ninst=ninst, rep=rep) %>% as_tibble()
+    dat <- lapply(1:ninst, \(i) {
+        g <- correlated_binomial(n, p1=0.5, p2=0.5, rho=sqrt(r2))
+        x <- g[,1] * bgx + rnorm(n)
+        y <- x * bxy + rnorm(n)
+        e <- get_effs(x, y, g)
+        e$inst <- 1:2
+        return(e)
+    }) %>% bind_rows()
+
+    bind_rows(
+        suppressMessages(mr(dat, method=c("mr_wald_ratio", "mr_ivw")) %>% mutate(inst="Causal+Tagging")),
+        suppressMessages(mr(dat %>% filter(SNP == 1), method=c("mr_wald_ratio", "mr_ivw")) %>% mutate(inst="Causal"))
+    ) %>% bind_cols(args) %>%
+    return()
+}
+
+
+param <- expand.grid(
+    r2=c(seq(0, 0.2, by=0.01), seq(0.3, 1, by=0.05)),
+    bgx=seq(0, 0.2, by=0.2),
+    bxy=0,
+    n=c(1000, 10000, 100000),
+    ninst=c(1, 20),
+    rep=1:10000
+)
+
+sim(10000, 0.8, 0.1, 0, 20, 1)
+
+dim(param)
+
+plan(multicore, workers=150)
+
+res <- future_pmap(param, sim, .progress=TRUE) %>% bind_rows
+
+p <- res %>% group_by(r2, bxy, bgx, ninst, n, inst) %>% summarise(fdr=mean(pval < 0.05), nrep=n()) %>%
+filter(bxy == 0) %>%
+ggplot(., aes(x=r2, y=fdr)) +
+geom_point(aes(colour=as.factor(inst), shape=as.factor(bgx))) +
+geom_smooth(aes(colour=as.factor(inst), linetype=as.factor(bgx)), se=FALSE) + 
+geom_hline(yintercept=0.05, linetype="dashed") +
+facet_grid(n ~ ninst, labeller=label_both, scale="free_y") +
+ylim(0, 0.17) +
+labs(x="LD (R-square) between causal and tagging variants", y="False discovery rate", colour="SNPs included", shape="G effect on x", linetype="G effect on x")
+
+ggsave(p, file="mr_fdr.png", width=10, height=10)
+saveRDS(res, file="mr_fdr.rds")
+```
+
+
+
+
 
 ## Summary
 
