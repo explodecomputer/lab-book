@@ -51,6 +51,90 @@ res %>%
     geom_point()
 ```
 
+
+Untidy sims:
+
+```{r, eval=FALSE}
+
+library(dplyr)
+library(simulateGP)
+
+n <- 10000
+G <- correlated_binomial(n, 0.3, 0.1, 0.5)
+dim(G)
+cor(G)
+
+lm(G[,1] ~ G[,2])
+
+x <- G[,1] + rnorm(n)
+
+lm(x ~ G[,2])
+
+cor(G) * (sd(G[,1]) / sd(G[,2]))
+
+
+
+
+
+
+
+n <- 100000
+ap <- rbinom(n, 2, 0.5) / 2
+g <- rbinom(n, 2, 0.3)
+
+b <- 1.2
+
+l <- ap * b + g + g * ap + rnorm(n)
+copd <- rbinom(n, 1, plogis(l))
+
+b0 <- glm(copd ~ g, family="binomial", subset=ap==0)$coef[2]
+b1 <- glm(copd ~ g, family="binomial", subset=ap==1)$coef[2]
+b2 <- glm(copd ~ g, family="binomial", subset=ap==2)$coef[2]
+
+b0
+b1
+b2
+
+b2 <- glm(copd ~ g * ap, family="binomial")
+
+
+fn <- function(n, bap, bm, bi, sim=1) {
+    args <- list(n=n, bap=bap, bm=bm, bi=bi, sim=sim) %>% as_tibble()
+    ap <- rbinom(n, 2, 0.5) / 2
+    g <- rbinom(n, 2, 0.3)
+
+    l <- ap * bap + g * ap * bi + rnorm(n)
+    copd <- rbinom(n, 1, plogis(l))
+    bhat <- glm(copd ~ g * ap, family="binomial")$coef[4]
+    args$bhat <- bhat
+    return(args)
+}
+
+param <- expand.grid(
+    n=100000,
+    bap=c(0.1, 0.3, 0.5),
+    bm=c(0, 0.1),
+    bi=c(0.1, 0.3, 0.5),
+    sim=1:5
+)
+
+fn(100000, 0.3, 0.1, 0.5)
+
+library(purrr)
+res <- pmap(param, fn)
+
+
+library(ggplot2)
+
+res %>% 
+    bind_rows() %>%
+    ggplot(aes(bap, bhat, color=factor(bi))) +
+    geom_point()
+
+
+```
+
+
 ---
 
 ```{r}
