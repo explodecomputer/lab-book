@@ -481,6 +481,241 @@ saveRDS(res, file="mr_fdr.rds")
 ```
 
 
+## Accounting for LD
+
+```{r}
+generate_g <- function(n, ninst, r2, p1, p2) {
+    lapply(1:ninst, \(i) {
+        correlated_binomial(n, p1=p1[i], p2=p2[i], rho=sqrt(r2[i]))
+    }) %>% do.call(cbind, .)
+}
+
+g <- generate_g(100000, 10, rep(0.5, 10), rep(0.4, 10), rep(0.1, 10))
+ld <- cor(g)
+heatmap(cor(g))
+
+b <- rep(c(0.1, 0), 10)
+x <- g %*% b + rnorm(100000)
+y <- rnorm(100000)
+
+get_effs(x, y, g) %>% mr(method="mr_ivw") %>% str
+get_effs(x, y, g[, seq(1,20, by=2)]) %>% mr(method="mr_ivw") %>% str
+
+```
+
+```{r}
+bhat <- get_effs(x, y, g)
+wr <- bhat$beta.outcome / bhat$beta.exposure
+wr_se <- bhat$se.outcome / bhat$beta.exposure
+metafor::rma.uni(yi=wr, sei=wr_se, method="FE")
+
+bhat %>% mr_singlesnp()
+
+sigma <- diag(wr_se) %*% ld %*% diag(wr_se)
+w <- solve(sigma) %*% rep(1, 20)
+w <- w / sum(w)
+
+t(w) %*% wr
+sqrt(t(w) %*% sigma %*% w)
+
+ivw_cor <- function(bgx, bgy, se_gy, rho) {
+    stopifnot(length(bgx) == length(bgy))
+    stopifnot(length(bgx) == nrow(rho))
+    stopifnot(nrow(rho) == ncol(rho))
+    stopifnot(length(bgx) == length(se_gy))
+    stopifnot(all(diag(rho) == 1))
+    wr <- bgy / bgx
+    wr_se <- se_gy / bgx
+    sigma <- diag(wr_se) %*% rho %*% diag(wr_se)
+    w <- solve(sigma) %*% rep(1, length(bgx))
+    w <- w / sum(w)
+    res <- tibble(
+        method = "ivw_cor",
+        b = t(w) %*% wr |> drop(),
+        se = sqrt(t(w) %*% sigma %*% w) |> drop(),
+        pval = pnorm(abs(b) / se, lower.tail=FALSE),
+        nsnp = length(bgx)
+    )
+    res2 <- tibble(
+        method = "ivw",
+        b = sum(wr / wr_se^2) / sum(1 / wr_se^2),
+        se = 1 / sqrt(sum(1 / wr_se^2)),
+        pval = pnorm(abs(b) / se, lower.tail=FALSE),
+        nsnp = length(bgx)
+    )
+    return(bind_rows(res2, res))
+}
+
+ivw_cor(bhat$beta.exposure, bhat$beta.outcome, bhat$se.outcome, ld)
+
+bhat1 %>% mr(method="mr_ivw")
+bhat2 %>% mr(method="mr_ivw")
+```
+
+
+```{r}
+
+generate_g <- function(n, ninst, r2, p1, p2) {
+    lapply(1:ninst, \(i) {
+        correlated_binomial(n, p1=p1[i], p2=p2[i], rho=sqrt(r2[i]))
+    }) %>% do.call(cbind, .)
+}
+
+g <- generate_g(10000, 1500, rep(0.1, 1500), rep(0.5, 1500), rep(0.5, 1500))
+ld <- cor(g)
+
+b <- rep(c(0.1, 0), 1500)
+x <- g %*% b + rnorm(10000)
+y1 <- rnorm(10000)
+y2 <- x * 0.2 + rnorm(10000)
+bhat1 <- get_effs(x, y1, g)
+bhat2 <- get_effs(x, y2, g)
+
+res1 <- ivw_cor(bhat1$beta.exposure, bhat1$beta.outcome, bhat1$se.outcome, ld)
+res2 <- ivw_cor(bhat2$beta.exposure, bhat2$beta.outcome, bhat2$se.outcome, ld)
+
+
+bind_rows(
+    res1, 
+    bhat1[seq(1,3000,by=2),] %>% mr(method="mr_ivw") %>% mutate(method="ivw_ind") %>% dplyr::select(method, b, se, pval, nsnp)
+)
+bind_rows(
+    res2,
+    bhat2[seq(1,3000,by=2),] %>% mr(method="mr_ivw") %>% mutate(method="ivw_ind") %>% dplyr::select(method, b, se, pval, nsnp)
+)
+```
+
+- If the correlated variants are truly NULL (i.e. they contribute nothing to genetic effects on X and are just tagging SNPs), the standard error with the ivw_cor estimate will be LARGER than the standard error after strict clumping (i.e. power will be worse than just strict clumping)
+- If the correlated variants are capturing additional genetic effects, the standard error with the ivw_cor estimate will be SMALLER than the the standard error after strict clumping (i.e. power will be better).
+
+```{r}
+
+
+g <- generate_g(10000, 500, rep(0.1, 500), rep(0.5, 500), rep(0.5, 500))
+ld <- cor(g)
+
+b <- rep(c(0.1, 0.2), 500)
+x <- g %*% b + rnorm(10000)
+y1 <- rnorm(10000)
+y2 <- x * 0.2 + rnorm(10000)
+bhat1 <- get_effs(x, y1, g)
+bhat2 <- get_effs(x, y2, g)
+
+res1 <- ivw_cor(bhat1$beta.exposure, bhat1$beta.outcome, bhat1$se.outcome, ld)
+res2 <- ivw_cor(bhat2$beta.exposure, bhat2$beta.outcome, bhat2$se.outcome, ld)
+bind_rows(
+    res1, 
+    bhat1[seq(1,1000,by=2),] %>% mr(method="mr_ivw") %>% mutate(method="ivw_ind") %>% dplyr::select(method, b, se, pval, nsnp)
+)
+bind_rows(
+    res2,
+    bhat2[seq(1,1000,by=2),] %>% mr(method="mr_ivw") %>% mutate(method="ivw_ind") %>% dplyr::select(method, b, se, pval, nsnp)
+)
+
+
+```
+
+
+```{r}
+bhat <- get_effs(x, y, g)
+generate_pcs <- princomp(ld)
+
+
+Psi = ((abs(bhat$beta.exposure))/bhat$se.outcome) %o% ((abs(bhat$beta.exposure))/bhat$se.outcome) * ld
+
+pcs <- eigen(Psi)
+
+K <- which(cumsum(pcs$values^2) / sum(pcs$values^2) > 0.99)[1]
+K
+
+xcomp <- bhat$beta.exposure %*% pcs$vectors[,1:K] %>% drop()
+ycomp <- bhat$beta.outcome %*% pcs$vectors[,1:K] %>% drop()
+secomp <- bhat$se.outcome %*% pcs$vectors[,1:K] %>% drop()
+Omega <- bhat$se.outcome %o% bhat$se.outcome * ld
+pcOmega <- t(pcs$vectors[,1:K]) %*% Omega %*% pcs$vectors[,1:K]
+
+summary(lm(ycomp ~ 0 + xcomp, weights=1/secomp^2))
+
+wr <- ycomp / xcomp
+wr_se <- secomp / xcomp
+
+
+
+library(metafor)
+rma.uni(yi=wr, sei=wr_se, method="FE")
+
+
+wr_se <- diag(wr_se) %*% pcOmega %*% diag(wr_se)
+sqrt(diag(wr_se))
+
+
+se <- pcOmega %*% diag()
+
+```
+
+
+
+```{r}
+sim <- function(n, r2, bgx, bxy, ninst, rep=1) {
+
+    args <- list(n=n, r2=r2, bgx=bgx, bxy=bxy, ninst=ninst, rep=rep) %>% as_tibble()
+    g <- 
+    dat <- lapply(1:ninst, \(i) {
+        g <- correlated_binomial(n, p1=0.5, p2=0.5, rho=sqrt(r2))
+        x <- g[,1] * bgx + rnorm(n)
+        y <- x * bxy + rnorm(n)
+        e <- get_effs(x, y, g)
+        e$inst <- 1:2
+        return(e)
+    }) %>% bind_rows()
+
+    bind_rows(
+        suppressMessages(mr(dat, method=c("mr_wald_ratio", "mr_ivw")) %>% mutate(inst="Causal+Tagging")),
+        suppressMessages(mr(dat %>% filter(SNP == 1), method=c("mr_wald_ratio", "mr_ivw")) %>% mutate(inst="Causal"))
+    ) %>% bind_cols(args) %>%
+    return()
+}
+
+
+library(MASS)
+
+reg_nonind <- function(x, y, rho, se_x=NULL, se_y=NULL, nboot=NULL)
+{
+  X <- cbind(rep(1, length(x)), x)
+  rho_inv <- solve(rho)
+  #beta <- solve(t(X) %*% rho_inv %*% X) %*% t(X) %*% rho_inv %*% y
+  beta <- ginv(t(X)%*%rho_inv %*%X)%*%t(X)%*%rho_inv %*%y
+  yhat <- X %*% beta
+  yres <- as.numeric(y - yhat)
+  se <- as.numeric((t(yres) %*% rho_inv %*% yres) / (length(x)-qr(X)$rank)) * solve(t(X) %*% rho_inv %*% X)
+  se <- sqrt(diag(se))
+  return(tibble(
+    param=c("intercept", "slope"), beta=beta, se=se, pval=pnorm(abs(beta)/se, lower.tail=FALSE)
+  ))
+  
+  # get standard error via parametric bootstrap
+  # betaboot <- matrix(0, nboot, 2)
+  # for(i in 1:nboot)
+  # {
+  #   X[,2] <- rnorm(length(x), mean=x, sd=se_x)
+  #   Y <- rnorm(length(y), mean=y, sd=se_y)
+  #   betaboot[i,] <- solve(t(X) %*% rho_inv %*% X) %*% t(X) %*% rho_inv %*% Y %>% as.numeric()
+  # }
+  # se_boot <- apply(betaboot, 2, sd)
+}
+
+reg_nonind(bhat$beta.exposure, bhat$beta.outcome, ld, bhat$se.expposure, bhat$se.outcome, 1000)
+
+
+
+
+```
+
+
+
+```{r}
+?metafor::rma.uni
+```
 
 
 
