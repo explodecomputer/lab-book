@@ -1,0 +1,108 @@
+---
+title: "Height residuals sim"
+author: Gibran Hemani
+date: "2025-03-01"
+categories: []
+---
+
+## Background
+
+```{r}
+library(purrr)
+library(dplyr)
+library(ggplot2)
+
+
+n <- 10000
+dat <- tibble(
+    pgs1 = rnorm(n, 0, sqrt(0.3)),
+    pgs2 = rnorm(n, 0, sqrt(0.1)),
+    pgs3 = rnorm(n, 0, sqrt(0.3)),
+    envir = rnorm(n, 0, sqrt(0.3)),
+    stoch = rnorm(n, 0, sqrt(0.1)),
+    height_pgs = pgs1,
+    height_bv = pgs1 + pgs2 + pgs3,
+    height_residual = pgs2 + pgs3 + envir + stoch,
+    height = height_pgs + height_residual,
+    chd_liability = height * 0.1 + envir * 0.2 + rnorm(n),
+    chd = rbinom(n, 1, plogis(chd_liability))
+)
+
+fixed_effects_meta_analysis <- function(beta_vec, se_vec) {
+    w <- 1 / se_vec^2
+    beta <- sum(beta_vec * w) / sum(w)
+    se <- sqrt(1 / sum(w))
+    pval <- pnorm(abs(beta / se), lower.tail = FALSE)
+    Qj <- w * (beta-beta_vec)^2
+    Q <- sum(Qj)
+    Qdf <- length(beta_vec)-1
+    # Qjpval <- pchisq(Qj, 1, lower.tail=FALSE)
+    Qpval <- pchisq(Q, Qdf, lower.tail=FALSE)
+    return(list(beta=beta, se=se, Q=Q, Qpval=Qpval))
+}
+
+analysis <- function(dat) {
+    fit1 <- glm(chd ~ height, family = binomial, data=dat) %>% summary
+    fit2 <- glm(chd ~ height_pgs, family = binomial, data=dat) %>% summary
+    fit3 <- glm(chd ~ height_residual, family = binomial, data=dat) %>% summary
+    print(fit1$coef[2,1])
+    print(fit2$coef[2,1])
+    print(fit3$coef[2,1])
+
+    qstat <- fixed_effects_meta_analysis(c(fit2$coefficients[2,1], fit3$coefficients[2,1]), c(fit2$coefficients[2,2], fit3$coefficients[2,2]))
+    qstat$b_pgs <- fit2$coefficients[2,1]
+    qstat$se_pgs <- fit2$coefficients[2,2]
+    qstat$b_residual <- fit3$coefficients[2,1]
+    qstat$se_residual <- fit3$coefficients[2,2]
+    return(qstat)
+}
+
+analysis(dat)
+
+sim <- function(n, b_height, b_envir, nsim=1) {
+    args <- list(n=n, b_height=b_height, b_envir=b_envir, nsim=nsim) %>% as_tibble()
+    dat <- tibble(
+        pgs1 = rnorm(n, 0, sqrt(0.3)),
+        pgs2 = rnorm(n, 0, sqrt(0.1)),
+        pgs3 = rnorm(n, 0, sqrt(0.3)),
+        envir = rnorm(n, 0, sqrt(0.3)),
+        stoch = rnorm(n, 0, sqrt(0.1)),
+        height_pgs = pgs1,
+        height_bv = pgs1 + pgs2 + pgs3,
+        height_residual = pgs2 + pgs3 + envir + stoch,
+        height = height_pgs + height_residual,
+        chd_liability = height * b_height + envir * b_envir + rnorm(n),
+        chd = rbinom(n, 1, plogis(chd_liability))
+    )
+
+    analysis(dat) %>% as_tibble() %>% bind_cols(args)
+}
+
+sim(10000, 0.1, 0.5)
+
+
+param <- expand.grid(
+    n = 1000,
+    b_height = c(0, 1),
+    b_envir = seq(0, 1, 0.1),
+    nsim = 1:100
+)
+
+param 
+res <- pmap(param, sim) %>% bind_rows()
+
+library(ggplot2)
+
+res %>% 
+    group_by(b_height, b_envir) %>% 
+    summarise(Q = mean(Q), pow=sum(Qpval < 0.05)/n()) %>%
+    ggplot(., aes(b_envir, Q)) + geom_point(aes(colour=b_height))
+
+```
+
+
+---
+
+```{r}
+sessionInfo()
+```

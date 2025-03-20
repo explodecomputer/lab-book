@@ -14,6 +14,7 @@ Is it possible to estimate the environmental factor using the GxE interaction te
 ```{r}
 library(purrr)
 library(ggplot2)
+library(dplyr)
 ```
 
 

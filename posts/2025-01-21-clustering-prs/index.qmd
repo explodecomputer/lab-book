@@ -69,7 +69,7 @@ make_effects_matrix <- function(dat) {
 
 
 
-```{r}
+```{r, eval=FALSE}
 
 dat <- make_disease(n, nclust, nsnp_per_trait, ntrait_per_clust=1)
 effects_matrix <- make_effects_matrix(dat)

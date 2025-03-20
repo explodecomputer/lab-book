@@ -1,0 +1,89 @@
+---
+title: "LDL-dementia simulations"
+author: Gibran Hemani
+date: "2025-02-14"
+categories: []
+---
+
+## Background
+
+Higher LDL increases risk of vascular dementia, has a very modest effect on Alzheimer's disease, but its largest influence is on uncategorised dementia. This association is even larger than its association with Ischaemic heart disease.
+
+Hypothesis that the association with uncategorised dementia is due to mortality bias. People with high LDL die earlier from IHD, so they don't live long enough to get diagnosed with vascular dementia. People with lower LDL live longer but don't get diagnosed with vascular dementia because the LDL level isn't high enough
+
+## Simulation setup
+
+- Simulations to evaluate if mortality bias would attenuate the influence of LDL on vascular dementia
+- LDL is genetically influenced
+- LDL influences IHD
+- IHD influences death
+- LDL influences vascular dementia
+- vascular dementia happens later in life
+- People with the highest LDL get diagnosed with vascular dementia
+- Everyone else with vascular dementia gets diagnosed with unknown dementia
+
+
+```{r}
+library(dplyr)
+
+n <- 1000000
+b_g_ldl <- 0.5
+b_age_ihd <- 0.1
+b_ldl_ihd <- 0.2
+b_ldl_vd <- 0.3
+b_age_death <- 0.2
+b_ihd_death <- 1.5
+b_age_vd <- 0.1
+
+age <- rnorm(n)
+g <- rbinom(n, 2, 0.4)
+ldl <- g * b_g_ldl + rnorm(n, 0, 1)
+ihd_liability <- age * b_age_ihd + ldl * b_ldl_ihd + rnorm(n, 0, 1)
+ihd <- rbinom(n, 1, plogis(ihd_liability))
+death_liability <- age * b_age_death + ihd * b_ihd_death + rnorm(n, 0, 1)
+death <- rbinom(n, 1, plogis(death_liability))
+vd_liability <- age * b_age_vd + ldl * b_ldl_vd + rnorm(n, 0, 1)
+vd <- rbinom(n, 1, plogis(vd_liability))
+mean_ldl_vd <- mean(ldl[vd == 1])
+vd_diagnosed <- ldl > mean_ldl_vd & vd == 1
+vd_diagnosed[vd == 1 & ldl <= mean_ldl_vd] <- NA
+table(vd_diagnosed)
+table(vd)
+unknown_diagnosed <- vd_diagnosed
+unknown_diagnosed[vd_diagnosed == 1] <- NA
+unknown_diagnosed[is.na(vd_diagnosed)] <- 1
+
+dat <- tibble(age, ldl, ihd, death, vd, g, vd_diagnosed, unknown_diagnosed)
+
+table(dat$death)
+table(dat$vd_diagnosed)
+table(dat$unknown_diagnosed)
+table(dat$vd)
+
+library(ivreg)
+
+
+summary(ivreg(ihd ~ ldl | g, data = dat))
+summary(ivreg(death ~ ldl | g, data = dat))
+summary(ivreg(vd ~ ldl | g, data = dat))
+
+summary(ivreg(vd_diagnosed ~ ldl | g, data = dat))
+summary(ivreg(unknown_diagnosed ~ ldl | g, data = dat))
+
+
+summary(ivreg(vd_diagnosed ~ ldl | g, data = dat %>% subset(death != 1)))
+summary(ivreg(unknown_diagnosed ~ ldl | g, data = dat %>% subset(death != 1)))
+
+
+
+
+
+
+
+```
+
+---
+
+```{r}
+sessionInfo()
+```

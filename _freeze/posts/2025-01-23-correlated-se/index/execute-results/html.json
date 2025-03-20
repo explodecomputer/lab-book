@@ -1,0 +1,17 @@
+{
+  "hash": "8c695eae69a0413cacfa242ed6deeaf9",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"2025-01-23-correlated-se\"\nauthor: Gibran Hemani\ndate: \"2025-03-20\"\ncategories: []\n---\n\n\n## Background\n\nThe standard error in a region is \n\n$$\ncov(\\hat{\\beta}) = S \\rho S\n$$\n\nwhere $S$ is the diagonal matrix of standard errors, $\\rho$ is the LD correlation matrix.\n\nQuite slow to calculate, how to speed it up?\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(randcorr)\nlibrary(exvatools)\nlibrary(microbenchmark)\n\nrho <- randcorr(2000)\nhist(rho)\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-1-1.png){width=672}\n:::\n\n```{.r .cell-code}\nS <- diag(runif(2000))\n\nse1 <- S %*% rho %*% S\nse2 <- multd(dmult(S, rho), S)\n\ncor(c(se1), c(se2))\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] 1\n```\n\n\n:::\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\nmicrobenchmark(se1 <- S %*% rho %*% S, se2 <- multd(dmult(S, rho), S), times = 5)\n```\n\n::: {.cell-output .cell-output-stderr}\n\n```\nWarning in microbenchmark(se1 <- S %*% rho %*% S, se2 <- multd(dmult(S, : less\naccurate nanosecond times to avoid potential integer overflows\n```\n\n\n:::\n\n::: {.cell-output .cell-output-stdout}\n\n```\nUnit: milliseconds\n                           expr       min         lq       mean     median\n         se1 <- S %*% rho %*% S 5246.6404 5371.90881 5540.00547 5414.32240\n se2 <- multd(dmult(S, rho), S)   60.4561   86.70983   90.28943   95.21467\n        uq       max neval cld\n 5784.9195 5882.2362     5  a \n  102.2686  106.7979     5   b\n```\n\n\n:::\n:::\n\n\n\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsessionInfo()\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nR version 4.4.3 (2025-02-28)\nPlatform: aarch64-apple-darwin20\nRunning under: macOS Sonoma 14.6.1\n\nMatrix products: default\nBLAS:   /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRblas.0.dylib \nLAPACK: /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.0\n\nlocale:\n[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8\n\ntime zone: Europe/London\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nother attached packages:\n[1] microbenchmark_1.5.0 exvatools_0.9.0      randcorr_1.0        \n\nloaded via a namespace (and not attached):\n [1] cli_3.6.3         knitr_1.48        rlang_1.1.4       TH.data_1.1-2    \n [5] xfun_0.48         jsonlite_1.8.9    zoo_1.8-12        htmltools_0.5.8.1\n [9] rmarkdown_2.27    grid_4.4.3        evaluate_1.0.1    MASS_7.3-64      \n[13] fastmap_1.2.0     yaml_2.3.10       mvtnorm_1.2-5     compiler_4.4.3   \n[17] multcomp_1.4-26   codetools_0.2-20  sandwich_3.1-1    htmlwidgets_1.6.4\n[21] lattice_0.22-6    digest_0.6.37     splines_4.4.3     Matrix_1.7-2     \n[25] tools_4.4.3       survival_3.8-3   \n```\n\n\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

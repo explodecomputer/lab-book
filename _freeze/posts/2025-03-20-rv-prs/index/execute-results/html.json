@@ -1,0 +1,17 @@
+{
+  "hash": "ab5984b0649893e727a2447547564262",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Power of discovery variant to associate with PRS\"\nauthor: Gibran Hemani\ndate: \"2025-03-20\"\ncategories: []\n---\n\n\n## Background\n\nGiven that a variant associates with a trait due to polygenic confounding, what is the minimum $R^2$ of the PRS required to detect polygenic confounding with 80% power?\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(pwr)\nlibrary(ggplot2)\n\nparam <- expand.grid(\n    N = 500000,\n    Fdisc = qf(10^-c(8:30), 1, 500000, low=FALSE),\n    nsig = c(1, 10, 100)\n)\n\nparam$r2 = param$Fdisc / param$N\nparam$validate_alpha = 0.05 / param$nsig\nparam$validate_r2 = sapply(1:nrow(param), \\(i) {\n    pwr.r.test(param$N[i], sig.level=param$validate_alpha[i], power=0.8)$r^2\n})\nparam$prs_r2 = param$validate_r2 / param$r2\n\nggplot(param, aes(x=-log10(pf(Fdisc, 1, 500000, low=F)), y=prs_r2)) +\ngeom_point(aes(colour=as.factor(nsig))) +\ngeom_line(aes(colour=as.factor(nsig))) +\ntheme_bw() +\nlabs(x=\"Discovery -log10 p-value\", y = \"Minimim cor(y,PRS)^2 needed for polygenic confounding to be detected\", colour=\"Number of GWAS\\nhits to test\")\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-1-1.png){width=672}\n:::\n:::\n\n\n\n\n\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsessionInfo()\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nR version 4.4.3 (2025-02-28)\nPlatform: aarch64-apple-darwin20\nRunning under: macOS Sonoma 14.6.1\n\nMatrix products: default\nBLAS:   /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRblas.0.dylib \nLAPACK: /Library/Frameworks/R.framework/Versions/4.4-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.0\n\nlocale:\n[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8\n\ntime zone: Europe/London\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nother attached packages:\n[1] ggplot2_3.5.1 pwr_1.3-0    \n\nloaded via a namespace (and not attached):\n [1] vctrs_0.6.5       cli_3.6.3         knitr_1.48        rlang_1.1.4      \n [5] xfun_0.48         generics_0.1.3    jsonlite_1.8.9    labeling_0.4.3   \n [9] glue_1.8.0        colorspace_2.1-1  htmltools_0.5.8.1 scales_1.3.0     \n[13] fansi_1.0.6       rmarkdown_2.27    grid_4.4.3        evaluate_1.0.1   \n[17] munsell_0.5.1     tibble_3.2.1      fastmap_1.2.0     yaml_2.3.10      \n[21] lifecycle_1.0.4   compiler_4.4.3    dplyr_1.1.4       htmlwidgets_1.6.4\n[25] pkgconfig_2.0.3   farver_2.1.2      digest_0.6.37     R6_2.5.1         \n[29] tidyselect_1.2.1  utf8_1.2.4        pillar_1.9.0      magrittr_2.0.3   \n[33] withr_3.0.2       tools_4.4.3       gtable_0.3.6     \n```\n\n\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
