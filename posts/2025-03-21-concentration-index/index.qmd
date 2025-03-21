@@ -1,0 +1,97 @@
+---
+title: "Concentration index"
+author: Gibran Hemani
+date: "2025-03-21"
+categories: []
+---
+
+## Background
+
+How do concentration index and Lorenz curves respond to different simulation scenarios?
+
+
+## Simulations
+
+### Random
+
+GWAS attention is independent of DALY
+
+```{r}
+library(dplyr)
+library(rineq)
+
+ndisease <- 450
+diseases <- tibble(
+    disease = 1:ndisease, 
+    daly = rbeta(ndisease, 1, 0.7), 
+    gwas_attention = rbeta(ndisease, 1, 0.7))
+ci1 <- ci(ineqvar=diseases$gwas_attention, outcome=diseases$daly, method="direct")
+summary(ci1)
+plot(ci1)
+```
+
+Try again with uniform distribtuion
+
+```{r}
+diseases <- tibble(
+    disease = 1:ndisease, 
+    daly = rbeta(ndisease, 1, 1), 
+    gwas_attention = rbeta(ndisease, 1, 1))
+ci1 <- ci(ineqvar=diseases$gwas_attention, outcome=diseases$daly, method="direct")
+summary(ci1)
+plot(ci1)
+```
+
+### Proportional
+
+GWAS attention is the same as DALY
+
+```{r}
+ndisease <- 450
+diseases <- tibble(
+    disease = 1:ndisease, 
+    daly = rbeta(ndisease, 1, 0.7), 
+    gwas_attention = daly + rnorm(ndisease, 0, sd=0.001))
+ci1 <- ci(ineqvar=diseases$gwas_attention, outcome=diseases$daly, method="direct")
+summary(ci1)
+plot(ci1)
+```
+
+Again with uniform distribution
+
+```{r}
+diseases <- tibble(
+    disease = 1:ndisease, 
+    daly = rbeta(ndisease, 1, 1), 
+    gwas_attention = daly + rnorm(ndisease, 0, sd=0.001))
+ci1 <- ci(ineqvar=diseases$gwas_attention, outcome=diseases$daly, method="direct")
+summary(ci1)
+plot(ci1)
+```
+
+
+### Unequal
+
+GWAS attention grows faster than DALY
+
+```{r}
+diseases <- tibble(
+    disease = 1:ndisease, 
+    daly = 1:ndisease, 
+    gwas_attention = daly^2)
+ci1 <- ci(ineqvar=diseases$gwas_attention, outcome=diseases$daly, method="direct")
+summary(ci1)
+plot(ci1)
+```
+
+
+
+---
+
+```{r}
+sessionInfo()
+```
+
+
+
+
