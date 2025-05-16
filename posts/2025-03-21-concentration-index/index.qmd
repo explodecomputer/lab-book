@@ -70,6 +70,17 @@ plot(ci1)
 ```
 
 
+```{r}
+diseases <- tibble(
+    disease = 1:ndisease, 
+    gwas_attention = rbeta(ndisease, 1, 1), 
+    daly = gwas_attention + rnorm(ndisease, 0, sd=1))
+ci1 <- ci(ineqvar=diseases$gwas_attention, outcome=diseases$daly, method="direct")
+summary(ci1)
+plot(ci1)
+```
+
+
 ### Unequal
 
 GWAS attention grows faster than DALY
@@ -84,7 +95,29 @@ summary(ci1)
 plot(ci1)
 ```
 
+Note that the x-axis is ranked so it loses information about the non-uniformity of the distribution
 
+```{r}
+diseases <- tibble(
+    disease = 1:ndisease, 
+    daly = 1:ndisease, 
+    gwas_attention = daly)
+ci1 <- ci(ineqvar=diseases$gwas_attention, outcome=diseases$daly, method="direct")
+summary(ci1)
+plot(ci1)
+```
+
+
+
+```{r}
+diseases <- tibble(
+    disease = 1:ndisease, 
+    daly = (1:ndisease)^2, 
+    gwas_attention = 1:ndisease)
+ci1 <- ci(ineqvar=diseases$gwas_attention, outcome=diseases$daly, method="direct")
+summary(ci1)
+plot(ci1)
+```
 
 ---
 
