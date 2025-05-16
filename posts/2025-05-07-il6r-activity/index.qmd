@@ -1,0 +1,96 @@
+---
+title: "IL6 activity"
+author: Gibran Hemani
+date: "2025-05-07"
+categories: []
+---
+
+## Background
+
+
+```{r, eval=FALSE}
+n <- 50000
+
+g_il6 <- rbinom(n, 2, 0.5)
+g_il6r <- rbinom(n, 2, 0.5)
+il6 <- rnorm(n, 2.19, 3.13) / (1000 * 23.7)
+il6r <- rnorm(n, 102.46, 53.59) / 50
+sgp130 <- rnorm(n, 307.13, 63.47) / 100
+
+
+sd(il6)
+sd(il6r)
+sd(sgp130)^2
+
+
+dimer <- 0.5 * (il6 + il6r + 0.5) - sqrt(
+    ((il6 + il6r + 0.5)/2)^2 - (il6 * il6r)
+)
+
+
+trimer <- 0.5 * (dimer + sgp130 + 0.05) - sqrt(
+    ((dimer + sgp130 + 0.05)/2)^2 - (dimer * sgp130)
+)
+
+
+var(dimer, na.rm = TRUE)
+var(sgp130)
+
+
+var(trimer, na.rm = TRUE)
+
+
+hist(dimer / trimer)
+
+var(sqrt(
+    ((dimer + sgp130 + 0.05)/2)^2 - (dimer * sgp130)
+), na.rm = TRUE)
+
+
+range(sqrt(
+    ((dimer + sgp130 + 0.05)/2)^2 - (dimer * sgp130)
+), na.rm = TRUE)
+
+
+var(0.5 * (dimer + sgp130 + 0.05), na.rm = TRUE)
+
+cor(dimer, trimer, use="pair")
+
+dimer2 <- dimer - trimer
+
+cor(dimer2, trimer, use="pair")
+
+hist(dimer2/trimer)
+
+hist(trimer/dimer2)
+
+
+cor(trimer / dimer2, dimer / trimer, use="pair")
+
+
+cor(dimer, dimer2, use="pair")
+
+cor(trimer/dimer2, il6, use="pair")
+cor(trimer/dimer2, il6r, use="pair")
+cor(trimer/dimer2, sgp130, use="pair")
+
+cor(trimer/dimer2, sgp130, use="pair")
+
+cor(dimer2/trimer, sgp130, use="pair")
+
+hist(dimer2/trimer, breaks=100)
+
+
+dimer / trimer - contaminated activity score
+dimer2 / trimer - activity score
+trimer / dimer2 - inactivity score
+
+
+
+```
+
+---
+
+```{r}
+sessionInfo()
+```

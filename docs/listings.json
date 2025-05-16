@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/2025-05-07-il6r-activity/index.html",
       "/posts/2025-03-21-concentration-index/index.html",
       "/posts/2025-03-20-rv-prs/index.html",
       "/posts/2025-03-01-height-residuals-sim/index.html",
@@ -24,6 +25,7 @@
       "/posts/2024-02-11-modal-coloc/index.html",
       "/posts/2023-12-08-diff-vuln-susc/index.html",
       "/posts/2023-12-06-rsq/index.html",
+      "/posts/2023-12-01-mrgxe/index.html",
       "/posts/2023-11-28-ct-interaction-heterogeneity/index.html",
       "/posts/2023-11-10-rare-power-sibs/index.html",
       "/posts/2023-11-08-families-in-stickleback/index.html",
@@ -43,8 +45,10 @@
       "/posts/2022-01-09-did-models-confounding/index.html",
       "/posts/2025-01-21-clustering-prs/index.html",
       "/posts/2025-01-27-prs-collider-sims/index.html",
-      "/posts/2023-12-01-mrgxe/index.html",
       "/posts/2025-01-23-correlated-se/index.html",
+      "/posts/2025-05-15-trait-clusters/index.html",
+      "/posts/2025-05-08-wald-ratio-se/index.html",
+      "/posts/2025-04-02-prs-diff/index.html",
       "/posts/2025-01-21-gxe/index.html",
       "/posts/2024-11-02-collider-interaction/index.html",
       "/posts/2024-09-18-conditional-summary-stats/index.html",

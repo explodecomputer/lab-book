@@ -1,0 +1,163 @@
+---
+title: "Simulate trait clusters"
+author: Gibran Hemani
+date: "2025-05-15"
+categories: []
+---
+
+## Background
+
+Need a function that will create GWAS summary statistics for multiple traits
+- There is a set of underlying latent traits
+- There may be pleiotropic or causal relationships between the latent traits
+- A number of observed traits arise from each latent trait
+
+## Sim
+
+```{r}
+library(simulateGP)
+library(GWASBrewer)
+library(dplyr)
+library(ggplot2)
+
+G_from_df <- function(df) {
+    stopifnot(inherits(df, "data.frame"))
+    stopifnot(nrow(df) >0)
+    stopifnot(all(c("i", "j", "eff") %in% names(df)))
+    nodes <- unique(c(df$i, df$j))
+    message(nrow(df), " causal relationships specified amongst ", length(nodes), " traits")
+    G <- matrix(0, length(nodes), length(nodes))
+    rownames(G) <- nodes
+    colnames(G) <- nodes
+    for(x in 1:nrow(df)) {
+        G[df$i[x], df$j[x]] <- df$eff[x]
+    }
+    return(G)
+}
+
+
+#' @param latent_causal_matrix For L latent traits, the causal relationships between them. Should be a DAG
+#' @param pleio_min Mimumum fraction of h2 due to pleiotropy. How deviant should proximal traits be to the underlying latent trait? Proximal traits will have the same h2 as the latent trait, but some fraction of that h2 will be from other variants. 
+#' @param pleio_max Maximum fraction of h2 due to pleiotropy
+#' @param n_proximal_traits Vector of length L saying how many traits for each latent trait
+#' @param nid Vector of size sum(n_proximal_traits). Sample size of each proximal trait
+#' @param nsnp Vector of size L saying how many SNPs for each latent trait
+#' @param h2 Vector of size L saying variance explained in proximal trait by SNPs
+pie_hat_sim <- function(latent_causal_matrix, pleio_min, pleio_max, n_proximal_traits, nid, nsnp, h2) {
+    n_latent <- nrow(latent_causal_matrix)
+    a <- lapply(1:n_latent, \(trait) {
+        latent_names <- unique(c(latent_causal_matrix$i, latent_causal_matrix$j))
+        tibble(
+            i = latent_names[trait], 
+            j = paste0(latent_names[trait], 1:n_proximal_traits[trait]), 
+            eff=runif(n_proximal_traits[trait], 1-pleio_max, 1-pleio_min),
+            pi = 0.1,
+            h2 = h2[trait]
+        )
+    }) %>% bind_rows()
+
+    J <- sum(nsnp)
+    latent_causal_matrix$pi <- nsnp / J
+    latent_causal_matrix$h2 <- h2
+
+    mat <- G_from_df(bind_rows(latent_causal_matrix, a))
+
+    o <- sim_mv(
+        G = mat,
+        N = c(rep(500000, n_latent), nid), 
+        J = sum(nsnp),
+        h2 = c(latent_causal_matrix$h2, a$h2),
+        pi = c(latent_causal_matrix$pi, a$pi),
+        est_s = TRUE,
+        af = function(n) {runif(n, 0.01, 0.99)}
+    )
+    dat <- lapply(1:ncol(o$beta_hat), \(i) {
+        as_tibble(o$snp_info) %>%
+        mutate(
+            trait = colnames(o$direct_trait_effects)[i],
+            bhat = o$beta_hat[,i],
+            se = o$se_beta_hat[,i],
+            pval = pnorm(abs(bhat)/se, low=F)
+        )
+    }) %>% bind_rows()
+    return(dat)
+}
+
+plot_pair <- function(dats, exposure, outcome) {
+    e <- subset(dats, pval < 5e-8 & trait == exposure)
+    o <- subset(dats, SNP %in% e$SNP & trait == outcome)
+    tibble(eb=e$bhat, ese=e$se, ob=o$bhat, ose=o$se) %>%
+    ggplot(aes(x=eb, y=ob)) +
+    geom_errorbar(aes(ymin=ob - ose * 1.96, ymax=ob+ose*1.96), colour="grey") +
+    geom_errorbarh(aes(xmin=eb - ese * 1.96, xmax=eb+ese*1.96), colour="grey") +
+    geom_smooth(method="lm") +
+    geom_point()
+}
+
+
+```
+
+
+Use the simulation function to generate a dataset of summary statistics for each latent trait plus all the proxy traits.
+
+```{r}
+# Specify the causal relationship amongst the latent traits
+# Every latent trait must be included in this matrix
+# If a latent trait isn't causally related to anything else just give it a 0 causal effect e.g. for Z here
+latent_causal_matrix <- dplyr::tribble(
+    ~i, ~j, ~eff,
+    "Y", "X", 0.25,
+    "X", "A", 0.24,
+    "Y", "A", 0.34,
+    "Z", "A", 0
+)
+dat <- pie_hat_sim(
+    latent_causal_matrix,
+    pleio_min = 0.1,
+    pleio_max = 0.2,
+    n_proximal_traits = c(3, 5, 10, 8),
+    nid = runif(3+5+10+8, 50000, 150000), 
+    nsnp = c(200, 250, 300, 200), 
+    h2 = c(0.08, 0.1, 0.1, 0.07)
+)
+str(dat)
+```
+
+e.g. Plot the betas for one proximal trait against another
+
+```{r}
+plot_pair(dat, "Y1", "A2")
+```
+
+Plot for different proximal traits for the same latent trait
+
+```{r}
+plot_pair(dat, "Z1", "Z8")
+```
+
+Simulate again but with no pleiotropy
+
+```{r}
+latent_causal_matrix <- dplyr::tribble(
+    ~i, ~j, ~eff,
+    "Y", "X", 0.25,
+    "X", "A", 0.24,
+    "Y", "A", 0.34
+)
+dat <- pie_hat_sim(
+    latent_causal_matrix,
+    pleio_min = 0,
+    pleio_max = 0,
+    n_proximal_traits = c(3, 5, 10),
+    nid = runif(3+5+10, 50000, 150000), 
+    nsnp = c(200, 250, 300), 
+    h2 = c(0.08, 0.1, 0.1)
+)
+plot_pair(dat, "Y1", "Y3")
+```
+
+---
+
+```{r}
+sessionInfo()
+```

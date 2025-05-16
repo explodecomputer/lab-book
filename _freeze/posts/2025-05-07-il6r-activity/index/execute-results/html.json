@@ -1,0 +1,15 @@
+{
+  "hash": "f50cdedbf27ff369e474eb3851387e84",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"IL6 activity\"\nauthor: Gibran Hemani\ndate: \"2025-05-07\"\ncategories: []\n---\n\n\n## Background\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nn <- 50000\n\ng_il6 <- rbinom(n, 2, 0.5)\ng_il6r <- rbinom(n, 2, 0.5)\nil6 <- rnorm(n, 2.19, 3.13) / (1000 * 23.7)\nil6r <- rnorm(n, 102.46, 53.59) / 50\nsgp130 <- rnorm(n, 307.13, 63.47) / 100\n\n\nsd(il6)\nsd(il6r)\nsd(sgp130)^2\n\n\ndimer <- 0.5 * (il6 + il6r + 0.5) - sqrt(\n    ((il6 + il6r + 0.5)/2)^2 - (il6 * il6r)\n)\n\n\ntrimer <- 0.5 * (dimer + sgp130 + 0.05) - sqrt(\n    ((dimer + sgp130 + 0.05)/2)^2 - (dimer * sgp130)\n)\n\n\nvar(dimer, na.rm = TRUE)\nvar(sgp130)\n\n\nvar(trimer, na.rm = TRUE)\n\n\nhist(dimer / trimer)\n\nvar(sqrt(\n    ((dimer + sgp130 + 0.05)/2)^2 - (dimer * sgp130)\n), na.rm = TRUE)\n\n\nrange(sqrt(\n    ((dimer + sgp130 + 0.05)/2)^2 - (dimer * sgp130)\n), na.rm = TRUE)\n\n\nvar(0.5 * (dimer + sgp130 + 0.05), na.rm = TRUE)\n\ncor(dimer, trimer, use=\"pair\")\n\ndimer2 <- dimer - trimer\n\ncor(dimer2, trimer, use=\"pair\")\n\nhist(dimer2/trimer)\n\nhist(trimer/dimer2)\n\n\ncor(trimer / dimer2, dimer / trimer, use=\"pair\")\n\n\ncor(dimer, dimer2, use=\"pair\")\n\ncor(trimer/dimer2, il6, use=\"pair\")\ncor(trimer/dimer2, il6r, use=\"pair\")\ncor(trimer/dimer2, sgp130, use=\"pair\")\n\ncor(trimer/dimer2, sgp130, use=\"pair\")\n\ncor(dimer2/trimer, sgp130, use=\"pair\")\n\nhist(dimer2/trimer, breaks=100)\n\n\ndimer / trimer - contaminated activity score\ndimer2 / trimer - activity score\ntrimer / dimer2 - inactivity score\n```\n:::\n\n\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsessionInfo()\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nR version 4.5.0 (2025-04-11)\nPlatform: aarch64-apple-darwin20\nRunning under: macOS Sonoma 14.6.1\n\nMatrix products: default\nBLAS:   /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRblas.0.dylib \nLAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1\n\nlocale:\n[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8\n\ntime zone: Europe/London\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nloaded via a namespace (and not attached):\n [1] htmlwidgets_1.6.4 compiler_4.5.0    fastmap_1.2.0     cli_3.6.5        \n [5] tools_4.5.0       htmltools_0.5.8.1 yaml_2.3.10       rmarkdown_2.29   \n [9] knitr_1.50        jsonlite_2.0.0    xfun_0.52         digest_0.6.37    \n[13] rlang_1.1.6       evaluate_1.0.3   \n```\n\n\n:::\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

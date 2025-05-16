@@ -1,0 +1,201 @@
+---
+title: "Wald Ratio standard error"
+author: Gibran Hemani
+date: "2025-05-08"
+categories: []
+---
+
+## Background
+
+```{r}
+library(MendelianRandomization)
+library(dplyr)
+library(ivreg)
+library(twopartm)
+
+simulate_sumstats <- function(bgx, bxy, nx, ny, af) {
+    g_a <- rbinom(nx, 2, af)
+    g_b <- rbinom(ny, 2, af)
+    xpred_a <- bgx * g_a
+    xe_a <- rnorm(nx, 0, sqrt(1-var(xpred_a)))
+    x_a <- xpred_a + xe_a
+
+    xpred_b <- bgx * g_b
+    xe_b <- rnorm(ny, 0, sqrt(1-var(xpred_b)))
+    x_b <- xpred_b + xe_b
+    ypred <- bxy * x_b
+    ye <- rnorm(ny, 0, sqrt(1-var(ypred)))
+    y <- ypred + ye
+
+    modx <- summary(lm(x_a ~ g_a))
+    bgx_hat <- modx$coefficients[2, 1]
+    segx_hat <- modx$coefficients[2, 2]
+
+    mody <- summary(lm(y ~ g_b))
+    bgy_hat <- mody$coefficients[2, 1]
+    segy_hat <- mody$coefficients[2, 2]
+    bgy_pval <- mody$coefficients[2, 4]
+    bgy_pval_pnorm <- 2 * pnorm(-abs(bgy_hat / segy_hat))
+
+
+    modiv <- summary(ivreg(y ~ x_b | g_b))
+    return(list(
+        bgx = bgx_hat,
+        segx = segx_hat,
+        bgy = bgy_hat,
+        segy = segy_hat,
+        bgy_pval = bgy_pval,
+        bgy_pval_pnorm = bgy_pval_pnorm,
+        b = modiv$coefficients[2, 1],
+        se = modiv$coefficients[2, 2],
+        pval = modiv$coefficients[2, 4]
+    ))
+}
+
+wr_delta1 <- function(sim_result) {
+    biv_b <- sim_result$bgy / sim_result$bgx
+    biv_se <- sim_result$segy / sim_result$bgx
+    biv_pval <- 2 * pnorm(-abs(biv_b / biv_se))
+    return(tibble(
+        b = biv_b,
+        se = biv_se,
+        pval = biv_pval,
+        method = "delta1"
+    ))
+}
+
+wr_bootstrap <- function(sim_result, nboot = 1000) {
+    biv_b <- sim_result$bgy / sim_result$bgx
+    biv_boot <- rnorm(nboot, sim_result$bgy, sim_result$segy) / rnorm(nboot, sim_result$bgx, sim_result$segx)
+    biv_se <- sd(biv_boot)
+    biv_pval <- 2 * pnorm(-abs(biv_b / biv_se))
+
+    return(tibble(
+        b = biv_b,
+        se = biv_se,
+        pval = biv_pval,
+        method = "bootstrap"
+    ))
+}
+
+wr_delta2 <- function(sim_result) {
+    bgx <- sim_result$bgx
+    segx <- sim_result$segx
+    bgy <- sim_result$bgy
+    segy <- sim_result$segy
+
+    biv_b <- bgy / bgx
+    # temp <- sqrt((segy^2 / bgy^2) + segx^2 / bgx^2)
+    # biv_se <- biv_b * temp
+    biv_se <- sqrt(bgy^2 * segx^2 + bgx^2 * segy^2) / bgx^2
+    biv_pval <- 2 * pnorm(-abs(biv_b / biv_se))
+    return(tibble(
+        b = biv_b,
+        se = biv_se,
+        pval = biv_pval,
+        method = "delta2"
+    ))
+}
+
+wr_fieller <- function(sim_result) {
+    vcov <- matrix(c(sim_result$segy^2, 0, 0, sim_result$segx^2), nrow = 2)
+    tryCatch({
+        f <- FiellerRatio(xest = sim_result$bgy, yest = sim_result$bgx, V = vcov)
+        se <- (f[1] - f[2]) / 1.96
+        pval <- 2 * pnorm(-abs(f[1] / se))
+        return(tibble(
+            b = f[1],
+            se = se,
+            pval = pval,
+            method = "fieller"
+        ))    
+    },
+    error = function(e) {
+        message("Error in FiellerRatio: ", e$message)
+        return(tibble(
+            b = NA,
+            se = NA,
+            pval = NA,
+            method = "fieller"
+        ))
+    })
+}
+
+a <- simulate_sumstats(0.5, 0.3, 100000, 10000, 0.5)
+a
+wr_delta1(a)
+wr_delta2(a)
+wr_fieller(a)
+wr_bootstrap(a)
+
+params <- expand.grid(
+    bgx = seq(0.01, 0.1, by = 0.01),
+    bxy = c(0, 0.1, 0.2),
+    nx = c(10000, 100000),
+    ny = c(10000, 100000),
+    af = c(0.01, 0.4),
+    sim=1:10
+)
+
+full_sim <- function(bgx, bxy, nx, ny, af, sim) {
+    args <- tibble(bgx = bgx, bxy = bxy, nx = nx, ny = ny, af = af)
+    a <- simulate_sumstats(bgx, bxy, nx, ny, af)
+    r1 <- tibble(
+        b = a$b,
+        se = a$se,
+        pval = a$pval,
+        method = "ivreg"
+    )
+
+    res <- bind_rows(
+        r1, 
+        wr_delta1(a),
+        wr_delta2(a),
+        wr_fieller(a),
+        wr_bootstrap(a)
+    )
+    return(bind_cols(args, res))
+}
+
+full_sim(0.1, 0.2, 10000, 10000, 0.5, 1)
+
+do.call(full_sim, params[1,])
+
+dim(params)
+
+library(furrr)
+plan(multicore, workers = 4)
+opt <- furrr::furrr_options(seed = TRUE)
+res <- furrr::future_pmap(params, full_sim, .options = opt, .progress = TRUE)
+
+length(res)
+
+r <- bind_rows(res)
+
+library(ggplot2)
+r %>% filter(se < 1 & se > 0) %>%
+ggplot(aes(x = bgx, y=se)) +
+    geom_boxplot(aes(fill=method, linetype=as.factor(af))) +
+    facet_grid(bxy ~ nx + ny) +
+    scale_colour_brewer(palette = "Set1") 
+
+
+library(tidyr)
+r %>% 
+    filter(se < 1 & se > 0) %>%
+    group_by(method) %>%
+    mutate(sim = 1:n()) %>%
+    ungroup() %>%
+    select(-c(b, pval, bgx, bxy, nx, ny, af)) %>%
+    pivot_wider(names_from = method, values_from = c(se)) %>%
+    select(-c(sim)) %>%
+    pairs
+
+
+```
+
+---
+
+```{r}
+sessionInfo()
+```

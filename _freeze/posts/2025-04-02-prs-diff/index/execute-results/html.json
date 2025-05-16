@@ -1,0 +1,17 @@
+{
+  "hash": "afcc7eb94a4c33f39697399eeb629f0d",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: Detecting PRS association difference across contexts\nauthor: Gibran Hemani\ndate: 2025-04-02\n---\n\n::: {.cell}\n\n```{.r .cell-code}\n# Objective\n# For some genetic effect estimate with HDL in the general population (e.g. PRS or single SNP effect, n=500000)\n# what is the power to detect a significant difference in this effect in sepsis cases (e.g. n=1000)\n\nlibrary(metafor)\n```\n\n::: {.cell-output .cell-output-stderr}\n\n```\nLoading required package: Matrix\n```\n\n\n:::\n\n::: {.cell-output .cell-output-stderr}\n\n```\nLoading required package: metadat\n```\n\n\n:::\n\n::: {.cell-output .cell-output-stderr}\n\n```\nLoading required package: numDeriv\n```\n\n\n:::\n\n::: {.cell-output .cell-output-stderr}\n\n```\n\nLoading the 'metafor' package (version 4.8-0). For an\nintroduction to the package please type: help(metafor)\n```\n\n\n:::\n\n```{.r .cell-code}\nlibrary(dplyr)\n```\n\n::: {.cell-output .cell-output-stderr}\n\n```\n\nAttaching package: 'dplyr'\n```\n\n\n:::\n\n::: {.cell-output .cell-output-stderr}\n\n```\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n```\n\n\n:::\n\n::: {.cell-output .cell-output-stderr}\n\n```\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n```\n\n\n:::\n\n```{.r .cell-code}\nlibrary(ggplot2)\n\ncalculate_power <- function(b_baseline, n_baseline, b_alternative, n_alternative) {\n  # Calculate the standard error of the baseline effect\n  se_baseline <- 1 / sqrt(n_baseline)\n  \n  # Calculate the standard error of the alternative effect\n  se_alternative <- 1 / sqrt(n_alternative)\n    \n  # Calculate the non-central chi-square statistic \n  qe <- metafor::rma.uni(\n    c(b_baseline, b_alternative), \n    sei=c(se_baseline, se_alternative), \n    method=\"FE\"\n  )$QE\n\n  # Calculate the power using the non-central chi-square distribution with 1 df\n  power <- pchisq(qchisq(0.05, df = 1, lower.tail = FALSE), df = 1, ncp = qe, lower.tail = FALSE)\n  \n  return(power)\n}\n\n# Set the parameters\nparam <- expand.grid(\n    b_baseline = sqrt(c(0.001, 0.01, 0.15)),\n    n_baseline = 500000,\n    n_alternative = 1000,\n    perc_change_range = seq(0.5, 1, by = 0.05),\n    eff=\"\"\n) %>% mutate(\n    eff=case_when(b_baseline == sqrt(0.001) ~ \"Small SNP effect\", b_baseline == sqrt(0.01) ~ \"Large SNP effect\", b_baseline == sqrt(0.15) ~ \"PRS effect\"),\n    b_alternative = b_baseline * perc_change_range\n    )\n\n# Calculate power\nfor(i in 1:nrow(param)) {\n    param$power[i] <- calculate_power(param$b_baseline[i], param$n_baseline[i], param$b_alternative[i], param$n_alternative[i])\n}\n\n# Plot\nggplot(param, aes(x=perc_change_range, y=power, colour=eff)) +\n    geom_point() +\n    geom_line() +\n    geom_hline(yintercept=0.8, linetype=\"dotted\") +\n    scale_colour_brewer(type=\"qual\") +\n    labs(x=\"Relative change in genetic effect in sepsis cases\", y=\"Power to detect difference in effect from general population\", colour=\"Genetic effect\")\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-1-1.png){width=672}\n:::\n:::",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
