@@ -1,0 +1,123 @@
+---
+title: "OpenGWAS meta data"
+author: Gibran Hemani
+date: "2025-02-20"
+categories: [OpenGWAS]
+---
+
+## Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval=FALSE)
+```
+
+```{r}
+library(dplyr)
+library(ieugwasr)
+meta = ieugwasr::gwasinfo() %>% tibble() %>% mutate(batch = batch_from_id(id))
+```
+
+
+## Consortium field
+
+Check
+
+```{r}
+meta$consortium[meta$consortium == "NA"] <- NA
+subset(meta, is.na(consortium)) %>% group_by(batch) %>% count()
+```
+
+- For ieu-a and ieu-b we can look at these manually
+- For all others it will be straightforward to update
+- Separate note - ieu-b-5114 trait name appears to be wrong
+
+
+## Ancestry
+
+```{r}
+meta$population[meta$population == "NA"] <- NA
+meta %>% subset(is.na(population)) %>% group_by(batch) %>% count()
+```
+
+- These should be available for ebi-a
+
+
+## Sex
+
+```{r}
+meta$sex[meta$sex == "NA"] <- NA
+meta %>% subset(is.na(sex)) %>% group_by(batch) %>% count()
+```
+
+- Need to investigate if EBI actually records sex systematically
+
+
+## Units
+
+
+```{r}
+meta$unit[meta$unit == "NA"] <- NA
+table(is.na(meta$unit[meta$category!="binary"]))
+```
+
+```{r}
+meta %>% filter(is.na(unit) & category != "binary") %>%
+  group_by(batch) %>%
+  count()
+```
+
+- ubm-b, eqtl-a, met-d, prot-a, prot-b, prot-c, ubm-a, ubm-b should all be sd units (need to check)
+- ebi-a should be accessible from ebi gwas catalog but it might not be straightforward to parse e.g. see https://www.ebi.ac.uk/gwas/studies/GCST002783 as an example. It gives 'unit increase' and 'unit decrease' interchangeably. 
+  - We have previously parsed this freeform text into standardised units for other datasets. Could revisit that method
+  - We could estimate the SD directly from the summary statistics quite easily e.g. for a set of variants regress $2p_j(1-p_j)b_j^2 \sim R^2$ and the slope will be an estimate of the variance of the trait. 
+- For the ieu-a and ieu-b traits we can get the units manually from the corresponding papers.
+- need to make units a mandatory field
+
+## Transformations
+
+We currently don't collect this information. Making sure that we either record the standard deviation of the trait or automate estimation of it as above will go some way towards this, but other aspects of transformations such as adjusting for the mean (relative vs absolute scale) or adjusting for non-normality etc will be hard to do systematically
+
+## Trait type
+
+```{r}
+meta$category[meta$category == "NA"] <- NA
+```
+
+```{r}
+meta %>% subset(is.na(category)) %>% group_by(batch) %>% count()
+```
+
+- This is a manual mapping which we could look into automating. 
+- For eqtl-a, ubm-a the category will be straightforward
+
+## Sample size
+
+```{r}
+table(is.na(meta$sample_size))
+```
+
+```{r}
+meta %>% group_by(batch) %>% summarise(sum(is.na(sample_size)))
+```
+
+- These will be retrievable, and it should be a mandatory field. 
+- Just a note that sample sizes will be possible to be estimated directly from the metadata too e.g. with estimate of SD the sample size is approx $var(y) / 2p_j(1-p_j) \sim \sigma^2 N)$
+
+## Ontology
+
+```{r}
+meta$ontology[meta$ontology == "NA"] <- NA
+meta %>% group_by(batch) %>% summarise(n=n(), prop=sum(is.na(ontology))/n())
+```
+
+- The ontologies will be available for all ebi traits
+- for molecular traits we can look into relevant ontologies that might be straightforward to map from trait names
+- For ieu-a, ieu-b, finn-b, bbj-a, ukb-* it is very challenging
+  - Currently working on finetuning a LMM to automate this process to EFO.
+
+
+---
+
+```{r}
+sessionInfo()
+```

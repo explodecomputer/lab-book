@@ -1,0 +1,159 @@
+---
+title: "MVMR collider"
+author: Gibran Hemani
+date: "2025-07-03"
+categories: []
+---
+
+## Background
+
+Imaging traits are available in non-random samples. 
+
+```{r}
+library(simulateGP)
+library(TwoSampleMR)
+library(dplyr)
+library(janitor)
+library(furrr)
+library(ggplot2)
+
+n <- 10000
+nsnp <- 100
+g <- make_geno(n, nsnp, 0.5)
+dim(g)
+
+effs <- choose_effects(nsnp, 0.5)
+
+bmi <- make_phen(effs, g)
+
+gx <- make_geno(n, nsnp, 0.5)
+effsx <- choose_effects(nsnp, 0.5)
+
+x <- make_phen(effsx, gx)
+
+test <- rbinom(n, 1, plogis(bmi + x + bmi*x))
+
+table(test)
+
+y <- bmi * 0.5 + rnorm(n)
+
+summary(lm(y ~ x))
+summary(lm(y[test==1] ~ x[test==1]))
+
+gwas_x <- gwas(x, cbind(g, gx))
+gwas_y <- gwas(y, cbind(g, gx))
+
+dat <- merge_exp_out(gwas_x, gwas_y)
+library(TwoSampleMR)
+mr(dat, method_list="mr_ivw")
+
+
+gwas_x_test <- gwas(x[test==1], cbind(g, gx)[test==1,])
+gwas_y_test <- gwas(y[test==1], cbind(g, gx)[test==1,])
+gwas_test <- gwas(test, cbind(g, gx))
+
+dat_test <- merge_exp_out(gwas_x_test, gwas_y_test)
+mr(dat_test, method_list="mr_ivw")
+```
+
+
+```{r}
+dat_test2 <- merge_exp_out(gwas_x_test, gwas_y)
+mr(dat_test2, method_list="mr_ivw")
+```
+
+
+```{r}
+sig_index <- gwas_x_test$pval < 5e-8 | gwas_test$pval < 5e-8
+summary(lm(gwas_y_test$bhat[sig_index] ~ 0 + gwas_x_test$bhat[sig_index] + gwas_test$bhat[sig_index], weight=1/gwas_y_test$se[sig_index]^2))
+summary(lm(gwas_y_test$bhat[sig_index] ~ 0 + gwas_x_test$bhat[sig_index] + gwas_test$bhat[sig_index], weight=1/gwas_y_test$se[sig_index]^2))
+```
+
+Simulation
+
+```{r}
+run_sim <- function(nsnp, n, h2_x, h2_y, h2_u, b_us, b_xs, b_ints, b_uy, sim=1) {
+    args <- tibble(nsnp, n, h2_x, h2_u, b_us, b_xs, b_ints, b_uy, sim)
+    gu <- make_geno(n, nsnp, 0.5)
+    effsu <- choose_effects(nsnp, h2_u)
+    u <- make_phen(effsu, gu)
+    uxy <- rnorm(n)
+
+    gx <- make_geno(n, nsnp, 0.5)
+    effsx <- choose_effects(nsnp, h2_x)
+    x <- make_phen(c(0.2, effsx), cbind(uxy, gx))
+
+    test <- rbinom(n, 1, plogis(u * b_us + x * b_xs + u*x * b_ints))
+
+    y <- make_phen(c(b_uy, 0.2), cbind(u, uxy))
+    res <- list()
+    res[[1]] <- summary(lm(y ~ x))$coef %>% as_tibble() %>% janitor::clean_names() %>% mutate(method="obs", exp="x", out="y", sel="none") %>% slice(2)
+    res[[2]] <- summary(lm(y[test==1] ~ x[test==1]))$coef %>% as_tibble() %>% janitor::clean_names() %>% mutate(method="obs", exp="x", out="y", sel="x and y") %>% slice(2)
+
+    gwas_x <- gwas(x, cbind(gu, gx))
+    gwas_y <- gwas(y, cbind(gu, gx))
+    
+    sel <- gwas_x$pval < 5e-8
+    res[[3]] <- summary(lm(gwas_y$bhat[sel] ~ 0 + gwas_x$bhat[sel], weight=1/gwas_y$se[sel]^2 ))$coef %>% as_tibble() %>% janitor::clean_names() %>% mutate(method="mr", exp="x", out="y", sel="none") %>% slice(1)
+
+
+    gwas_x_test <- gwas(x[test==1], cbind(gu, gx)[test==1,])
+    gwas_y_test <- gwas(y[test==1], cbind(gu, gx)[test==1,])
+
+    sel <- gwas_x_test$pval < 5e-8
+    res[[4]] <- summary(lm(gwas_y_test$bhat[sel] ~ 0 + gwas_x_test$bhat[sel], weight=1/gwas_y_test$se[sel]^2 ))$coef %>% as_tibble() %>% janitor::clean_names() %>% mutate(method="mr", exp="x", out="y", sel="x and y") %>% slice(1)
+
+    res[[5]] <- summary(lm(gwas_y$bhat[sel] ~ 0 + gwas_x_test$bhat[sel], weight=1/gwas_y$se[sel]^2 ))$coef %>% as_tibble() %>% janitor::clean_names() %>% mutate(method="mr", exp="x", out="y", sel="x") %>% slice(1)
+
+    res[[6]] <- summary(lm(gwas_y_test$bhat[sel] ~ 0 + gwas_x$bhat[sel], weight=1/gwas_y_test$se[sel]^2 ))$coef %>% as_tibble() %>% janitor::clean_names() %>% mutate(method="mr", exp="x", out="y", sel="y") %>% slice(1)
+
+    gwas_test <- gwas(test, cbind(gu, gx))
+
+    sel <- gwas_x_test$pval < 5e-8 | gwas_test$pval < 5e-8
+    res[[7]] <- summary(lm(gwas_y_test$bhat[sel] ~ 0 + gwas_x_test$bhat[sel] + gwas_test$bhat[sel], weight=1/gwas_y_test$se[sel]^2))$coef %>% as_tibble() %>% janitor::clean_names() %>% mutate(method="mvmr", exp="x", out="y", sel="x and y") %>% slice(1)
+    
+    res[[8]] <- summary(lm(gwas_y$bhat[sel] ~ 0 + gwas_x_test$bhat[sel] + gwas_test$bhat[sel], weight=1/gwas_y$se[sel]^2))$coef %>% as_tibble() %>% janitor::clean_names() %>% mutate(method="mvmr", exp="x", out="y", sel="x") %>% slice(1)
+
+    res[[9]] <- summary(lm(gwas_y_test$bhat[sel] ~ 0 + gwas_x$bhat[sel] + gwas_test$bhat[sel], weight=1/gwas_y_test$se[sel]^2))$coef %>% as_tibble() %>% janitor::clean_names() %>% mutate(method="mvmr", exp="x", out="y", sel="y") %>% slice(1)
+
+    res[[10]] <- summary(lm(gwas_y$bhat[sel] ~ 0 + gwas_x$bhat[sel] + gwas_test$bhat[sel], weight=1/gwas_y$se[sel]^2))$coef %>% as_tibble() %>% janitor::clean_names() %>% mutate(method="mvmr", exp="x", out="y", sel="none") %>% slice(1)
+
+    return(bind_rows(res) %>% select(method, exp, out, sel, everything()) %>% bind_cols(args, .))
+}
+```
+
+
+```{r}
+run_sim(100, 50000, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5) %>% str
+```
+
+Adjusting for the GWAS for test status makes things horribly worse
+
+```{r}
+param <- expand.grid(
+    n=50000, nsnp=100,
+    h2_x=0.5, h2_u=0.5, b_us = 0.5, b_xs = c(0, 0.5), b_ints = c(0, 0.5), b_uy = 0.5,
+    sim=1:20
+)
+
+opt <- furrr::furrr_options(seed=TRUE)
+plan(multicore, workers=7)
+out <- future_pmap(param, run_sim, .options=opt) %>%
+    bind_rows()
+```
+
+
+```{r}
+ggplot(out %>% filter(b_ints==0.5), aes(x=sel, y=estimate)) +
+geom_hline(yintercept=0, linetype="dotted") +
+geom_violin(aes(fill=sel)) +
+facet_grid(method ~ b_xs, label=label_both, scale="free_x") +
+labs(y="Effect estimate", x="Which variable is GWAS'd in only tested individuals", fill="") +
+scale_fill_brewer(type="qual")
+```
+
+---
+
+```{r}
+sessionInfo()
+```
