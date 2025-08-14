@@ -1,0 +1,137 @@
+---
+title: "MVMR interpretation with differential power"
+author: Gibran Hemani
+date: "2025-08-14"
+categories: []
+---
+
+## Background
+
+Suppose this is the model:
+
+```
+G1 -> childhood BMI
+         | 
+         V
+G2 -> adulthood BMI -> BC
+```
+
+If the childhood BMI GWAS and the adulthood GWAS are different sample sizes, how does this influence the MVMR performance?
+
+## Simulations
+
+```{r}
+library(simulateGP)
+library(dplyr)
+library(furrr)
+library(ggplot2)
+
+do_mvmr <- function(ss1, ss2, ssout) {
+    snplist <- c(
+        subset(ss1, pval < 5e-8)$snp,
+        subset(ss2, pval < 5e-8)$snp
+    ) %>% unique
+    b1 <- subset(ss1, snp %in% snplist)$bhat
+    b2 <- subset(ss2, snp %in% snplist)$bhat
+    bout <- subset(ssout, snp %in% snplist)$bhat
+    seout <- subset(ssout, snp %in% snplist)$se
+    mod <- summary(lm(bout ~ 0 + b1 + b2, weight=1/seout^2))$coef %>% as_tibble()
+    names(mod) <- c("b", "se", "tval", "pval")
+    mod <- mutate(mod, trait=c("1", "2"), ninst = c(sum(ss1$pval < 5e-8), sum(ss2$pval < 5e-8)))
+    return(mod)
+}
+
+generate_data <- function(nsnp, h2_1, h2_2, Pi_1, Pi_2, b_12, nid1, nid2, nid3, b_1o, b_2o, rep=NULL, gxe=NULL) {
+    map <- arbitrary_map(runif(nsnp, 0.01, 0.99))
+
+    params1 <- generate_gwas_params(map=map, h2=h2_1, S=-0.1, Pi=Pi_1)
+    params2 <- generate_gwas_params(map=map, h2=h2_2, S=-0.1, Pi=Pi_2)
+    params2$beta <- params2$beta + params1$beta * b_12
+
+    ss1 <- generate_gwas_ss(params1, nid=nid1)
+    ss2 <- generate_gwas_ss(params2, nid=nid2)
+
+    params3 <- params2
+    params3$beta <- params1$beta * b_1o + params2$beta * b_2o
+    ssout <- generate_gwas_ss(params3, nid=300000)
+    return(list(ss1, ss2, ssout))
+}
+```
+
+### Example
+
+```{r}
+dat <- generate_data(
+    nsnp = 1000000,
+    h2_1 = 0.3,
+    h2_2 = 0.3,
+    Pi_1 = 0.02,
+    Pi_2 = 0.02,
+    b_12 = 0.8,
+    nid1 = 220000,
+    nid2 = 220000,
+    nid3 = 300000,
+    b_1o = 0,
+    b_2o = -0.5
+)
+
+str(dat)
+
+do_mvmr(dat[[1]], dat[[2]], dat[[3]])
+```
+
+Here, the power is the same for the two exposures, and we get an appropriate result of exposure 2 having the causal influence.
+
+
+### Analysis
+
+Run simulations with different sample sizes for the exposure 2 (the real causal exposure)
+
+```{r}
+params <- expand.grid(
+    nsnp = 1000000,
+    h2_1 = 0.3,
+    h2_2 = 0.1,
+    Pi_1 = 0.02,
+    Pi_2 = 0.005,
+    b_12 = 0.9,
+    gxe = 0,
+    nid1 = 220000,
+    nid2 = seq(10000, 220000, by=10000),
+    nid3 = 300000,
+    b_1o = 0,
+    b_2o = -0.5,
+    rep = 1:5
+)
+
+run_sim <- function(...) {
+    l <- list(...)
+    dat <- do.call(generate_data, l)
+    res <- do_mvmr(dat[[1]], dat[[2]], dat[[3]])
+    res <- bind_cols(res, as_tibble(l))
+}
+
+plan(multicore, workers=6)
+
+res <- future_pmap(params, run_sim, .options=furrr_options(seed=TRUE)) %>% bind_rows()
+```
+
+
+```{r}
+res %>% mutate(
+    trait = case_when(trait == 1 ~ "Pre-puberty body size", trait == 2 ~ "Post-puberty body size")
+) %>%
+ggplot(aes(x=nid2, y=b, colour=as.factor(trait))) +
+geom_point() +
+labs(x="Sample size for post-puberty GWAS", y="MVMR beta", colour="Exposure")
+```
+
+## Summary
+
+This is probably well known, but when X2 is causal but has low power, X1 will appear to be the causal factor
+
+---
+
+```{r}
+sessionInfo()
+```
