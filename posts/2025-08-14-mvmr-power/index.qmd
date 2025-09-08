@@ -130,6 +130,28 @@ labs(x="Sample size for post-puberty GWAS", y="MVMR beta", colour="Exposure")
 
 This is probably well known, but when X2 is causal but has low power, X1 will appear to be the causal factor
 
+Empirically we see the below, so this power issue is not the whole story.
+
+```
+childhood (high power)
+  |
+  v
+adolescent (low power) -> BC
+
+- adolescent attenuates when power is low
+
+
+
+
+
+adolescent (low power) -> BC
+  |
+  v
+adult (high power)
+
+- adult attenuates even though power is high
+```
+
 ---
 
 ```{r}
