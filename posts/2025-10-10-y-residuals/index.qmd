@@ -1,0 +1,148 @@
+---
+title: "Residuals for PRS to overcome issue of non-independence"
+author: Gibran Hemani
+date: "2025-10-10"
+categories: []
+---
+
+## Background
+
+If $Y$ includes related samples, why is it beneficial to adjust for PRS, or to take residuals from the LMM, in order to perform regression without the issue of non-independence?
+
+Data generating model:
+
+$$
+Y = \sigma^2_g K + \sigma^2_e I
+$$
+
+where $K$ is the kinship matrix and $I$ is the identity matrix. 
+
+The PRS is an estimate of $\sigma^2_g K$, which means the residual of $Y$ will reduce to the uncorrelated term $\sigma^2_e I$. However it's not clear how well the PRS method will work if it's an imperfect measure of $\sigma^2_g K$, and it also is a question as to whether correcting for the complete or incomplete PRS will help with vQTL estimates.
+
+
+1. Create y from lots of gs
+2. duplicate some values of y
+3. regress x on y 
+4. predict y from gs and adjust for prediction
+5. regression x on y resid
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+group_size <- 20
+ngroup <- 50
+n <- group_size * ngroup
+p <- 100
+g <- matrix(rbinom(group_size * p, 2, 0.5), group_size, p)
+betas <- rnorm(p)
+
+prs <- rep(scale(g %*% betas), each=ngroup)
+e <- rnorm(n)
+y <- (prs + e) %>% scale %>% drop
+```
+
+Now generate estimates of the PRS. 
+
+- Betas are imperfectly estimates
+- Only some Betas are included
+
+```{r}
+betahat <- rnorm(p, betas)
+prshat1 <- rep(scale(g %*% betahat), each=ngroup)
+prshat2 <- rep(scale(g[,1:(p/2)] %*% betas[1:(p/2)]), each=ngroup)
+```
+
+```{r}
+pairs(cbind(prs, prshat1, prshat2))
+```
+
+Generate residuals
+
+```{r}
+yresid <- residuals(lm(y ~ prs)) %>% scale %>% drop
+yresidhat1 <- residuals(lm(y ~ prshat1)) %>% scale %>% drop
+yresidhat2 <- residuals(lm(y ~ prshat2)) %>% scale %>% drop
+pairs(cbind(y, yresid, yresidhat1, yresidhat2))
+```
+
+Function for vQTL estimation
+
+```{r}
+drm <- function(g, y) {
+  y.i <- tapply(y, g, median, na.rm=T)  
+  z.ij <- abs(y - y.i[g+1])
+  summary(lm(z.ij ~ g))$coef %>%
+    as_tibble() %>%
+    slice(2) %>%
+    mutate(method="drm")
+}
+
+add <- function(g, y) {
+    summary(lm(y ~ g))$coef %>%
+    as_tibble() %>%
+    slice(2) %>%
+    mutate(method="add")
+}
+
+```
+
+Run simulations
+
+- Null SNP
+- Strong relatedness
+- Y is adjusted for different levels of PRS
+- Additive (`add`) and vQTL models (`drm`)
+- 1000 replicates
+
+```{r}
+params <- expand.grid(
+    y_options = c("y", "yresid", "yresidhat1", "yresidhat2"),
+    method_options = c("drm", "add"),
+    stringsAsFactors=FALSE
+)
+
+sims <- lapply(1:1000, \(i) {
+    SNP <- rep(rbinom(group_size, 2, 0.5), each = ngroup)
+    lapply(1:nrow(params), \(j) {
+        m <- get(params$method_options[j])
+        yo <- get(params$y_options[j])
+        m(SNP, yo) %>% mutate(what = params$y_options[j])
+    }) %>% bind_rows()
+
+}) %>% bind_rows()
+names(sims) <- c("b", "se", "tval", "pval", "method", "what")
+sims
+```
+
+Mean absolute values from the simulations
+
+```{r}
+sims %>% group_by(method, what) %>% summarise(b=mean(abs(b)), se=mean(se), pval=mean(pval), tval=mean(abs(tval)))
+```
+
+
+Look at difference in betas
+
+```{r}
+ggplot(sims, aes(x=b)) +
+geom_density(aes(fill=what), alpha=0.5) +
+facet_grid(method ~ .)
+```
+
+
+## Summary
+
+- Full adjustment for PRS will remove type 1 error for both vQTLs and additive effects
+- The standard error is not affected by the adjustment
+- The betas are attenuated when PRS is more effectively captured
+
+
+---
+
+```{r}
+sessionInfo()
+```
+
+
+
