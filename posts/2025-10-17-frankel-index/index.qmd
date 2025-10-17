@@ -1,0 +1,120 @@
+---
+title: "Frankel's health attention index"
+author: Gibran Hemani
+date: "2025-10-17"
+categories: []
+---
+
+## Background
+
+Frankel 1989 claimed that part of the issue of waiting lists was that professionals would prioritise treatment for things that were more fashionable rather than more urgent or prevalent.
+
+This is the dataset:
+
+```{r}
+library(dplyr)
+library(data.table)
+library(ggplot2)
+library(ggrepel)
+library(knitr)
+dat <- fread("frankel-index.csv")
+kable(dat)
+```
+
+Work out the number of papers per disease
+
+```{r}
+names(dat) <- c("disease", "dd", "index")
+dat$papers <- dat$index * dat$dd / 1000
+```
+
+The paper points out that there are a highly disproportionate number of papers for slow viruses of the CNS. But this claim might be a bit exaggerated by representing it as a ratio of two low numbers. 
+
+```{r}
+ggplot(dat, aes(x=dd, y=index)) +
+geom_point() +
+geom_text_repel(aes(label=disease), size=2)
+```
+
+Instead, plot papers against numbers of deaths and discharges
+
+```{r}
+ggplot(dat, aes(x=dd, y=papers)) +
+geom_point() +
+geom_text_repel(aes(label=disease), size=2) +
+geom_smooth(method="lm")
+```
+
+The fraction of all papers that were on the slow viruses of the CNS was `r round(dat$papers[1]/sum(dat$papers), 3)`. 
+
+Inequality analysis
+
+```{r}
+library(rineq)
+
+out1 <- rineq::ci(
+    ineqvar = dat$papers,
+    outcome = dat$papers, 
+    method = "direct"
+)
+gini <- tibble(
+    ci = out1$concentration_index,
+    ci_se = sqrt(out1$variance),
+    ci_lci = ci - 1.96 * ci_se,
+    ci_uci = ci + 1.96 * ci_se
+)
+
+out2 <- rineq::ci(
+    ineqvar = dat$papers,
+    outcome = dat$dd, 
+    method = "direct"
+)
+ciout <- tibble(
+    ci = out2$concentration_index,
+    ci_se = sqrt(out2$variance),
+    ci_lci = ci - 1.96 * ci_se,
+    ci_uci = ci + 1.96 * ci_se
+)
+
+make_plot_dat <- function(x) {
+  myOrder <- order(x$fractional_rank)
+  xCoord <- x$fractional_rank[myOrder]
+  y <- x$outcome[myOrder]
+  cumdist <- cumsum(y) / sum(y)
+  tibble(xCoord, cumdist)
+}
+
+plot_dat <- bind_rows(
+    make_plot_dat(out1) %>% mutate(group=paste0("Number of papers (Gini index = ", round(out1$concentration_index, 2), ")")), 
+    make_plot_dat(out2) %>% mutate(group=paste0("Deaths and discharges (concentration index = ", round(out2$concentration_index, 2), ")"))
+)
+
+ggplot(aes(x = xCoord, y = cumdist, group = group), data = plot_dat) +
+  geom_line(aes(colour = group)) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  theme_bw() +
+  theme(legend.position = "inside", legend.position.inside=c(0.3,0.8)) +
+  labs(
+    x = "Fractional rank of number of papers",
+    y = "Cumulative proportion of deaths and discharges",
+    colour = "Outcome"
+  )
+```
+
+The concentration index has quite a large confidence interval
+
+```{r}
+ciout %>% kable
+```
+
+
+
+## Summary
+
+There is some concordance between the inequality in disease attention and the disease impact.
+
+---
+
+```{r}
+sessionInfo()
+```

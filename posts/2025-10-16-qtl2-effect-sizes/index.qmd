@@ -1,0 +1,144 @@
+---
+title: "Getting effect sizes from R/qtl2"
+author: Gibran Hemani
+date: "2025-10-16"
+categories: [] 
+html:
+    embed-resources: true
+---
+
+## Background
+
+```{r}
+library(qtl2)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+Download the data and read in
+
+```{r}
+file <- "https://raw.githubusercontent.com/rqtl/qtl2data/main/DOex/DOex.zip"
+DOex <- read_cross2(file)
+```
+
+Calculate genotype and allele probabilities
+
+```{r}
+pr <- calc_genoprob(DOex, error_prob=0.002)
+apr <- genoprob_to_alleleprob(pr)
+```
+
+Calculate kinships
+
+```{r}
+k <- calc_kinship(apr, "loco")
+```
+
+Organise covariates
+
+```{r}
+sex <- (DOex$covar$Sex == "male")*1
+names(sex) <- rownames(DOex$covar)
+
+sex <- setNames( (DOex$covar$Sex == "male")*1, rownames(DOex$covar) )
+```
+
+Perform scan
+
+```{r}
+out <- scan1(apr, DOex$pheno, k, sex)
+
+par(mar=c(4.1, 4.1, 0.6, 0.6))
+plot(out, DOex$gmap)
+```
+
+Get coefficients for each marker on chromosome 2. This gives an additive effect for each founder line. 
+
+```{r}
+coef_c2 <- scan1coef(apr[,"2"], DOex$pheno, k[["2"]], sex, se=TRUE)
+par(mar=c(4.1, 4.1, 0.6, 0.6))
+plot_coefCC(coef_c2, DOex$gmap["2"], bgcolor="gray95", legend="bottomleft")
+```
+
+We can also get p-values for each founder line:
+
+```{r}
+z <- coef_c2 / attributes(coef_c2)$SE
+pval <- pnorm(abs(z), low=F)
+plot_coefCC(-log10(pval), DOex$gmap["2"], bgcolor="gray95", legend="bottomleft")
+```
+
+
+Make a forest plot of the effect sizes at the peak:
+
+```{r}
+marker_position <- which(abs(coef_c2[,1:8]) == max(abs(coef_c2[,1:8])), arr.ind=TRUE)[1]
+best_coef <- tibble(
+    line = colnames(coef_c2)[1:8],
+    b=coef_c2[marker_position,1:8], 
+    se = attributes(coef_c2)$SE[marker_position,1:8],
+    lci = b - 1.96 * se,
+    uci = b + 1.96 * se
+)
+ggplot(best_coef, aes(x=b, y=line)) +
+geom_point() +
+geom_errorbarh(aes(xmin=lci, xmax=uci)) +
+geom_vline(linetype="dotted", xintercept=0)
+```
+
+
+There is clear heterogeneity in effect sizes across the lines, so the average effect would be diluted. This heterogeneity could be because the marker is in LD with the causal variant in one line but not the others?
+
+To what degree are these effects correlated at null positions?
+
+```{r}
+null_positions <- which(out < 2)
+
+coefs <- lapply(names(apr), \(x) {
+    scan1coef(apr[,x], DOex$pheno, k[[x]], sex, se=TRUE)
+})
+
+coefs <- do.call(rbind, coefs)[null_positions,1:8]
+cor(coefs) %>% 
+    as_tibble() %>% 
+    mutate(line = LETTERS[1:8]) %>% 
+    tidyr::pivot_longer(!line) %>%
+    ggplot(., aes(x=line, y=name)) +
+        geom_tile(aes(fill=value)) +
+        scale_fill_gradient2() +
+        geom_text(aes(label=round(value, 2)))
+```
+
+Try permuting for comparison
+
+```{r}
+coefs_permuted <- coefs
+
+for(i in 1:ncol(coefs_permuted)) {
+    coefs_permuted[,i] <- sample(coefs_permuted[,i])
+}
+cor(coefs_permuted) %>% 
+    as_tibble() %>% 
+    mutate(line = LETTERS[1:8]) %>% 
+    tidyr::pivot_longer(!line) %>%
+    ggplot(., aes(x=line, y=name)) +
+        geom_tile(aes(fill=value)) +
+        scale_fill_gradient2() +
+        geom_text(aes(label=round(value, 2)))
+
+```
+
+
+
+Questions
+
+- How would you obtain an average additive effect estimate across all lines?
+
+
+---
+
+```{r}
+sessionInfo()
+```
