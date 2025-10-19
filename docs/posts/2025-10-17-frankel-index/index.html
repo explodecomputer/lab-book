@@ -192,7 +192,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="background" class="level2">
 <h2 class="anchored" data-anchor-id="background">Background</h2>
-<p>Frankel 1989 claimed that part of the issue of waiting lists was that professionals would prioritise treatment for things that were more fashionable rather than more urgent or prevalent.</p>
+<p>Frankel 1989 discussed that part of the issue of waiting lists was that professionals would prioritise treatment for things that were more fashionable rather than more urgent or prevalent.</p>
 <p>This is the dataset:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -324,7 +324,7 @@ Attaching package: 'data.table'</code></pre>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(dat) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"disease"</span>, <span class="st">"dd"</span>, <span class="st">"index"</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>papers <span class="ot">&lt;-</span> dat<span class="sc">$</span>index <span class="sc">*</span> dat<span class="sc">$</span>dd <span class="sc">/</span> <span class="dv">1000</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>The paper points out that there are a highly disproportionate number of papers for slow viruses of the CNS. But this claim might be a bit exaggerated by representing it as a ratio of two low numbers.</p>
+<p>The paper points out that there are a highly disproportionate number of papers for slow viruses of the CNS. This does look like a major misalignment of resources and needs presented this way, but it is a ratio of two low numbers.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dat, <span class="fu">aes</span>(<span class="at">x=</span>dd, <span class="at">y=</span>index)) <span class="sc">+</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>() <span class="sc">+</span></span>
@@ -337,7 +337,7 @@ Attaching package: 'data.table'</code></pre>
 </div>
 </div>
 </div>
-<p>Instead, plot papers against numbers of deaths and discharges</p>
+<p>Instead, plot papers against numbers of deaths and discharges. This might more reflect the degree to which there is misalignment between resources and health needs</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dat, <span class="fu">aes</span>(<span class="at">x=</span>dd, <span class="at">y=</span>papers)) <span class="sc">+</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>() <span class="sc">+</span></span>
@@ -355,7 +355,11 @@ Attaching package: 'data.table'</code></pre>
 </div>
 </div>
 <p>The fraction of all papers that were on the slow viruses of the CNS was 0.012.</p>
-<p>Inequality analysis</p>
+</section>
+<section id="inequality-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="inequality-analysis">Inequality analysis</h2>
+<p>The Gini index represents the degree to which resources are equally allocated. A high Gini index means that a large fraction of resources are attributed to a small number of categories. The concentration index examines the degree to which another variable can explain the inequality within a Gini coefficient. A concentration index that is equal to the Gini index means that there is perfect alignment of the second variable to the resource. A concentration index of 0 means that there is no alignment (it’s basically random).</p>
+<p>This plot shows that there is unequal attention to diseases in the literature, and there does match to some degree the unequal distribution of disease burden.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rineq)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -414,7 +418,7 @@ Attaching package: 'data.table'</code></pre>
 </div>
 </div>
 </div>
-<p>The concentration index has quite a large confidence interval</p>
+<p>However the concentration index has quite a large confidence interval.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>ciout <span class="sc">%&gt;%</span> kable</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
@@ -441,7 +445,7 @@ Attaching package: 'data.table'</code></pre>
 </section>
 <section id="summary" class="level2">
 <h2 class="anchored" data-anchor-id="summary">Summary</h2>
-<p>There is some concordance between the inequality in disease attention and the disease impact.</p>
+<p>There is some concordance between the inequality in disease attention and the disease impact, but these estimates are imprecise.</p>
 <hr>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

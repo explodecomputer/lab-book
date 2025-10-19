@@ -7,7 +7,7 @@ categories: []
 
 ## Background
 
-Frankel 1989 claimed that part of the issue of waiting lists was that professionals would prioritise treatment for things that were more fashionable rather than more urgent or prevalent.
+Frankel 1989 discussed that part of the issue of waiting lists was that professionals would prioritise treatment for things that were more fashionable rather than more urgent or prevalent.
 
 This is the dataset:
 
@@ -28,7 +28,7 @@ names(dat) <- c("disease", "dd", "index")
 dat$papers <- dat$index * dat$dd / 1000
 ```
 
-The paper points out that there are a highly disproportionate number of papers for slow viruses of the CNS. But this claim might be a bit exaggerated by representing it as a ratio of two low numbers. 
+The paper points out that there are a highly disproportionate number of papers for slow viruses of the CNS. This does look like a major misalignment of resources and needs presented this way, but it is a ratio of two low numbers. 
 
 ```{r}
 ggplot(dat, aes(x=dd, y=index)) +
@@ -36,7 +36,7 @@ geom_point() +
 geom_text_repel(aes(label=disease), size=2)
 ```
 
-Instead, plot papers against numbers of deaths and discharges
+Instead, plot papers against numbers of deaths and discharges. This might more reflect the degree to which there is misalignment between resources and health needs
 
 ```{r}
 ggplot(dat, aes(x=dd, y=papers)) +
@@ -47,7 +47,11 @@ geom_smooth(method="lm")
 
 The fraction of all papers that were on the slow viruses of the CNS was `r round(dat$papers[1]/sum(dat$papers), 3)`. 
 
-Inequality analysis
+## Inequality analysis
+
+The Gini index represents the degree to which resources are equally allocated. A high Gini index means that a large fraction of resources are attributed to a small number of categories. The concentration index examines the degree to which another variable can explain the inequality within a Gini coefficient. A concentration index that is equal to the Gini index means that there is perfect alignment of the second variable to the resource. A concentration index of 0 means that there is no alignment (it's basically random).
+
+This plot shows that there is unequal attention to diseases in the literature, and there does match to some degree the unequal distribution of disease burden.
 
 ```{r}
 library(rineq)
@@ -101,7 +105,7 @@ ggplot(aes(x = xCoord, y = cumdist, group = group), data = plot_dat) +
   )
 ```
 
-The concentration index has quite a large confidence interval
+However the concentration index has quite a large confidence interval.
 
 ```{r}
 ciout %>% kable
@@ -111,7 +115,7 @@ ciout %>% kable
 
 ## Summary
 
-There is some concordance between the inequality in disease attention and the disease impact.
+There is some concordance between the inequality in disease attention and the disease impact, but these estimates are imprecise.
 
 ---
 
