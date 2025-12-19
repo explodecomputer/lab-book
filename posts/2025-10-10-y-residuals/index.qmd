@@ -20,7 +20,7 @@ where $K$ is the kinship matrix and $I$ is the identity matrix.
 The PRS is an estimate of $\sigma^2_g K$, which means the residual of $Y$ will reduce to the uncorrelated term $\sigma^2_e I$. However it's not clear how well the PRS method will work if it's an imperfect measure of $\sigma^2_g K$, and it also is a question as to whether correcting for the complete or incomplete PRS will help with vQTL estimates.
 
 
-1. Create y from lots of gs
+1. Create y from prs
 2. duplicate some values of y
 3. regress x on y 
 4. predict y from gs and adjust for prediction
@@ -31,26 +31,27 @@ library(dplyr)
 library(ggplot2)
 
 group_size <- 20
-ngroup <- 50
+ngroup <- 20
 n <- group_size * ngroup
 p <- 100
-g <- matrix(rbinom(group_size * p, 2, 0.5), group_size, p)
+g <- matrix(rbinom(ngroup * p, 2, 0.5), ngroup, p)
 betas <- rnorm(p)
+fam_effect <- rnorm(ngroup, sd=1) %>% rep(., each=group_size)
 
-prs <- rep(scale(g %*% betas), each=ngroup)
+prs <- rep(scale(g %*% betas), each=group_size)
 e <- rnorm(n)
-y <- (prs + e) %>% scale %>% drop
+y <- (prs + fam_effect + e) %>% scale %>% drop
 ```
 
 Now generate estimates of the PRS. 
 
-- Betas are imperfectly estimates
-- Only some Betas are included
+- Betas are imperfectly estimates (`prshat1`)
+- Only some Betas are included (`prshat2`)
 
 ```{r}
 betahat <- rnorm(p, betas)
-prshat1 <- rep(scale(g %*% betahat), each=ngroup)
-prshat2 <- rep(scale(g[,1:(p/2)] %*% betas[1:(p/2)]), each=ngroup)
+prshat1 <- rep(scale(g %*% betahat), each=group_size)
+prshat2 <- rep(scale(g[,1:(p/2)] %*% betas[1:(p/2)]), each=group_size)
 ```
 
 ```{r}
@@ -64,6 +65,37 @@ yresid <- residuals(lm(y ~ prs)) %>% scale %>% drop
 yresidhat1 <- residuals(lm(y ~ prshat1)) %>% scale %>% drop
 yresidhat2 <- residuals(lm(y ~ prshat2)) %>% scale %>% drop
 pairs(cbind(y, yresid, yresidhat1, yresidhat2))
+```
+
+Do PRS and residuals capture original structure? Visualise outer product
+
+```{r}
+prshat1_outer <- prshat1 %*% t(prshat1)
+heatmap(prshat1_outer, Rowv=NA, Colv=NA)
+
+prshat2_outer <- prshat2 %*% t(prshat2)
+heatmap(prshat2_outer, Rowv=NA, Colv=NA)
+
+prs_outer <- prs %*% t(prs)
+heatmap(prs_outer, Rowv=NA, Colv=NA)
+```
+
+```{r}
+pairs(cbind(c(prs_outer), c(prshat1_outer), c(prshat2_outer)))
+```
+
+Squared difference
+
+```{r}
+prshat1_sd <- outer(prshat1, prshat1, function(a, b) (a-b)^2)
+prshat2_sd <- outer(prshat2, prshat2, function(a, b) (a-b)^2)
+prs_sd <- outer(prs, prs, function(a, b) (a-b)^2)
+
+heatmap(prshat1_sd, Rowv=NA, Colv=NA)
+```
+
+```{r}
+pairs(cbind(c(prs_sd), c(prshat1_sd), c(prshat2_sd)))
 ```
 
 Function for vQTL estimation
@@ -103,7 +135,7 @@ params <- expand.grid(
 )
 
 sims <- lapply(1:1000, \(i) {
-    SNP <- rep(rbinom(group_size, 2, 0.5), each = ngroup)
+    SNP <- rep(rbinom(ngroup, 2, 0.5), each = group_size)
     lapply(1:nrow(params), \(j) {
         m <- get(params$method_options[j])
         yo <- get(params$y_options[j])
@@ -121,13 +153,111 @@ Mean absolute values from the simulations
 sims %>% group_by(method, what) %>% summarise(b=mean(abs(b)), se=mean(se), pval=mean(pval), tval=mean(abs(tval)))
 ```
 
-
 Look at difference in betas
 
 ```{r}
 ggplot(sims, aes(x=b)) +
 geom_density(aes(fill=what), alpha=0.5) +
 facet_grid(method ~ .)
+```
+
+Try LMM
+
+```{r}
+library(lme4)
+fam <- rep(1:ngroup, each=group_size)
+summary(lmer(y ~ SNP + (1 | fam)))
+summary(lm(y ~ SNP))
+summary(lm(y[(1:ngroup - 1) * group_size + 1] ~ SNP[(1:ngroup - 1) * group_size + 1]))
+
+sqrt(var(y) / (var(SNP) * ngroup))
+sqrt(var(y) / (var(SNP) * ngroup * group_size))
+```
+
+
+
+```{r}
+sims2 <- lapply(1:1000, \(i) {
+    # SNP <- rep(rbinom(ngroup, 2, 0.5), each = group_size)
+    SNP <- rbinom(ngroup * group_size, 2, 0.5)
+    lapply(1:nrow(params), \(j) {
+        m <- get(params$method_options[j])
+        yo <- get(params$y_options[j])
+        m(SNP, yo) %>% mutate(what = params$y_options[j])
+    }) %>% bind_rows()
+
+}) %>% bind_rows()
+names(sims2) <- c("b", "se", "tval", "pval", "method", "what")
+sims2 %>% group_by(method, what) %>% summarise(b=mean(abs(b)), se=mean(se), pval=mean(pval), tval=mean(abs(tval)))
+
+ggplot(sims2, aes(x=b)) +
+geom_density(aes(fill=what), alpha=0.5) +
+facet_grid(method ~ .)
+```
+
+```{r}
+sims3 <- lapply(1:1000, \(i) {
+    SNP <- rep(rbinom(ngroup, 2, 0.5), each = group_size) %>% sample()
+    # SNP <- rbinom(ngroup * group_size, 2, 0.5)
+    lapply(1:nrow(params), \(j) {
+        m <- get(params$method_options[j])
+        yo <- get(params$y_options[j])
+        m(SNP, yo) %>% mutate(what = params$y_options[j])
+    }) %>% bind_rows()
+
+}) %>% bind_rows()
+names(sims3) <- c("b", "se", "tval", "pval", "method", "what")
+
+sims3 %>% group_by(method, what) %>% summarise(b=mean(abs(b)), se=mean(se), pval=mean(pval), tval=mean(abs(tval)))
+
+ggplot(sims3, aes(x=b)) +
+geom_density(aes(fill=what), alpha=0.5) +
+facet_grid(method ~ .)
+```
+
+
+## Regress from SNP as well
+
+```{r}
+drm <- function(g, y, gr=g) {
+  y.i <- tapply(y, g, median, na.rm=T)  
+  z.ij <- abs(y - y.i[g+1])
+  summary(lm(z.ij ~ gr))$coef %>%
+    as_tibble() %>%
+    slice(2) %>%
+    mutate(method="drm")
+}
+
+add <- function(g, y, nothing=NULL) {
+    summary(lm(y ~ g))$coef %>%
+    as_tibble() %>%
+    slice(2) %>%
+    mutate(method="add")
+}
+
+params <- expand.grid(
+    y_options = c("y", "yresid", "yresidhat1", "yresidhat2"),
+    method_options = c("drm", "add"),
+    stringsAsFactors=FALSE
+)
+
+params <- mutate(params, prs=case_when(y_options=="y" ~ "vec", y_options=="yresid" ~ "prs", y_options == "yresidhat1" ~ "prshat1", y_options == "yresidhat2" ~ "prshat2"))
+vec <- rnorm(length(y), 0, sd=0.001)
+j <- 1
+sims <- lapply(1:1000, \(i) {
+    message(i)
+    SNP <- rep(rbinom(ngroup, 2, 0.5), each = group_size)
+    lapply(1:nrow(params), \(j) {
+        m <- get(params$method_options[j])
+        yo <- get(params$y_options[j])
+        p <- get(params$prs[j])
+        SNP_resid <- residuals(lm(SNP ~ p))
+        m(SNP, yo, SNP_resid) %>% mutate(what = params$y_options[j])
+    }) %>% bind_rows()
+
+}) %>% bind_rows()
+names(sims) <- c("b", "se", "tval", "pval", "method", "what")
+sims
 ```
 
 

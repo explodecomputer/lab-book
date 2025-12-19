@@ -1,0 +1,221 @@
+---
+title: "Survival analysis using factoral MR"
+author: Gibran Hemani, David Carslake
+date: "2025-12-19"
+categories: []
+---
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(simsurv)
+library(survival)
+library(boot)
+set.seed(123)
+```
+
+
+## Manually estimating power
+
+Suppose I want to know the power of a linear regression model through simulation. Generate simulated data to match what I see in my real analysis - the data generating model (DGM)
+
+- Here we have a variable x and y, both have variance of 1
+- There is some sample size n
+- But I don't know the effect size of x on y
+- I will be varying the effect size (beta) to see how it affects power
+
+```{r}
+dgm <- function(n = 30, beta = 0.2) {
+  x <- rnorm(n)
+  # We want the variance of y to be 1, so we just add enough noise on top of x*beta
+  y <- beta * x + rnorm(n, sd = sqrt(1 - beta^2))
+  tibble(x = x, y = y)
+}
+```
+
+
+Now that I've generated the data to mimic my real analysis, I need
+to estimate the effect of x on y in the same way that I would in the real analysis
+
+```{r}
+estimation <- function(data) {
+  model <- lm(y ~ x, data = data)
+  summary(model)$coefficients[2, 4]  # p-value for the slope
+}
+```
+
+
+Finally, I need to run this across lots of different potential values of beta and n, to see the average power.
+
+Power depends on the significance threshold (alpha). If I simulate a null where beta = 0, then I want power to equal the significance threshold
+
+```{r}
+power_simulation <- function(nsim = 1000, n = c(30, 50, 70), beta = c(0, 0.2, 0.4), alpha = 0.05) {
+    params <- expand.grid(n = n, beta = beta, sim=1:nsim)
+    for(i in 1:nrow(params)) {
+        data <- dgm(n = params$n[i], beta = params$beta[i])
+        params$p_value[i] <- estimation(data)
+    }
+    # Count how many significant results we get for each combination of n and beta
+    # Divide by nsim to get the proportion of significant results (i.e., power)
+    params <- params %>%
+        group_by(n, beta) %>%
+        summarise(power = mean(p_value < alpha)) %>%
+        ungroup()
+    return(params)    
+}
+```
+
+
+Try out the dgm function
+
+```{r}
+data <- dgm(n = 5000, beta = 0.3)
+estimation(data)
+```
+
+Run the power simulation just for beta = 0
+
+```{r}
+results <- power_simulation(nsim = 10000, n = c(500), beta = c(0), alpha = 0.05)
+results
+```
+
+So power is roughly the same as alpha (0.05), that's good. Can generate power curves for varying n and beta
+
+```{r}
+results <- power_simulation(nsim = 500, n = c(50, 70, 90), beta = c(0, 0.3, 0.6, 0.9), alpha = 0.05)
+ggplot(results, aes(x = beta, y = power, color = factor(n))) +
+    geom_line() +
+    geom_point() +
+    labs(title = "Power Simulation Results",
+         x = "Effect Size (Beta)",
+         y = "Power",
+         color = "Sample Size (n)")
+```
+
+
+## Survival and factoral MR
+
+From this we can see the basic framework of a power simulation. Now we have to adapt it for factorial MR in cancer survival.
+
+That means the dgm function needs to generate 
+
+- genotype
+- proteomic
+- time to event
+
+And the estimation function needs to run a factorial MR analysis on time to event
+
+For the time to event part, we can simulate the data using the simsurv package. First generate the protein levels and their interaction
+
+```{r}
+n <- 10000
+g1 <- rbinom(n, 2, 0.3)  # genotype for protein 1
+g2 <- rbinom(n, 2, 0.4)  # genotype for protein 2
+u <- rnorm(n)          # unmeasured confounder
+pred1 <-  0.5 * g1 + 0.3 * u
+pred2 <-  0.5 * g2 + 0.3 * u
+
+covars <- tibble(protein1 = pred1 + rnorm(n, sd = sqrt(1 - var(pred1))),
+                 protein2 = pred2 + rnorm(n, sd = sqrt(1 - var(pred2))),
+                 interaction = protein1 * protein2)
+
+# we'll need the shape and scale parameters for the Weibull distribution - you can get these from fitting a Weibull model to real data. e.g.
+lambdas <- 1.5
+gammas <- 0.01
+
+# And now we select some hypothesised betas for the proteins and their interaction
+betas <- c(protein1 = 0.3, protein2 = 0.4, interaction = 0.2)
+
+# Finally we need a max time for the simulation. This will introduce right-censoring e.g.
+maxt <- 5
+
+simdata <- simsurv(lambdas = lambdas,
+                   gammas = gammas,
+                   betas = betas,
+                   x = covars,
+                   maxt = maxt)
+
+head(simdata)
+```
+
+This gives the time to event and the outcome.
+
+For estimation part, if this was just an observational analysis we could use the survival package to fit a Cox proportional hazards model using the `survival` package. For example: 
+
+```{r}
+cox_model <- coxph(Surv(eventtime, status) ~ protein1 + protein2 + interaction, data = merge(covars, simdata, by = "row.names"))
+summary(cox_model)
+```
+
+
+But as this is a factorial MR, we will need to use the genetic predictors of protein1, protein2 and the interaction.
+
+- First stage: regress protein1 and protein2 on their respective genotypes to get predicted values
+- Second stage: fit a Cox model using the predicted values and their interaction
+- Finally, bootstrap the interaction coefficients to get the correct p-value (use the SD(betas) as the standard error to get the p-values)
+
+```{r}
+iv_coxph <- function(data, ind=1:nrow(data)) {
+  d <- data[ind, ]
+  
+  m1 <- lm(protein1 ~ g1 + g2 + g1:g2, data = d)
+  d$res1 <- residuals(m1)
+  
+  m2 <- lm(protein2 ~ g1 + g2 + g1:g2, data = d)
+  d$res2 <- residuals(m2)
+  
+  fit_cox <- coxph(Surv(eventtime, status) ~ protein1 * protein2 + res1 + res2, data = d)
+  return(summary(fit_cox)$coefficients["protein1:protein2", 1])  # return the beta for the interaction term
+}
+
+estimation <- function(data) {
+  bootres <- boot(data = data, statistic = iv_coxph, R=100)
+  sd_boot <- sd(bootres$t)
+  pval <- 2 * (1 - pnorm(abs(bootres$t0 / sd_boot)))
+  return(pval)
+}
+```
+
+
+So overall the power simulation framework will be similar to the linear regression example, but with a more complex dgm and estimation function.
+
+```{r}
+dgm <- function(n = 1000, freq1, freq2, rsq_g1p1, rsq_g2p2, beta_p1, beta_p2, beta_interaction, beta_u, lambdas, gammas, maxt) {
+  g1 <- rbinom(n, 2, freq1)  # genotype for protein 1
+  g2 <- rbinom(n, 2, freq2)  # genotype for protein 2
+  u <- rnorm(n)              # unmeasured confounder that induces correlation between protein 1 and 2
+  pred1 <-  scale(g1) * rsq_g1p1 + beta_u * u
+  pred2 <-  scale(g2) * rsq_g2p2 + beta_u * u
+  
+  covars <- tibble(protein1 = pred1 + rnorm(n, sd = sqrt(1 - var(pred1))),
+                   protein2 = pred2 + rnorm(n, sd = sqrt(1 - var(pred2))),
+                   interaction = protein1 * protein2)
+    
+  betas <- c(protein1 = beta_p1, protein2 = beta_p2, interaction = beta_interaction)  
+  simdata <- simsurv(lambdas = lambdas,
+                     gammas = gammas,
+                     betas = betas,
+                     x = covars,
+                     maxt = maxt)
+  
+  d <- cbind(covars, simdata, g1, g2) %>% as_tibble()
+  return(d)
+}
+```
+
+Note that there's quite a lot of parameters that could vary in the dgm, but you could fix many of those cos you know what they are in the real data (e.g. n, freq1, freq2, rsq, beta_p1, beta_p2, lambdas, gammas, maxt values). So you'd end up varying the beta_interaction values and beta_u values only
+
+Example:
+
+```{r}
+d <- dgm(n = 1000, freq1 = 0.3, freq2 = 0.4, rsq_g1p1 = 0.1, rsq_g2p2 = 0.1,
+         beta_p1 = 0.3, beta_p2 = 0.4, beta_interaction = 0.2, beta_u = 0.3,
+         lambdas = 1.5, gammas = 0.01, maxt = 5)
+
+estimation(d)
+```
+
+And wrap this into the power simulation function as before...
+
