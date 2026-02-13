@@ -1,0 +1,144 @@
+---
+title: "residual-height"
+author: Gibran Hemani
+date: "2026-02-13"
+categories: []
+---
+
+## Background
+
+$$
+X = \beta_{gx} G + \beta_{cx} C + \epsilon_x
+$$
+
+$$
+Y = \beta_{xy} X + \beta_{cy} C + \epsilon_y
+$$
+
+Two stage least squares aims to estimate the causal effect of X on Y, $\beta_{xy}$, by using G as an instrument for X. The first stage regression is:
+
+$$
+X = \beta_{gx} G
+$$
+
+Make a prediction of X from G, and then use this predicted value of X in the second stage regression to estimate $\beta_{xy}$.  
+
+$$
+\hat{X} = \hat{\beta}_{gx} G
+$$
+
+And then the second stage regression is:
+
+$$
+Y = \beta_{xy} \hat{X} + error
+$$
+
+So $\hat{\beta_{xy}}$ is the estimate of the causal effect of X on Y, which is independent of the common confounding of X and Y.
+
+## Simulation
+
+Generate Height:
+
+```{r}
+set.seed(123)
+library(dplyr)
+library(ggplot2)
+library(furrr)
+library(knitr)
+n <- 1000000
+h2 <- 0.7
+r2_prs <- 0.75
+prs_explained <- rnorm(n, mean = 0, sd = sqrt(r2_prs * h2))
+prs_unexplained <- rnorm(n, mean = 0, sd = sqrt((1 - r2_prs) * h2))
+childhood_environment <- rnorm(n, mean = 0, sd = sqrt(1 - h2))
+height <- prs_explained + prs_unexplained + childhood_environment
+residual_height <- height - prs_explained
+```
+
+Generate coronary heart disease (just a continuous measure for simplicity):
+
+```{r}
+beta_height_chd <- -0.1
+beta_environment_chd <- -0.2
+chd <- beta_height_chd * height + beta_environment_chd * childhood_environment + rnorm(n)
+```
+
+Get estimates of the effect of PRS, height and residual height on CHD:
+
+```{r}
+get_est <- function(x, y) {
+    mod <- summary(lm(y ~ x))$coefficients
+    tibble(
+        beta = mod[2, 1],
+        se = mod[2, 2],
+        p = mod[2, 4],
+        rsq = cor(x, y)^2,
+        var_exposure = var(x)
+    )
+}
+bind_rows(
+    get_est(prs_explained, chd) %>% mutate(exposure = "PRS"),
+    get_est(height, chd) %>% mutate(exposure = "Height"),
+    get_est(residual_height, chd) %>% mutate(exposure = "Residual Height")
+) %>% kable()
+```
+
+Generalise this simulation to a function:
+
+```{r}
+sim <- function(h2, r2_prs, beta_height_chd, beta_environment_chd, n = 100000, simrep = 1) {
+    args <- list(
+        h2 = h2,
+        r2_prs = r2_prs,
+        beta_height_chd = beta_height_chd,
+        beta_environment_chd = beta_environment_chd,
+        n = n,
+        simrep = simrep
+    )
+    prs_explained <- rnorm(n, mean = 0, sd = sqrt(r2_prs * h2))
+    prs_unexplained <- rnorm(n, mean = 0, sd = sqrt((1 - r2_prs) * h2))
+    childhood_environment <- rnorm(n, mean = 0, sd = sqrt(1 - h2))
+    height <- prs_explained + prs_unexplained + childhood_environment
+    residual_height <- height - prs_explained
+    chd <- beta_height_chd * height + beta_environment_chd * childhood_environment + rnorm(n)
+    res <- bind_rows(
+        get_est(prs_explained, chd) %>% mutate(exposure = "PRS"),
+        get_est(height, chd) %>% mutate(exposure = "Height"),
+        get_est(residual_height, chd) %>% mutate(exposure = "Residual Height")
+    )
+    bind_cols(args, res)
+}
+sim(h2 = 0.7, r2_prs = 0.75, beta_height_chd = -0.1, beta_environment_chd = -0.1) %>% kable()
+```
+
+Try a few different scenarios
+
+```{r}
+#| warning: false
+params <- expand.grid(
+    h2 = 0.7,
+    r2_prs = c(0.75, 0.4),
+    beta_height_chd = c(0, -0.1, -0.2, -0.3),
+    beta_environment_chd = c(-0.1, -0.2, -0.3),
+    simrep = 1:10
+)
+
+plan(multicore)
+results <- future_pmap(params, sim, .progress = TRUE) %>% bind_rows() 
+```
+
+look at the results:
+
+```{r}
+ggplot(results, aes(x = beta_height_chd, y = beta, colour = exposure)) +
+    geom_point() +
+    facet_grid(r2_prs ~ beta_environment_chd, labeller = label_both) +
+    scale_colour_brewer(type="qual")
+```
+
+
+---
+
+```{r}
+sessionInfo()
+```

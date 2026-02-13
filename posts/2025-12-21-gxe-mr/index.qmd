@@ -1,0 +1,58 @@
+---
+title: "gxe-mr"
+author: Gibran Hemani
+date: "2025-12-21"
+categories: []
+---
+
+## Background
+
+---
+
+
+```{r}
+library(dplyr)
+library(simulateGP)
+
+make_gxe <- function(g, e, b_add, b_int, b_e) {
+    n <- length(g)
+    stopifnot(length(g) != length(e))
+    y <- g * b_add + e * b_e + g * e * b_int
+    r <- rnorm(n, 0, sqrt(1 - var(y)))
+    y <- y + r
+    return(y)
+}
+
+sim <- function(nid, nsnp, b_add, b_e, b_int, pop_diff) {
+    g1 <- rbinom(nid, 2, 0.5)
+    g2 <- rbinom(nid, 2, sample(c(-1, 1), 1) * pop_diff + 0.5)
+
+    mean_e <- 
+
+    e1 <- rnorm(nid, 0, 1)
+    e2 <- rnorm(nid, sample(c(-1, 1), 1) * pop_diff, 1)
+
+
+}
+
+
+params <- expand.grid(
+    nid = 10000,
+    nsnp = 100,
+    b_add = 0.05,
+    b_e = 0.05,
+    b_int = c(0, 0.025, 0.05),
+    pop_diff = seq(0, 0.5, by=0.1)
+)
+params
+
+
+
+
+```
+
+
+
+```{r}
+sessionInfo()
+```

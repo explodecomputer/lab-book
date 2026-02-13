@@ -1,0 +1,102 @@
+---
+title: "2025-12-24-cov-g-y"
+author: Gibran Hemani
+date: "`r Sys.Date()`"
+categories: []
+execute:
+    eval: false
+---
+
+## Background
+
+---
+
+
+```{r}
+library(dplyr)
+library(tidyr)
+
+sim <- function(a=1, bgx=2, bgu=3, bxy=4, bux=5, buy=6, p=0.4, n=100000) {
+    params <- as.list(environment())
+    g <- rbinom(n, 2, p)
+    u <- rnorm(n) + g * bgu
+    x <- g * bgx + u * bux + rnorm(n)
+    y <- g * a + u * buy + x * bxy + rnorm(n)
+    return(list(
+        tibble(g, u, x, y),
+        params
+    ))
+}
+
+sim()
+
+estimated <- function(dat) {
+    dat <- dat[[1]]
+    xhat <- fitted.values(lm(x ~ g, dat))
+    tibble(
+        cov_g_y = cov(dat$g, dat$y),
+        cov_xhat_y = cov(xhat, dat$y),
+        cov_x_y = cov(dat$x, dat$y),
+        var_x = var(dat$x),
+        var_g = var(dat$g),
+        var_y = var(dat$y),
+        var_u = var(dat$u),
+        var_xhat = var(xhat),
+        lm_x_y = lm(y ~ x, dat)$coef[2],
+        lm_xhat_y = lm(dat$y ~ xhat)$coef[2],
+        lm_xhat
+    )
+}
+
+
+
+sim() %>% estimated
+
+expected <- function(dat) {
+    d <- dat[[2]]
+    a <- d$a
+    bgx <- d$bgx
+    bgu <- d$bgu
+    bxy <- d$bxy
+    bux <- d$bux
+    buy <- d$buy
+    p <- d$p
+    n <- d$n
+    tibble(
+        var_g = 2 * p * (1-p),
+        cov_g_y = (a + bxy * bgx + bxy * bgu * bux + buy * bgu) * var_g,
+        cov_xhat_y = var_g * (bgx + bux * bgu) * (bxy * bgx + bxy * bux * bgu + buy * bgu + a),
+            cov_xhat_y_causal = var_g * (bgx + bux * bgu) * (bxy * bgx + bxy * bux * bgu),
+        var_u = var_g * bgu^2 + 1,
+        var_x = var_g * (bgx^2 + 2 * bux * bgx * bgu) + bux^2 * var_u + 1,
+        cov_x_y = a * (bgx + bgu * bux) * var_g + bxy * var_x + buy * (bgu * bgx * var_g + bux * var_u),
+        var_y = (a + bxy * bgx + bxy * bgu * bux + buy * bgu)^2 * var_g + (bxy * bux + buy)^2 * 1 + 1 + bxy^2 * 1,
+        var_xhat = var_x - var_u * bux^2 - 1 + var_g * bgu^2 * bux^2
+    )
+}
+
+covs <- function(dat) {
+    es <- estimated(dat) %>% pivot_longer(names_to="param", values_to="estimated", cols=names(.))
+    ex <- expected(dat) %>% pivot_longer(names_to="param", values_to="expected", cols=names(.))
+    return(merge(es, ex, all=TRUE) %>% mutate(diff = round((estimated - expected) / estimated * 100)))
+}
+
+sim() %>% covs()
+
+sim(a=0) %>% covs()
+sim(a=0, buy=0) %>% covs()
+sim(a=1) %>% covs()
+
+
+
+dat <- sim()
+
+estimated(dat)
+expected(dat)
+
+```
+
+
+```{r}
+sessionInfo()
+```

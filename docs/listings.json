@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/2025-12-21-gxe-mr/index.html",
       "/posts/2025-12-19-mr-factorial-survival/index.html",
       "/posts/2025-10-10-y-residuals/index.html",
       "/posts/2025-08-14-mvmr-power/index.html",
@@ -48,6 +49,8 @@
       "/posts/2022-01-09-did-models-confounding/index.html",
       "/posts/2025-01-21-clustering-prs/index.html",
       "/posts/2025-01-27-prs-collider-sims/index.html",
+      "/posts/2025-12-24-cov-g-y/index.html",
+      "/posts/2026-02-13-residual-height/index.html",
       "/posts/2025-10-17-frankel-index/index.html",
       "/posts/2025-10-16-qtl2-effect-sizes/index.html",
       "/posts/2025-05-15-trait-clusters/index.html",

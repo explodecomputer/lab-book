@@ -1,0 +1,15 @@
+{
+  "hash": "aba118bebe4510bc138d8030d64f4533",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"2025-12-24-cov-g-y\"\nauthor: Gibran Hemani\ndate: \"2026-02-13\"\ncategories: []\nexecute:\n    eval: false\n---\n\n## Background\n\n---\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(dplyr)\nlibrary(tidyr)\n\nsim <- function(a=1, bgx=2, bgu=3, bxy=4, bux=5, buy=6, p=0.4, n=100000) {\n    params <- as.list(environment())\n    g <- rbinom(n, 2, p)\n    u <- rnorm(n) + g * bgu\n    x <- g * bgx + u * bux + rnorm(n)\n    y <- g * a + u * buy + x * bxy + rnorm(n)\n    return(list(\n        tibble(g, u, x, y),\n        params\n    ))\n}\n\nsim()\n\nestimated <- function(dat) {\n    dat <- dat[[1]]\n    xhat <- fitted.values(lm(x ~ g, dat))\n    tibble(\n        cov_g_y = cov(dat$g, dat$y),\n        cov_xhat_y = cov(xhat, dat$y),\n        cov_x_y = cov(dat$x, dat$y),\n        var_x = var(dat$x),\n        var_g = var(dat$g),\n        var_y = var(dat$y),\n        var_u = var(dat$u),\n        var_xhat = var(xhat),\n        lm_x_y = lm(y ~ x, dat)$coef[2],\n        lm_xhat_y = lm(dat$y ~ xhat)$coef[2],\n        lm_xhat\n    )\n}\n\n\n\nsim() %>% estimated\n\nexpected <- function(dat) {\n    d <- dat[[2]]\n    a <- d$a\n    bgx <- d$bgx\n    bgu <- d$bgu\n    bxy <- d$bxy\n    bux <- d$bux\n    buy <- d$buy\n    p <- d$p\n    n <- d$n\n    tibble(\n        var_g = 2 * p * (1-p),\n        cov_g_y = (a + bxy * bgx + bxy * bgu * bux + buy * bgu) * var_g,\n        cov_xhat_y = var_g * (bgx + bux * bgu) * (bxy * bgx + bxy * bux * bgu + buy * bgu + a),\n            cov_xhat_y_causal = var_g * (bgx + bux * bgu) * (bxy * bgx + bxy * bux * bgu),\n        var_u = var_g * bgu^2 + 1,\n        var_x = var_g * (bgx^2 + 2 * bux * bgx * bgu) + bux^2 * var_u + 1,\n        cov_x_y = a * (bgx + bgu * bux) * var_g + bxy * var_x + buy * (bgu * bgx * var_g + bux * var_u),\n        var_y = (a + bxy * bgx + bxy * bgu * bux + buy * bgu)^2 * var_g + (bxy * bux + buy)^2 * 1 + 1 + bxy^2 * 1,\n        var_xhat = var_x - var_u * bux^2 - 1 + var_g * bgu^2 * bux^2\n    )\n}\n\ncovs <- function(dat) {\n    es <- estimated(dat) %>% pivot_longer(names_to=\"param\", values_to=\"estimated\", cols=names(.))\n    ex <- expected(dat) %>% pivot_longer(names_to=\"param\", values_to=\"expected\", cols=names(.))\n    return(merge(es, ex, all=TRUE) %>% mutate(diff = round((estimated - expected) / estimated * 100)))\n}\n\nsim() %>% covs()\n\nsim(a=0) %>% covs()\nsim(a=0, buy=0) %>% covs()\nsim(a=1) %>% covs()\n\n\n\ndat <- sim()\n\nestimated(dat)\nexpected(dat)\n```\n:::\n\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsessionInfo()\n```\n:::\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
