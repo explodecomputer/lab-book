@@ -137,6 +137,358 @@ ggplot(results, aes(x = beta_height_chd, y = beta, colour = exposure)) +
 ```
 
 
+## Estimate effect of environment on Y
+
+The height residual is still heritable. We can estimate the path from E -> X -> Y because
+
+- E->X can be obtained with MR of residual -> height
+- X->Y can be obtained with MR of height -> CHD
+
+```{r}
+est_ey <- function(dat) {
+    
+    dat <- dat[[1]]
+    xhat <- fitted.values(lm(height ~ prs_explained, dat))
+    tibble(
+        cov_prs_chd = cov(dat$prs_explained, dat$chd),
+        cov_xhat_chd = cov(xhat, dat$chd),
+        cov_x_chd = cov(dat$height, dat$chd),
+        var_x = var(dat$height),
+        var_prs = var(dat$prs_explained),
+        var_chd = var(dat$chd),
+        var_environment = var(dat$childhood_environment),
+        var_xhat = var(xhat),
+        lm_x_chd = lm(chd ~ height, dat)$coef[2],
+        lm_xhat_chd = lm(dat$chd ~ xhat)$coef[2]
+    )
+}
+```
+
+
+## Can we estimate the effect of environment on Y using the residual height?
+
+According to the model described above, the influence of adverse childhood environment on CHD is due to two paths:
+
+- $\beta_{cy}$: the direct effect of environment on CHD
+- $\beta_{cx} \beta_{xy}$: the effect of environment on CHD mediated by height
+
+The PRS effect estimate on CHD represents $\beta_{xy}$, the causal effect of height on CHD. Can we express $\beta_{cy}$ in terms of values that are observable in the data?
+
+$$
+\begin{aligned}
+cov(X, Y) &= cov(\beta_{gx} G + \beta_{cx} C + \epsilon_x, \beta_{xy} X + \beta_{cy} C + \epsilon_y) \\
+&= \beta_{gx} \beta_{xy} var(G) + (\beta_{cx} \beta_{xy} + \beta_{cy}) var(C) + \beta_{xy} var(\epsilon_x) \\
+&= \beta_{xy} var(X) h^2 + (\beta_{cx}^2 \beta_{xy} + \beta_{cx} \beta_{cy}) var(C) + \beta_{xy} var(X)((1-h^2) - var(C)) \\
+\end{aligned}
+$$
+
+This can be rearranged to be find an expression for $\beta_{cy}$:
+
+$$
+\begin{aligned}
+\beta_{cy} &= \frac{cov(X, Y) - \beta_{xy} var(X) h^2 - [(1-h^2) var(X) - \beta_{cx}^2 var(C)] \beta_{xy} - \beta_{cx}^2 \beta_{xy} var(C)}{var(C) \beta_{cx}} \\
+&= \frac{cov(X, Y) = \beta_{xy} var(X)}{var(C) \beta_{cx}}
+\end{aligned}
+$$
+
+In principle we can also express $\beta_{cy}$ in terms of the covariance of residual height association with CHD, which is observable in the data:
+
+$$
+\beta_{cy} = \frac{cov(X, Y | \hat{G}) - \beta_{xy} (var(X)(1-h^2) + h^2 var(X)(1-R^2))}{var(C) \beta_{cx}}
+$$
+
+where $R^2$ is the proportion of the heritability of height explained by the PRS.
+
+So we should be able to check empirically that 
+
+$$
+cov(X, Y | \hat{G}) - \beta_{xy} (var(X)(1-h^2) + h^2 var(X)(1-R^2)) = cov(X, Y) = \beta_{xy} var(X)
+$$
+
+In order to estimate $\beta_{cy}$, we need to know two parameters:
+
+- $var(C)$: the variance of 'childhood environment'. It is essentially $var(C) = (1 - h^2) var(X) - var(\epsilon_x)$, where $var(\epsilon_x)$ is the developmental stochastic process, leaving $var(C)$ to represent the shared and non-shared environment. Empirically, this is estimated at around 10% of the variance in height, so we can set $var(C) = 0.1 var(X)$.
+- $\beta_{cx}$: the effect of childhood environment on height. This cannot be easily estimated, so we can set this to 1, which means that when we interpret $\beta_{cy}$, we are interpreting it as the effect of childhood environment on CHD relative to its effect on height.
+
+## Function to estimate the effect of environment on Y
+
+```{r}
+est_cy <- function(height, prs, outcome, h2 = 0.7, prop_height_env = 0.1) {
+    var_x <- var(height)
+    var_prs <- var(prs)
+    var_c <- prop_height_env * var_x
+    cov_x_y <- cov(height, outcome)
+
+    return(beta_cy)
+}
+```
+
+
+```{r}
+library(AER) # For ivreg
+
+est_cy <- function(height, prs, outcome, h2 = 0.7, prop_height_env = 0.1, n_boot = 1000) {
+  
+  r2_prs <- cor(prs, height)^2
+
+  # Filter out NAs for a consistent sample size
+  df <- tibble(height, prs, outcome)
+  df <- na.omit(df)
+  n_obs <- nrow(df)
+  
+  # First-Stage F-statistic
+  first_stage <- lm(height ~ prs, data = df)
+  f_stat <- summary(first_stage)$fstatistic[1]
+  
+  # Two-Stage Least Squares (2SLS)
+  tsls_model <- AER::ivreg(outcome ~ height | prs, data = df)
+  b_xy <- coef(tsls_model)["height"]
+  se_b_xy <- summary(tsls_model)$coefficients["height", "Std. Error"]
+  
+  calc_buy_total <- function(c_xy, v_x, b_val, vu) {
+    (c_xy - (b_val * v_x)) / (1 * vu)
+  }
+  
+  calc_buy_res <- function(c_res_xy, v_x, b_val, h_sq, v_u, r2_prs) {
+    (c_res_xy - b_val * (v_x * (1 - h_sq) + h_sq * v_x * (1 - r2_prs))) / (v_u * 1)
+  }
+  
+  # Point Estimates
+  var_x <- var(df$height)
+  var_u <- prop_height_env * var_x
+  cov_x_y <- cov(df$height, df$outcome)
+  
+  res_x <- residuals(first_stage)
+  cov_res_x_y <- cov(res_x, df$outcome)
+  
+  b_uy_total <- calc_buy_total(cov_x_y, var_x, b_xy, var_u)
+  b_uy_res   <- calc_buy_res(cov_res_x_y, var_x, b_xy, h2, var_u, r2_prs)
+  
+  # Bootstrapping for SEs and CIs
+  boot_results <- replicate(n_boot, {
+    idx <- sample(1:n_obs, replace = TRUE)
+    df_b <- df[idx, ]
+    
+    # Bootstrap 2SLS
+    m_b <- AER::ivreg(outcome ~ height | prs, data = df_b)
+    b_xy_b <- coef(m_b)["height"]
+    
+    var_x_b <- var(df_b$height)
+    var_u_b <- prop_height_env * var_x_b
+    
+    # Total Cov method
+    c_xy_b <- cov(df_b$height, df_b$outcome)
+    buy_t <- calc_buy_total(c_xy_b, var_x_b, b_xy_b, var_u_b)
+    
+    # Residual Cov method
+    m_res_b <- lm(height ~ prs, data = df_b)
+    c_res_b <- cov(residuals(m_res_b), df_b$outcome)
+    buy_r <- calc_buy_res(c_res_b, var_x_b, b_xy_b, h2, var_u_b, r2_prs)
+    
+    c(b_xy_b, buy_t, buy_r)
+  })
+  
+  # Calculate Stats
+  estimates <- c(b_xy, b_uy_total, b_uy_res)
+  # b_xy SE is from AER package, b_uy SEs from bootstrap
+  ses <- c(se_b_xy, sd(boot_results[2,]), sd(boot_results[3,]))
+  
+  # P-values and CIs
+  z_scores <- estimates / ses
+  p_vals <- 2 * (1 - pnorm(abs(z_scores)))
+  
+  ci_lower <- c(estimates[1] - 1.96 * ses[1], 
+                quantile(boot_results[2,], 0.025), 
+                quantile(boot_results[3,], 0.025))
+  
+  ci_upper <- c(estimates[1] + 1.96 * ses[1], 
+                quantile(boot_results[2,], 0.975), 
+                quantile(boot_results[3,], 0.975))
+  
+  # Final Table
+  results_table <- tibble(
+    Parameter = c("b_xy (2SLS)", "b_uy (Total Cov)", "b_uy (Resid Cov)"),
+    Estimate = estimates,
+    Std_Error = ses,
+    P_value = p_vals,
+    LCI_95 = ci_lower,
+    UCI_95 = ci_upper,
+    Sample_Size = n_obs,
+    First_Stage_F = c(f_stat, NA, NA)
+  )
+  
+  return(results_table)
+}
+```
+
+
+h2 = var_prs * b^2 / var_x
+r2env_height = var_u * b_ux^2 / var_x
+
+var_x = var_prs * b^2 / h2
+var_x = var_u * b_ux^2 / r2env_height
+
+
+
+```{r}
+sim2 <- function(b_xy, b_uy, b_ux=1, b_prs=1, h2=0.7, r2_env_height=0.1, var_u = 1, var_x=1, var_ey = 1, r2_prs=1, n = 100000) {
+
+    r2_xe <- 1 - h2 - r2_env_height
+    var_prs <- h2 * var_x / b_prs^2
+    var_u <- r2_env_height * var_x / b_ux^2
+    var_ex <- r2_xe * var_x
+
+    args <- list(
+        h2 = h2,
+        r2_prs = r2_prs,
+        b_xy = b_xy,
+        b_uy = b_uy,
+        b_ux = b_ux,
+        b_prs = b_prs,
+        v_ex = var_ex,
+        v_ey = var_ey,
+        v_u = var_u,
+        v_prs = var_prs,
+        n = n
+    )
+    dat <- tibble(
+        prs_explained = rnorm(n, mean = 0, sd = sqrt(args$v_prs * b_prs * r2_prs)),
+        prs_unexplained = rnorm(n, mean = 0, sd = sqrt(args$v_prs * b_prs * (1 - r2_prs))),
+        prs = prs_explained + prs_unexplained,
+        u = rnorm(n, mean = 0, sd = sqrt(args$v_u)),
+        ex = rnorm(n, mean = 0, sd = sqrt(args$v_ex)),
+        x = prs + u * b_ux + ex,
+        residual_x = x - prs_explained,
+        ey = rnorm(n, mean = 0, sd = sqrt(args$v_ey)),
+        y = b_xy * x + b_uy * u + ey
+    )
+    return(list(args, dat))
+}
+
+dat <- sim2(b_xy = -0.2, b_uy = -0.2, r2_prs = 0.4, h2=0.7, n=1000000)[[2]]
+est_cy(dat$x, dat$prs_explained, dat$y, h2 = 0.7, prop_height_env = 0.1, n_boot = 10)
+```
+
+
+## Simulations to check equations
+
+Ignore this section for now, it's just me checking the equations are correct.
+
+```{r}
+library(dplyr)
+sim2 <- function(b_xy, b_uy, b_ux=1, b_prs=1, h2=0.7, r2_env_height=0.1, var_u = 1, var_x=1, var_ey = 1, r2_prs=1, n = 100000) {
+    r2_xe <- 1 - h2 - r2_env_height
+    var_prs <- h2 * var_x / b_prs^2
+    var_u <- r2_env_height * var_x / b_ux^2
+    var_ex <- r2_xe * var_x
+
+    args <- list(
+        h2 = h2,
+        r2_prs = r2_prs,
+        b_xy = b_xy,
+        b_uy = b_uy,
+        b_ux = b_ux,
+        b_prs = b_prs,
+        v_ex = var_ex,
+        v_ey = var_ey,
+        v_u = var_u,
+        v_prs = var_prs,
+        n = n
+    )
+    dat <- tibble(
+        prs_explained = rnorm(n, mean = 0, sd = sqrt(args$v_prs * b_prs * r2_prs)),
+        prs_unexplained = rnorm(n, mean = 0, sd = sqrt(args$v_prs * b_prs * (1 - r2_prs))),
+        prs = prs_explained + prs_unexplained,
+        u = rnorm(n, mean = 0, sd = sqrt(args$v_u)),
+        ex = rnorm(n, mean = 0, sd = sqrt(args$v_ex)),
+        x = prs + u * b_ux + ex,
+        residual_x = x - prs_explained,
+        ey = rnorm(n, mean = 0, sd = sqrt(args$v_ey)),
+        y = b_xy * x + b_uy * u + ey
+    )
+    return(list(args, dat))
+}
+
+est_obs <- function(simdat) {
+    dat <- simdat[[2]]
+    xhat <- fitted.values(lm(x ~ prs_explained, dat))
+    residual <- residuals(lm(x ~ prs_explained, dat))
+    h2 <- simdat[[1]]$h2
+    r2_prs <- simdat[[1]]$r2_prs
+    tibble(
+        var_x = var(dat$x),
+        var_prs_explained = var(dat$prs_explained),
+        var_prs_unexplained = var(dat$prs_unexplained),
+        var_prs = var(dat$prs_explained + dat$prs_unexplained),
+        var_residual = var(dat$residual_x),
+        var_y = var(dat$y),
+        var_u = var(dat$u),
+        var_xhat = var(xhat),
+        var_ex = var(dat$ex),
+
+        cov_prs_y = cov(dat$prs_explained, dat$y),
+        cov_prs_x = cov(dat$prs_explained, dat$x),
+        cov_xhat_y = cov(xhat, dat$y),
+        cov_residual_y = cov(residual, dat$y),
+        cov_x_y = cov(dat$x, dat$y),
+
+        lm_x_y = lm(y ~ x, dat)$coef[2],
+        lm_xhat_y = lm(dat$y ~ xhat)$coef[2],
+        lm_residual_y = lm(dat$y ~ residual)$coef[2],
+        lm_u_y = simdat[[1]]$b_uy,
+        lm_u_y_resx = simdat[[1]]$b_uy,
+        est_u_y = (cov_x_y - cov_prs_y) / (var_x - var_prs),
+        numerator = (cov_x_y - lm_xhat_y * var_x),
+        denominator = (cov_residual_y - lm_xhat_y * (var_x * (1 - h2) + h2 * var_x * (1 - r2_prs))),
+        ratio = numerator / denominator
+    ) %>% bind_cols(simdat[[1]]) %>% as.list()
+}
+
+est_exp <- function(res_obs) {
+
+    a <- res_obs %>% as_tibble() %>% mutate(
+        exp_var_x = var_prs * b_prs^2 + var_u * b_ux^2 + v_ex,
+        exp_var_residual = exp_var_x - var_prs * b_prs^2 + var_prs * b_prs^2 * (1-r2_prs),
+        exp_var_prs = h2 * exp_var_x,
+        exp_var_prs_explained = h2 * r2_prs * exp_var_x,
+        exp_var_prs_unexplained = h2 * (1 - r2_prs) * exp_var_x,
+        exp_var_residual = exp_var_x - exp_var_prs_explained,
+        exp_var_ex = exp_var_x * (1 - h2) - var_u * b_ux^2,
+        # exp_var_y = b_xy^2 * exp_var_prs + (b_ux * b_xy + b_uy)^2 * var_u + v_ey + b_xy^2 * exp_var_ex,
+        exp_var_y = b_xy^2 * h2 * exp_var_x + (b_ux * b_xy + b_uy)^2 * var_u + v_ey + b_xy^2 * (exp_var_x * (1-h2) - v_u * b_ux^2),
+
+        # exp_cov_x_y = var_prs * b_prs^2 * b_xy + var_u * (b_ux^2 * b_xy + b_ux * b_uy) + v_ex * b_xy,
+        exp_cov_x_y = b_xy * h2 * exp_var_x + (b_ux^2 * b_xy + b_uy * b_ux) * v_u + v_ex * b_xy,
+        exp_cov_x_y = b_xy * h2 * exp_var_x + (b_ux^2 * b_xy + b_uy * b_ux) * v_u + (exp_var_x * (1-h2) - v_u * b_ux^2) * b_xy,
+        exp_cov_prs_y = exp_var_prs_explained * b_prs * b_xy,
+        exp_cov_prs_x = exp_var_prs_explained * b_prs,
+        # exp_cov_residual_y = var_u * (b_ux^2 * b_xy + b_ux * b_uy) + v_ex * b_xy + (var_prs * b_prs * b_xy) * (1-r2_prs),
+        exp_cov_residual_y = var_u * (b_ux^2 * b_xy + b_ux * b_uy) + (exp_var_x * (1-h2) - v_u * b_ux^2) * b_xy + (h2 * exp_var_x * b_prs * b_xy) * (1-r2_prs),
+
+        exp_lm_x_y = exp_cov_x_y / exp_var_x,        
+        exp_lm_residual_y = exp_cov_residual_y / exp_var_residual,
+        exp_lm_xhat_y = exp_cov_prs_y / exp_cov_prs_x,
+        # exp_lm_u_y = (exp_cov_x_y - (b_xy * h2 * exp_var_x) - (exp_var_x * (1 - h2) - v_u * b_ux^2) * b_xy - (b_ux^2 * b_xy) * v_u) / (b_ux * v_u)
+        exp_lm_u_y = (exp_cov_x_y - (b_xy * exp_var_x)) / (b_ux * v_u),
+        exp_lm_u_y_resx = (exp_cov_residual_y - b_xy * (exp_var_x * (1 - h2) + h2 * exp_var_x * b_prs * (1 - r2_prs))) / (v_u * b_ux),
+        exp_ratio = exp_lm_u_y / exp_lm_u_y_resx
+    )
+    b <- a %>% select(starts_with("exp"))
+    names(b) <- gsub("exp_", "", names(b))
+    b <- tibble(parameter = names(b), exp = as.numeric(b[1, ]))
+
+    a <- a %>% select(-starts_with("exp"))
+    a <- tibble(parameter = names(a), obs = as.numeric(a[1, ]))
+
+    inner_join(a, b, by = "parameter") %>% mutate(ratio = round(obs / exp, 2)) %>% as.data.frame
+}
+
+res <- sim2(-0.5, -0.2, 1, r2_prs = 0.7, h2=0.7, n=1000000) %>% est_obs %>% est_exp
+res
+```
+
+
+
 ---
 
 ```{r}
