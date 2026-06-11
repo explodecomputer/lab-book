@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Gibran Hemani">
+<meta name="dcterms.date" content="2026-02-13">
+
+<title>residual-height notebook 2 – Gibran Hemani’s lab book</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-1b5cbb678aba238cc9ecc8dbef59e0a8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Gibran Hemani’s lab book</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">residual-height notebook 2</h1>
+                      </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Gibran Hemani </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">February 13, 2026</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<div id="153f9c04" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dat <span class="op">&lt;-</span> sim(b_xy <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span>, b_uy <span class="op">=</span> <span class="op">-</span><span class="fl">0.2</span>, b_ux <span class="op">=</span> <span class="dv">1</span>, b_prs<span class="op">=</span><span class="dv">1</span>, h2<span class="op">=</span><span class="fl">0.7</span>, r2_env_height<span class="op">=</span><span class="fl">0.15</span>, r2_prs<span class="op">=</span><span class="fl">0.4</span>, n<span class="op">=</span><span class="dv">100000</span>)[[<span class="dv">2</span>]]</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">str</span>(dat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tibble [100,000 × 9] (S3: tbl_df/tbl/data.frame)
+ $ prs_explained  : num [1:100000] -0.4 0.114 0.213 -0.449 0.138 ...
+ $ prs_unexplained: num [1:100000] -0.21 -0.692 -0.491 0.825 0.526 ...
+ $ prs            : num [1:100000] -0.61 -0.577 -0.277 0.377 0.665 ...
+ $ u              : num [1:100000] -0.106 0.406 0.151 -0.251 0.682 ...
+ $ ex             : num [1:100000] 0.518 -0.422 -0.401 -0.494 -0.104 ...
+ $ x              : num [1:100000] -0.199 -0.593 -0.527 -0.369 1.242 ...
+ $ residual_x     : num [1:100000] 0.2013 -0.7078 -0.74 0.0798 1.104 ...
+ $ ey             : num [1:100000] -0.955 -0.132 0.382 -1.381 -0.833 ...
+ $ y              : num [1:100000] -0.8345 0.0837 0.6148 -1.1465 -1.5905 ...</code></pre>
+</div>
+</div>
+<div id="a5db458f" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>gx_to_gp <span class="op">&lt;-</span> function(liability, varexp, prevalence) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    x_prime <span class="op">&lt;-</span> qnorm(prevalence, <span class="dv">0</span>, <span class="dv">1</span>, lower.tail<span class="op">=</span>FALSE)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    p <span class="op">&lt;-</span> pnorm(x_prime, mean<span class="op">=</span>liability, sd <span class="op">=</span> sqrt(<span class="dv">1</span> <span class="op">-</span> varexp), lower.tail<span class="op">=</span>FALSE)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span>(p)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>generate_binary_outcome <span class="op">&lt;-</span> function(liability, varexp, prevalence) {</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    cc <span class="op">&lt;-</span> rbinom(length(liability), <span class="dv">1</span>, gx_to_gp(liability, varexp, prevalence))</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span>(cc)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>binary_2sls <span class="op">&lt;-</span> function(x, y, prs) {</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    mod <span class="op">&lt;-</span> summary(glm(y <span class="op">~</span> prs, family<span class="op">=</span><span class="st">"binomial"</span>))</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    bgy <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">1</span>]</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    se_bgy <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">2</span>]</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    mod <span class="op">&lt;-</span> summary(lm(x <span class="op">~</span> prs))</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    bgx <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">1</span>]</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    se_bgx <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">2</span>]</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    beta_xy <span class="op">&lt;-</span> bgy <span class="op">/</span> bgx</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    se_beta_xy <span class="op">&lt;-</span> sqrt((se_bgy <span class="op">/</span> bgx)<span class="op">^</span><span class="dv">2</span> <span class="op">+</span> (bgy <span class="op">*</span> se_bgx <span class="op">/</span> bgx<span class="op">^</span><span class="dv">2</span>)<span class="op">^</span><span class="dv">2</span>)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span>(<span class="bu">list</span>(beta_xy <span class="op">=</span> beta_xy, se_beta_xy <span class="op">=</span> se_beta_xy))</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>continuous_2sls <span class="op">&lt;-</span> function(x, y, prs) {</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    mod <span class="op">&lt;-</span> summary(lm(y <span class="op">~</span> prs))</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    bgy <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">1</span>]</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    se_bgy <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">2</span>]</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    mod <span class="op">&lt;-</span> summary(lm(x <span class="op">~</span> prs))</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    bgx <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">1</span>]</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    se_bgx <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">2</span>]</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>    beta_xy <span class="op">&lt;-</span> bgy <span class="op">/</span> bgx</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    se_beta_xy <span class="op">&lt;-</span> sqrt((se_bgy <span class="op">/</span> bgx)<span class="op">^</span><span class="dv">2</span> <span class="op">+</span> (bgy <span class="op">*</span> se_bgx <span class="op">/</span> bgx<span class="op">^</span><span class="dv">2</span>)<span class="op">^</span><span class="dv">2</span>)</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span>(<span class="bu">list</span>(beta_xy <span class="op">=</span> beta_xy, se_beta_xy <span class="op">=</span> se_beta_xy))</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>dat$cc <span class="op">&lt;-</span> generate_binary_outcome(dat$y, varexp <span class="op">=</span> <span class="fl">0.2</span>, prevalence <span class="op">=</span> <span class="fl">0.1</span>)</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>continuous_2sls(dat$x, dat$y, dat$prs_explained)</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>binary_2sls(dat$x, dat$cc, dat$prs_explained)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<dl>
+    <dt>$beta_xy</dt>
+        <dd>-0.497850997027835</dd>
+    <dt>$se_beta_xy</dt>
+        <dd>0.00707376641206964</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-display">
+<dl>
+    <dt>$beta_xy</dt>
+        <dd>-0.626409705538854</dd>
+    <dt>$se_beta_xy</dt>
+        <dd>0.0160154339944029</dd>
+</dl>
+</div>
+</div>
+<div id="5b9ba222" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>param <span class="op">&lt;-</span> expand.grid(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    varexp <span class="op">=</span> c(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    prevalence <span class="op">=</span> c(<span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>binary_res <span class="op">&lt;-</span> lapply(<span class="dv">1</span>:nrow(param), \(i) {</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    varexp <span class="op">&lt;-</span> param[i,]$varexp</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    prevalence <span class="op">&lt;-</span> param[i,]$prevalence</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    dat$cc <span class="op">&lt;-</span> generate_binary_outcome(dat$y, varexp <span class="op">=</span> varexp, prevalence <span class="op">=</span> prevalence)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    res_continuous <span class="op">&lt;-</span> continuous_2sls(dat$x, dat$y, dat$prs_explained)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    res_binary <span class="op">&lt;-</span> binary_2sls(dat$x, dat$cc, dat$prs_explained)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    tibble(</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        varexp <span class="op">=</span> varexp,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        prevalence <span class="op">=</span> prevalence,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        method <span class="op">=</span> c(<span class="st">"binary"</span>, <span class="st">"continuous"</span>),</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        beta_xy <span class="op">=</span> c(res_binary$beta_xy, res_continuous$beta_xy),</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        se_beta_xy <span class="op">=</span> c(res_binary$se_beta_xy, res_continuous$se_beta_xy)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>}) <span class="op">%&gt;%</span> bind_rows()</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>ggplot(binary_res, aes(x <span class="op">=</span> beta_xy, y <span class="op">=</span> se_beta_xy, color <span class="op">=</span> method)) <span class="op">+</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    geom_point() <span class="op">+</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    facet_grid(varexp <span class="op">~</span> prevalence) <span class="op">+</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    labs(x <span class="op">=</span> <span class="st">"Estimated beta_xy"</span>, y <span class="op">=</span> <span class="st">"Standard error of beta_xy"</span>, color <span class="op">=</span> <span class="st">"Method"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis2_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="136b14f1" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>estimate_beta_cy(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    height <span class="op">=</span> dat$x,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    prs <span class="op">=</span> dat$prs_explained,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    outcome <span class="op">=</span> dat$cc,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    var_c <span class="op">=</span> <span class="fl">0.15</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    h2 <span class="op">=</span> <span class="fl">0.7</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    n_boot <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>estimate_beta_cy(</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    height <span class="op">=</span> dat$x,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    prs <span class="op">=</span> dat$prs_explained,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    outcome <span class="op">=</span> dat$y,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    var_c <span class="op">=</span> <span class="fl">0.15</span>,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    h2 <span class="op">=</span> <span class="fl">0.7</span>,</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    n_boot <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Binary outcome detected (prevalence = 0.189)
+Liability scale transformation factor = 0.2705</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<dl>
+    <dt>$beta_xy</dt>
+        <dd><strong>height:</strong> -0.353678285546259</dd>
+    <dt>$se_beta_xy</dt>
+        <dd>0.00836783982859172</dd>
+    <dt>$beta_cy_method1</dt>
+        <dd><strong>height:</strong> -0.0461408201620962</dd>
+    <dt>$beta_cy_method2</dt>
+        <dd><strong>height:</strong> -0.0461408201621222</dd>
+    <dt>$beta_cy_combined</dt>
+        <dd><strong>height:</strong> -0.0461408201621133</dd>
+    <dt>$se_method1</dt>
+        <dd>0.0642545301989432</dd>
+    <dt>$se_method2</dt>
+        <dd>0.0466293324546653</dd>
+    <dt>$se_combined</dt>
+        <dd>0.0380479336137564</dd>
+    <dt>$cov_estimators</dt>
+        <dd>5.18850345151184e-05</dd>
+    <dt>$correlation_estimators</dt>
+        <dd>0.0173172592745444</dd>
+    <dt>$weight_method1</dt>
+        <dd>0.342370006827975</dd>
+    <dt>$weight_method2</dt>
+        <dd>0.657629993172025</dd>
+    <dt>$r2_prs</dt>
+        <dd>0.281387979315542</dd>
+    <dt>$is_binary</dt>
+        <dd>TRUE</dd>
+    <dt>$prevalence</dt>
+        <dd>0.18905</dd>
+    <dt>$outcome_scale</dt>
+        <dd>'liability'</dd>
+    <dt>$beta_cy_method1_observed</dt>
+        <dd><strong>height:</strong> -0.012482458056538</dd>
+    <dt>$beta_cy_method2_observed</dt>
+        <dd><strong>height:</strong> -0.0124824580565451</dd>
+    <dt>$boot_distribution_method1</dt>
+        <dd><style>
+.list-inline {list-style: none; margin:0; padding: 0}
+.list-inline>li {display: inline-block}
+.list-inline>li:not(:last-child)::after {content: "\00b7"; padding: 0 .5ex}
+</style>
+<ol class="list-inline"><li>-0.0611031904933605</li><li>-0.135169080428818</li><li>-0.139630417357704</li><li>-0.156230633575275</li><li>-0.119066010525505</li><li>0.0205816882683652</li><li>0.080569271731431</li><li>-0.0527727037713818</li><li>-0.0498117314459362</li><li>-0.0787439314490554</li><li>0.041691414202236</li><li>-0.0609742220878743</li><li>0.0397545020862654</li><li>-0.0954466012620649</li><li>-0.0591472885341207</li><li>-0.0585753434347414</li><li>-0.0162898277995962</li><li>-0.105405567851969</li><li>0.0198725815306079</li><li>-0.122971528519119</li><li>-0.0434949530082326</li><li>-0.0622390114312051</li><li>0.0757112913282528</li><li>-0.0151974663859412</li><li>-0.116032428498501</li><li>0.0806090973291542</li><li>-0.129793099597847</li><li>0.0371662748236907</li><li>-0.0484091990962174</li><li>-0.053298371618411</li><li>-0.00561247893316303</li><li>-0.0686899047729173</li><li>0.00749802630228404</li><li>-0.0598614575650598</li><li>-0.121132656930218</li><li>0.000982959868562029</li><li>-0.0806600994747147</li><li>-0.043797327737302</li><li>0.037344789315098</li><li>-0.101471647641016</li><li>-0.06088227629016</li><li>-0.0420804320225053</li><li>-0.0225762662441897</li><li>-0.073730119682587</li><li>0.0408548152575747</li><li>-0.0344591629950885</li><li>0.0382961762728246</li><li>-0.0211696677122442</li><li>-0.118105800628724</li><li>-0.0360727545944138</li><li>-0.0207528663455216</li><li>0.0259590111030823</li><li>-0.108834868225128</li><li>0.0209172890814239</li><li>-0.00841872670066864</li><li>-0.0886134145444476</li><li>-0.0121242066573223</li><li>-0.0120022724837197</li><li>-0.0863692445534315</li><li>-0.0105136817488118</li><li>-0.109834948624145</li><li>-0.0524489238679272</li><li>0.0421164689889682</li><li>-0.0692817925022548</li><li>-0.0750808129470261</li><li>-0.139994570485952</li><li>-0.10529482754501</li><li>-0.00906185948704938</li><li>-0.0424167002940804</li><li>-0.0278478007856253</li><li>-0.0682019069045269</li><li>-0.0427361827046255</li><li>-0.173127137533978</li><li>-0.0686733587952739</li><li>-0.056433295853779</li><li>-0.0770850539543246</li><li>-0.052261924502032</li><li>-0.0246860279526018</li><li>-0.0724053705073356</li><li>-0.0178154070971077</li><li>-0.00365709639212909</li><li>0.0439906158214736</li><li>9.3172723094532e-05</li><li>-0.0521812699715958</li><li>0.0383029205540669</li><li>0.102361982320747</li><li>-0.260909275675758</li><li>0.0672883814651478</li><li>-0.0941630129920866</li><li>0.102542943248134</li><li>-0.0455534770373631</li><li>0.00612279782910471</li><li>-0.0598015006251095</li><li>-0.148969568495035</li><li>-0.0245998959426125</li><li>-0.040854015979174</li><li>-0.146992108183965</li><li>-0.0655688569651259</li><li>0.0145760157573712</li><li>-0.0251416546763345</li></ol>
+</dd>
+    <dt>$boot_distribution_method2</dt>
+        <dd><style>
+.list-inline {list-style: none; margin:0; padding: 0}
+.list-inline>li {display: inline-block}
+.list-inline>li:not(:last-child)::after {content: "\00b7"; padding: 0 .5ex}
+</style>
+<ol class="list-inline"><li>-0.0652278245705572</li><li>-0.104650626868185</li><li>-0.113056574457559</li><li>-0.0945793262498817</li><li>-0.101569936702741</li><li>-0.0265829238892682</li><li>0.0292920175141744</li><li>-0.087682005918698</li><li>-0.0592853920776707</li><li>-0.0731726695504334</li><li>0.0257606459816746</li><li>-0.0685198125204218</li><li>0.015087702267375</li><li>-0.0722248795388675</li><li>-0.0396232631309289</li><li>-0.0771622496094649</li><li>-0.00965308231199817</li><li>-0.0884132588714599</li><li>-0.0241147025590098</li><li>-0.113912765098206</li><li>-0.0528612609615785</li><li>-0.0404603064127261</li><li>0.0382899789869132</li><li>-0.0167458503278753</li><li>-0.12514307401458</li><li>0.0405238362724186</li><li>-0.108546341675922</li><li>-0.00408163724004184</li><li>-0.0826122096248635</li><li>-0.0533845155778164</li><li>-0.0237342762112691</li><li>-0.064053665904024</li><li>-0.0208504732247801</li><li>-0.0711807293854162</li><li>-0.110322320963719</li><li>-0.0300852487189132</li><li>-0.0714529760448407</li><li>-0.0356023969553724</li><li>0.0133827003732791</li><li>-0.0784652912766696</li><li>-0.0532794933065255</li><li>-0.0625523855787123</li><li>-0.0216974410389273</li><li>-0.0619901822883103</li><li>0.0123211903912979</li><li>-0.0241138549295462</li><li>-0.00260650974968311</li><li>-0.0351973835872563</li><li>-0.0710054075846515</li><li>-0.0444341983998022</li><li>-0.0110788458400416</li><li>0.0181073797348081</li><li>-0.078523480124807</li><li>0.0220511992277951</li><li>-0.0285536538276524</li><li>-0.0762069611480715</li><li>-0.0265961304900171</li><li>-0.0178983001983176</li><li>-0.084151750407915</li><li>-0.016452289940594</li><li>-0.0983578674944817</li><li>-0.0447059399782941</li><li>0.0194687654654045</li><li>-0.0597526454723468</li><li>-0.0683541557797384</li><li>-0.125784181966446</li><li>-0.083293725878232</li><li>-0.034211427401645</li><li>-0.0412799394959916</li><li>0.000485459087808684</li><li>-0.0709076677296979</li><li>-0.0527319789048432</li><li>-0.140697611245831</li><li>-0.068678899573747</li><li>-0.0299791196313125</li><li>-0.0689337749031155</li><li>-0.063454270599156</li><li>-0.0567547738398126</li><li>-0.0653908346359646</li><li>-0.0470383796348957</li><li>-0.00823525867640807</li><li>0.0242222037493185</li><li>-0.0153889859976803</li><li>-0.0569068866363121</li><li>0.0241691026948184</li><li>0.0619171053039704</li><li>-0.191423449680033</li><li>0.0274568382979265</li><li>-0.0609507817970366</li><li>0.0736247469107616</li><li>-0.0668609025927943</li><li>-0.00893319266005886</li><li>-0.0513381878313581</li><li>-0.118940878537881</li><li>-0.0342167235115769</li><li>-0.0550974678645145</li><li>-0.119563117226794</li><li>-0.0471305447376192</li><li>-0.00327214786177437</li><li>-0.030755677306192</li></ol>
+</dd>
+    <dt>$boot_distribution_combined</dt>
+        <dd><style>
+.list-inline {list-style: none; margin:0; padding: 0}
+.list-inline>li {display: inline-block}
+.list-inline>li:not(:last-child)::after {content: "\00b7"; padding: 0 .5ex}
+</style>
+<ol class="list-inline"><li>-0.0638156735733845</li><li>-0.115099230022118</li><li>-0.122154661232727</li><li>-0.11568688475983</li><li>-0.107560067616903</li><li>-0.0104351753028205</li><li>0.0468478113906564</li><li>-0.0757301079041615</li><li>-0.0560418948224978</li><li>-0.075080102524705</li><li>0.0312148632061231</li><li>-0.0659364286725095</li><li>0.0235328746897928</li><li>-0.0801753005637959</li><li>-0.0463077038415292</li><li>-0.0707986504155139</li><li>-0.0119253049099026</li><li>-0.0942309158131398</li><li>-0.0090547758049033</li><li>-0.117014213992477</li><li>-0.0496545180436386</li><li>-0.0479166817986072</li><li>0.0511019139487295</li><li>-0.016215730107103</li><li>-0.122023862247033</li><li>0.0542478273741143</li><li>-0.115820594330724</li><li>0.010040410694858</li><li>-0.0709021246766336</li><li>-0.0533550224698466</li><li>-0.0175299163534287</li><li>-0.0656409750372231</li><li>-0.0111447972481363</li><li>-0.0673053502149931</li><li>-0.114023455762382</li><li>-0.0194484259326864</li><li>-0.0746052189563927</li><li>-0.0384080954631364</li><li>0.0215866009279022</li><li>-0.0863419776622178</li><li>-0.0558824581685441</li><li>-0.0555434026998917</li><li>-0.0219983244304536</li><li>-0.0660095847341488</li><li>0.022090247731592</li><li>-0.0276557781225834</li><li>0.0113973431431254</li><li>-0.0303947144073475</li><li>-0.0871311694727508</li><li>-0.0415714908270597</li><li>-0.0143909403065567</li><li>0.0207955428199749</li><li>-0.0889011902756792</li><li>0.0216629824032396</li><li>-0.0216600586897062</li><li>-0.0804545586820998</li><li>-0.0216413778286035</li><li>-0.0158796771494128</li><li>-0.0849109538936565</li><li>-0.0144190886134249</li><li>-0.10228727583921</li><li>-0.0473569054254567</li><li>0.027222659875405</li><li>-0.0630151396060412</li><li>-0.0706571614400322</li><li>-0.130649392780898</li><li>-0.0908262432061099</li><li>-0.0256009696630043</li><li>-0.041669132298195</li><li>-0.00921499928851772</li><li>-0.0699812963775092</li><li>-0.0493097180915236</li><li>-0.151800508382532</li><li>-0.0686770025773833</li><li>-0.0390362361252268</li><li>-0.0717245283675347</li><li>-0.0596223469894626</li><li>-0.0457753970914436</li><li>-0.067792401330141</li><li>-0.0370333103275994</li><li>-0.00666783322387989</li><li>0.0309903151254405</li><li>-0.0100883592107368</li><li>-0.0552889772265468</li><li>0.0290080980117947</li><li>0.0757642181243608</li><li>-0.215213312400637</li><li>0.0410939640040569</li><li>-0.0723216536180582</li><li>0.0835254699882406</li><li>-0.0595658791598948</li><li>-0.00377847309348199</li><li>-0.0542357722903421</li><li>-0.129221801323547</li><li>-0.0309242101911271</li><li>-0.0502209371452765</li><li>-0.128953981048085</li><li>-0.053443269820847</li><li>0.00283852803837933</li><li>-0.0288336043400753</li></ol>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Continuous outcome detected - standardized to mean=0, SD=1</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<dl>
+    <dt>$beta_xy</dt>
+        <dd><strong>height:</strong> -0.441665535052701</dd>
+    <dt>$se_beta_xy</dt>
+        <dd>0.00528348139012448</dd>
+    <dt>$beta_cy_method1</dt>
+        <dd><strong>height:</strong> -0.165954112166875</dd>
+    <dt>$beta_cy_method2</dt>
+        <dd><strong>height:</strong> -0.165954112166932</dd>
+    <dt>$beta_cy_combined</dt>
+        <dd><strong>height:</strong> -0.165954112166916</dd>
+    <dt>$se_method1</dt>
+        <dd>0.0401685981744717</dd>
+    <dt>$se_method2</dt>
+        <dd>0.0292640184437315</dd>
+    <dt>$se_combined</dt>
+        <dd>0.0269693133336915</dd>
+    <dt>$cov_estimators</dt>
+        <dd>0.000389186019560699</dd>
+    <dt>$correlation_estimators</dt>
+        <dd>0.331082780199051</dd>
+    <dt>$weight_method1</dt>
+        <dd>0.276198223019937</dd>
+    <dt>$weight_method2</dt>
+        <dd>0.723801776980063</dd>
+    <dt>$r2_prs</dt>
+        <dd>0.281387979315542</dd>
+    <dt>$is_binary</dt>
+        <dd>FALSE</dd>
+    <dt>$prevalence</dt>
+        <dd>&lt;NA&gt;</dd>
+    <dt>$outcome_scale</dt>
+        <dd>'standardized'</dd>
+    <dt>$beta_cy_method1_observed</dt>
+        <dd><strong>height:</strong> -0.165954112166875</dd>
+    <dt>$beta_cy_method2_observed</dt>
+        <dd><strong>height:</strong> -0.165954112166932</dd>
+    <dt>$boot_distribution_method1</dt>
+        <dd><style>
+.list-inline {list-style: none; margin:0; padding: 0}
+.list-inline>li {display: inline-block}
+.list-inline>li:not(:last-child)::after {content: "\00b7"; padding: 0 .5ex}
+</style>
+<ol class="list-inline"><li>-0.201080149534597</li><li>-0.141986241730799</li><li>-0.117992732362003</li><li>-0.234078495267115</li><li>-0.198139496172601</li><li>-0.169901487133364</li><li>-0.219311061001482</li><li>-0.202691888846666</li><li>-0.139387591249826</li><li>-0.143533783033519</li><li>-0.20139024933716</li><li>-0.131939542347391</li><li>-0.182179716321898</li><li>-0.246757857627421</li><li>-0.1007136685065</li><li>-0.208860558880945</li><li>-0.106211936450269</li><li>-0.143161972668909</li><li>-0.172665742473354</li><li>-0.14934277410912</li><li>-0.212169846032858</li><li>-0.1698829744339</li><li>-0.186058899620131</li><li>-0.15198439422287</li><li>-0.134086974194455</li><li>-0.142712698959012</li><li>-0.174861051623753</li><li>-0.231885334860841</li><li>-0.160361219837752</li><li>-0.158182310786196</li><li>-0.186017737163378</li><li>-0.10404919494268</li><li>-0.151216138236994</li><li>-0.137823530039221</li><li>-0.118465958980409</li><li>-0.246967996908424</li><li>-0.133031676581657</li><li>-0.157065628461535</li><li>-0.159713528843896</li><li>-0.1546551446749</li><li>-0.123983467660231</li><li>-0.151145393514394</li><li>-0.161621358629921</li><li>-0.245922446713711</li><li>-0.14578944366245</li><li>-0.184883500452221</li><li>-0.129485534936634</li><li>-0.174601407857576</li><li>-0.224856958729769</li><li>-0.159858524100665</li><li>-0.144174454129412</li><li>-0.154487056212054</li><li>-0.154419920955245</li><li>-0.19183105558998</li><li>-0.170427287908341</li><li>-0.130975792442076</li><li>-0.154918142569359</li><li>-0.166314263600151</li><li>-0.210058320097843</li><li>-0.254272844404001</li><li>-0.15922022015918</li><li>-0.220100981200499</li><li>-0.133058995852077</li><li>-0.145392329889137</li><li>-0.116319367183657</li><li>-0.129477440555102</li><li>-0.231506108093738</li><li>-0.128681873275744</li><li>-0.248938361317341</li><li>-0.177045115971261</li><li>-0.14912645048928</li><li>-0.135253323620739</li><li>-0.137059929184164</li><li>-0.204411929375568</li><li>-0.251610842808553</li><li>-0.173152409110393</li><li>-0.176604958309179</li><li>-0.167423909291602</li><li>-0.152941611521434</li><li>-0.170485976545322</li><li>-0.18239432664296</li><li>-0.0757607054596917</li><li>-0.104856076655347</li><li>-0.271247756902795</li><li>-0.170263412951742</li><li>-0.147889486564038</li><li>-0.201135270251341</li><li>-0.244233025931237</li><li>-0.189926407640508</li><li>-0.177175495219979</li><li>-0.164555823561874</li><li>-0.181345122288013</li><li>-0.186207406443152</li><li>-0.0828697596409811</li><li>-0.187953696453619</li><li>-0.189810480735222</li><li>-0.156560171137261</li><li>-0.216972190791485</li><li>-0.190278224842864</li><li>-0.176162472366338</li></ol>
+</dd>
+    <dt>$boot_distribution_method2</dt>
+        <dd><style>
+.list-inline {list-style: none; margin:0; padding: 0}
+.list-inline>li {display: inline-block}
+.list-inline>li:not(:last-child)::after {content: "\00b7"; padding: 0 .5ex}
+</style>
+<ol class="list-inline"><li>-0.189023247474652</li><li>-0.147645214443561</li><li>-0.123346812318564</li><li>-0.215228704147959</li><li>-0.188592171856754</li><li>-0.154094450621137</li><li>-0.198485458322053</li><li>-0.206278923158365</li><li>-0.135047129427976</li><li>-0.13669786837128</li><li>-0.205080464368643</li><li>-0.153665238017864</li><li>-0.16743611671424</li><li>-0.23333631572506</li><li>-0.122411146185772</li><li>-0.184052972893622</li><li>-0.137854615180077</li><li>-0.15296174714388</li><li>-0.178070993834158</li><li>-0.148522337295296</li><li>-0.200037332526188</li><li>-0.161872414269867</li><li>-0.167351033493232</li><li>-0.15775434771434</li><li>-0.146554375462847</li><li>-0.146537920558163</li><li>-0.165065807591714</li><li>-0.223106707810149</li><li>-0.158039951534927</li><li>-0.156631695223541</li><li>-0.165661724086163</li><li>-0.12413587920615</li><li>-0.166828375511943</li><li>-0.14495905001803</li><li>-0.1383541702391</li><li>-0.228396757415416</li><li>-0.155474542614563</li><li>-0.157372770924548</li><li>-0.162294393756779</li><li>-0.149731418027964</li><li>-0.136009617606024</li><li>-0.157876236996877</li><li>-0.132829212630696</li><li>-0.22164551174682</li><li>-0.16380754716289</li><li>-0.159011878387065</li><li>-0.140934085418359</li><li>-0.177168149266043</li><li>-0.218581250077076</li><li>-0.160850218139862</li><li>-0.164185721595368</li><li>-0.148508841603871</li><li>-0.142274482453375</li><li>-0.174475874867003</li><li>-0.164351211525489</li><li>-0.144585879019798</li><li>-0.168389965234683</li><li>-0.175599434430052</li><li>-0.199168812838767</li><li>-0.216916074136781</li><li>-0.162672343273242</li><li>-0.20692413808712</li><li>-0.142723545768491</li><li>-0.152482475337673</li><li>-0.127320708177366</li><li>-0.137756432611885</li><li>-0.205593481982909</li><li>-0.143316534658032</li><li>-0.227691623297184</li><li>-0.164525026605583</li><li>-0.165075349057447</li><li>-0.145049151486755</li><li>-0.127080926629979</li><li>-0.200930870781448</li><li>-0.222359238505474</li><li>-0.17406081960274</li><li>-0.173040342755499</li><li>-0.156542957655167</li><li>-0.157451822058959</li><li>-0.167301495854578</li><li>-0.175600392273362</li><li>-0.105617730486561</li><li>-0.132445986720648</li><li>-0.247316327825268</li><li>-0.169433738040939</li><li>-0.16038671529588</li><li>-0.180275153379003</li><li>-0.227313321123545</li><li>-0.179184563615351</li><li>-0.165641164533858</li><li>-0.157272321819679</li><li>-0.199273472152803</li><li>-0.199049366732507</li><li>-0.114367186839892</li><li>-0.179031093164698</li><li>-0.177781138115106</li><li>-0.158977300027737</li><li>-0.182812012803223</li><li>-0.172264826833272</li><li>-0.163921762531624</li></ol>
+</dd>
+    <dt>$boot_distribution_combined</dt>
+        <dd><style>
+.list-inline {list-style: none; margin:0; padding: 0}
+.list-inline>li {display: inline-block}
+.list-inline>li:not(:last-child)::after {content: "\00b7"; padding: 0 .5ex}
+</style>
+<ol class="list-inline"><li>-0.192353342398734</li><li>-0.146082216236178</li><li>-0.121868024948655</li><li>-0.220434982959367</li><li>-0.191229125867386</li><li>-0.158460326017025</li><li>-0.204237452775431</li><li>-0.205288190655562</li><li>-0.136245957270257</li><li>-0.138585935853706</li><li>-0.204061233534385</li><li>-0.147664639479807</li><li>-0.171508272726792</li><li>-0.23704332174868</li><li>-0.116418341406742</li><li>-0.190904784060735</li><li>-0.129114963543314</li><li>-0.150255066847897</li><li>-0.176578073013328</li><li>-0.148748940485374</li><li>-0.203388311197496</li><li>-0.164084916752567</li><li>-0.172518112873977</li><li>-0.156160696813088</li><li>-0.143110901386841</li><li>-0.14548140114982</li><li>-0.16777123658741</li><li>-0.225531349002105</li><li>-0.15868108171532</li><li>-0.157059972486533</li><li>-0.17128401872586</li><li>-0.118587972706217</li><li>-0.162516303319237</li><li>-0.14298823207956</li><li>-0.132861081630404</li><li>-0.233526100762663</li><li>-0.1492758628968</li><li>-0.15728793872205</li><li>-0.161581563453986</li><li>-0.151091342578484</li><li>-0.132688016361225</li><li>-0.15601718998759</li><li>-0.140781552192613</li><li>-0.228350758045046</li><li>-0.15883097899388</li><li>-0.166157574428104</li><li>-0.137772016119152</li><li>-0.176459219850073</li><li>-0.22031458965514</li><li>-0.160576314008456</li><li>-0.158658645080894</li><li>-0.150160013855483</li><li>-0.145629030985389</li><li>-0.179269344942879</li><li>-0.166029413025366</li><li>-0.140826797291883</li><li>-0.164669071753681</li><li>-0.173034886746397</li><li>-0.202176475393287</li><li>-0.227233947702351</li><li>-0.161718873003492</li><li>-0.210563558740048</li><li>-0.14005421425529</li><li>-0.150524189763834</li><li>-0.124282157344067</li><li>-0.135469789717406</li><li>-0.2127505032685</li><li>-0.139274467189746</li><li>-0.233559934583322</li><li>-0.167983053040434</li><li>-0.160670291613794</li><li>-0.142343561237152</li><li>-0.129837109402956</li><li>-0.201892332979372</li><li>-0.230438479634467</li><li>-0.173809918238981</li><li>-0.174024883237174</li><li>-0.159548257161917</li><li>-0.156206109923048</li><li>-0.168181043762603</li><li>-0.177476864873559</li><li>-0.0973712732294781</li><li>-0.124825702587332</li><li>-0.253926146010808</li><li>-0.169662892776987</li><li>-0.156935002927472</li><li>-0.186036680591131</li><li>-0.231986513525451</li><li>-0.182151441847057</li><li>-0.168826926173089</li><li>-0.159284012058236</li><li>-0.194321693778469</li><li>-0.195502440120494</li><li>-0.105667653417853</li><li>-0.18149550033781</li><li>-0.18110362117088</li><li>-0.158309693323377</li><li>-0.192246993261625</li><li>-0.177240095354072</li><li>-0.167302624836475</li></ol>
+</dd>
+</dl>
+</div>
+</div>
+<div id="dd8708a0" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>generate_binary_outcome2 <span class="op">&lt;-</span> function(liability, varexp, prevalence) {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    n <span class="op">&lt;-</span> length(liability)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    liability <span class="op">&lt;-</span> scale(liability) <span class="op">*</span> sqrt(varexp)<span class="op">*</span><span class="dv">2</span> <span class="op">+</span> log(prevalence <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> prevalence))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    cc <span class="op">&lt;-</span> rbinom(length(liability), <span class="dv">1</span>, plogis(liability))</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span>(cc)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>dat$cc2 <span class="op">&lt;-</span> generate_binary_outcome2(dat$y, varexp <span class="op">=</span> <span class="fl">0.4</span>, prevalence <span class="op">=</span> <span class="fl">0.4</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>dat$cc <span class="op">&lt;-</span> generate_binary_outcome(dat$y, varexp <span class="op">=</span> <span class="fl">0.4</span>, prevalence <span class="op">=</span> <span class="fl">0.4</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(mean(dat$cc))</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>cor(dat$y, dat$cc2)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>cor(dat$y, dat$cc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.42636</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+0.480093929886205
+</div>
+<div class="cell-output cell-output-display">
+0.655762667041965
+</div>
+</div>
+<div id="a689b800" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>param <span class="op">&lt;-</span> expand.grid(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    varexp <span class="op">=</span> c(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>),</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    prevalence <span class="op">=</span> c(<span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>binary_res <span class="op">&lt;-</span> lapply(<span class="dv">1</span>:nrow(param), \(i) {</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    varexp <span class="op">&lt;-</span> param[i,]$varexp</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    prevalence <span class="op">&lt;-</span> param[i,]$prevalence</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    dat$cc2 <span class="op">&lt;-</span> generate_binary_outcome2(dat$y, varexp <span class="op">=</span> varexp, prevalence <span class="op">=</span> prevalence)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    res_continuous <span class="op">&lt;-</span> continuous_2sls(dat$x, dat$y, dat$prs_explained)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    res_binary <span class="op">&lt;-</span> binary_2sls(dat$x, dat$cc2, dat$prs_explained)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    tibble(</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        varexp <span class="op">=</span> varexp,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        prevalence <span class="op">=</span> prevalence,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        method <span class="op">=</span> c(<span class="st">"binary"</span>, <span class="st">"continuous"</span>),</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        beta_xy <span class="op">=</span> c(res_binary$beta_xy, res_continuous$beta_xy),</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        se_beta_xy <span class="op">=</span> c(res_binary$se_beta_xy, res_continuous$se_beta_xy)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>}) <span class="op">%&gt;%</span> bind_rows()</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>tidyr::pivot_wider(binary_res, names_from <span class="op">=</span> method, values_from <span class="op">=</span> c(beta_xy, se_beta_xy)) <span class="op">%&gt;%</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>ggplot(., aes(x<span class="op">=</span>beta_xy_continuous, y <span class="op">=</span> beta_xy_binary)) <span class="op">+</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    geom_point(aes(colour<span class="op">=</span>prevalence)) <span class="op">+</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    facet_grid(. <span class="op">~</span> varexp) <span class="op">+</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    geom_abline(slope <span class="op">=</span> <span class="dv">1</span>, intercept <span class="op">=</span> <span class="dv">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis2_files/figure-html/cell-7-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="62c68d2e" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dat <span class="op">&lt;-</span> sim(b_xy <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span>, b_uy <span class="op">=</span> <span class="op">-</span><span class="fl">0.2</span>, b_ux <span class="op">=</span> <span class="dv">1</span>, b_prs<span class="op">=</span><span class="dv">1</span>, h2<span class="op">=</span><span class="fl">0.7</span>, r2_env_height<span class="op">=</span><span class="fl">0.15</span>, r2_prs<span class="op">=</span><span class="fl">0.4</span>, n<span class="op">=</span><span class="dv">100000</span>)[[<span class="dv">2</span>]]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>param <span class="op">&lt;-</span> expand.grid(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    varexp <span class="op">=</span> c(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    prevalence <span class="op">=</span> c(<span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>),</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    rep <span class="op">=</span> <span class="dv">1</span>:<span class="dv">100</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>binary_res <span class="op">&lt;-</span> lapply(<span class="dv">1</span>:nrow(param), \(i) {</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    varexp <span class="op">&lt;-</span> param[i,]$varexp</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    prevalence <span class="op">&lt;-</span> param[i,]$prevalence</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    dat$cc2 <span class="op">&lt;-</span> generate_binary_outcome2(dat$y, varexp <span class="op">=</span> varexp, prevalence <span class="op">=</span> prevalence)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    res_continuous <span class="op">&lt;-</span> continuous_2sls(dat$x, dat$y, dat$prs_explained)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    res_binary <span class="op">&lt;-</span> binary_2sls(dat$x, dat$cc2, dat$prs_explained)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    dat$cc <span class="op">&lt;-</span> generate_binary_outcome(dat$y, varexp <span class="op">=</span> varexp, prevalence <span class="op">=</span> prevalence)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    res_binary1 <span class="op">&lt;-</span> binary_2sls(dat$x, dat$cc, dat$prs_explained)</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    tibble(</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        varexp <span class="op">=</span> varexp,</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        prevalence <span class="op">=</span> prevalence,</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        method <span class="op">=</span> c(<span class="st">"binary2"</span>, <span class="st">"continuous"</span>, <span class="st">"binary1"</span>),</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>        beta_xy <span class="op">=</span> c(res_binary$beta_xy, res_continuous$beta_xy, res_binary1$beta_xy),</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>        se_beta_xy <span class="op">=</span> c(res_binary$se_beta_xy, res_continuous$se_beta_xy, res_binary1$se_beta_xy)</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>}) <span class="op">%&gt;%</span> bind_rows()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="6d8f36db" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ggplot(binary_res, aes(x<span class="op">=</span>method, y <span class="op">=</span> beta_xy)) <span class="op">+</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    geom_boxplot(aes(fill<span class="op">=</span><span class="im">as</span>.factor(prevalence))) <span class="op">+</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    facet_grid(. <span class="op">~</span> varexp) <span class="op">+</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    geom_abline(slope <span class="op">=</span> <span class="dv">1</span>, intercept <span class="op">=</span> <span class="dv">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis2_files/figure-html/cell-9-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="72160a53" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>simdat <span class="op">&lt;-</span> function(n, prevalence, beta_xl) {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Simulate Exposure X (Standard Normal)</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    x <span class="op">&lt;-</span> rnorm(n)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Simulate Liability L</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># L = beta*X + epsilon, where epsilon is standard normal noise</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    epsilon <span class="op">&lt;-</span> rnorm(n)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    l <span class="op">&lt;-</span> beta_xl <span class="op">*</span> x <span class="op">+</span> epsilon</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Define Threshold T based on prevalence</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    threshold <span class="op">&lt;-</span> qnorm(<span class="dv">1</span> <span class="op">-</span> prevalence, mean <span class="op">=</span> <span class="dv">0</span>, sd <span class="op">=</span> sqrt(var(l)))</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    y <span class="op">&lt;-</span> <span class="im">as</span>.numeric(l <span class="op">&gt;</span> threshold)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span>(tibble(x <span class="op">=</span> x, l <span class="op">=</span> l, y <span class="op">=</span> y))</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>estimation <span class="op">&lt;-</span> function(dat) {</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># A. Estimate X -&gt; L (Linear Regression - the "Hidden" Truth)</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    model_linear <span class="op">&lt;-</span> lm(l <span class="op">~</span> x, dat)</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    hat_beta_xl <span class="op">&lt;-</span> coef(model_linear)[<span class="st">"x"</span>]</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># B. Estimate X -&gt; Y (Logistic GLM - what we usually observe)</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    model_logit <span class="op">&lt;-</span> glm(y <span class="op">~</span> x, data <span class="op">=</span> dat, family <span class="op">=</span> binomial(link <span class="op">=</span> <span class="st">"logit"</span>))</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    hat_beta_logit <span class="op">&lt;-</span> coef(model_logit)[<span class="st">"x"</span>]</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># C. Estimate X -&gt; Y (Probit GLM - the LTM-appropriate GLM)</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    model_probit <span class="op">&lt;-</span> glm(y <span class="op">~</span> x, data <span class="op">=</span> dat, family <span class="op">=</span> binomial(link <span class="op">=</span> <span class="st">"probit"</span>))</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    hat_beta_probit <span class="op">&lt;-</span> coef(model_probit)[<span class="st">"x"</span>]</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span>(tibble(</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>        method <span class="op">=</span> c(<span class="st">"Linear"</span>, <span class="st">"Logistic"</span>, <span class="st">"Probit"</span>, <span class="st">"Logistic (Transformed)"</span>),</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>        beta_hat <span class="op">=</span> c(hat_beta_xl, hat_beta_logit, hat_beta_probit, hat_beta_logit <span class="op">*</span> (sqrt(<span class="dv">3</span>) <span class="op">/</span> pi))</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a><span class="bu">set</span>.seed(<span class="dv">42</span>)</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>simdat(<span class="dv">100000</span>, prevalence <span class="op">=</span> <span class="fl">0.1</span>, beta_xl <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span>) <span class="op">%&gt;%</span> estimation()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<table class="dataframe caption-top table table-sm table-striped small">
+<caption>A tibble: 4 × 2</caption>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" scope="col">method</th>
+<th data-quarto-table-cell-role="th" scope="col">beta_hat</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th" scope="col">&lt;chr&gt;</th>
+<th data-quarto-table-cell-role="th" scope="col">&lt;dbl&gt;</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Linear</td>
+<td>-0.5028558</td>
+</tr>
+<tr class="even">
+<td>Logistic</td>
+<td>-0.9754070</td>
+</tr>
+<tr class="odd">
+<td>Probit</td>
+<td>-0.5108572</td>
+</tr>
+<tr class="even">
+<td>Logistic (Transformed)</td>
+<td>-0.5377701</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="ef56cb37" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>library(furrr)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>plan(<span class="st">"multicore"</span>, workers<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>param <span class="op">&lt;-</span> expand.grid(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="dv">100000</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    prevalence <span class="op">=</span> c(<span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    beta_xl <span class="op">=</span> c(<span class="op">-</span><span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.3</span>, <span class="dv">0</span>)</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>) <span class="op">%&gt;%</span> furrr::future_pmap(., \(n, prevalence, beta_xl) {</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    dat <span class="op">&lt;-</span> simdat(n <span class="op">=</span> n, prevalence <span class="op">=</span> prevalence, beta_xl <span class="op">=</span> beta_xl)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    est <span class="op">&lt;-</span> estimation(dat)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    bind_cols(tibble(n <span class="op">=</span> n, prevalence <span class="op">=</span> prevalence, beta_xl <span class="op">=</span> beta_xl), est)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>}) <span class="op">%&gt;%</span> bind_rows()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning message:
+“UNRELIABLE VALUE: Future (&lt;unnamed-1&gt;) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to "ignore". [future &lt;unnamed-1&gt; (ed502c4b95166bb22746467ddf260d51-1); on ed502c4b95166bb22746467ddf260d51@DT7MTP4F2G&lt;63874&gt;]”
+Warning message:
+“UNRELIABLE VALUE: Future (&lt;unnamed-2&gt;) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to "ignore". [future &lt;unnamed-2&gt; (ed502c4b95166bb22746467ddf260d51-2); on ed502c4b95166bb22746467ddf260d51@DT7MTP4F2G&lt;63874&gt;]”
+Warning message:
+“UNRELIABLE VALUE: Future (&lt;unnamed-3&gt;) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to "ignore". [future &lt;unnamed-3&gt; (ed502c4b95166bb22746467ddf260d51-3); on ed502c4b95166bb22746467ddf260d51@DT7MTP4F2G&lt;63874&gt;]”
+Warning message:
+“UNRELIABLE VALUE: Future (&lt;unnamed-4&gt;) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to "ignore". [future &lt;unnamed-4&gt; (ed502c4b95166bb22746467ddf260d51-4); on ed502c4b95166bb22746467ddf260d51@DT7MTP4F2G&lt;63874&gt;]”</code></pre>
+</div>
+</div>
+<div id="a9fe0d68" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>ggplot(param, aes(x<span class="op">=</span>beta_xl, y<span class="op">=</span>beta_hat, color<span class="op">=</span>method)) <span class="op">+</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>geom_point() <span class="op">+</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>geom_abline(slope <span class="op">=</span> <span class="dv">1</span>, intercept <span class="op">=</span> <span class="dv">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis2_files/figure-html/cell-12-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="e4557ed2" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>generate_binary_outcome3 <span class="op">&lt;-</span> function(liability, varexp<span class="op">=</span><span class="dv">1</span>, prevalence) {</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    n <span class="op">&lt;-</span> length(liability)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    threshold <span class="op">&lt;-</span> qnorm(<span class="dv">1</span> <span class="op">-</span> prevalence, mean <span class="op">=</span> <span class="dv">0</span>, sd <span class="op">=</span> sqrt(var(liability)))</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    cc <span class="op">&lt;-</span> <span class="im">as</span>.numeric(liability <span class="op">&gt;</span> threshold)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span>(cc)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>binary_2sls_probit <span class="op">&lt;-</span> function(x, y, prs) {</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    mod <span class="op">&lt;-</span> summary(glm(y <span class="op">~</span> prs, family<span class="op">=</span>binomial(link <span class="op">=</span> <span class="st">"probit"</span>)))</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    bgy <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">1</span>]</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    se_bgy <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">2</span>]</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    mod <span class="op">&lt;-</span> summary(lm(x <span class="op">~</span> prs))</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    bgx <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">1</span>]</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    se_bgx <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">2</span>]</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    beta_xy <span class="op">&lt;-</span> bgy <span class="op">/</span> bgx</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>    se_beta_xy <span class="op">&lt;-</span> sqrt((se_bgy <span class="op">/</span> bgx)<span class="op">^</span><span class="dv">2</span> <span class="op">+</span> (bgy <span class="op">*</span> se_bgx <span class="op">/</span> bgx<span class="op">^</span><span class="dv">2</span>)<span class="op">^</span><span class="dv">2</span>)</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span>(<span class="bu">list</span>(beta_xy <span class="op">=</span> beta_xy, se_beta_xy <span class="op">=</span> se_beta_xy))</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>param <span class="op">&lt;-</span> expand.grid(</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    prevalence <span class="op">=</span> c(<span class="fl">0.01</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>),</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    b_xy <span class="op">=</span> c(<span class="op">-</span><span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.3</span>, <span class="dv">0</span>),</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>    rep <span class="op">=</span> <span class="dv">1</span>:<span class="dv">50</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>plan(<span class="st">"multicore"</span>, workers<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>binary_res <span class="op">&lt;-</span> future_pmap(param, \(prevalence, rep, b_xy) {</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>    dat <span class="op">&lt;-</span> sim(b_xy <span class="op">=</span> b_xy, b_uy <span class="op">=</span> <span class="op">-</span><span class="fl">0.2</span>, b_ux <span class="op">=</span> <span class="dv">1</span>, b_prs<span class="op">=</span><span class="dv">1</span>, h2<span class="op">=</span><span class="fl">0.7</span>, r2_env_height<span class="op">=</span><span class="fl">0.15</span>, r2_prs<span class="op">=</span><span class="fl">0.4</span>, n<span class="op">=</span><span class="dv">100000</span>)[[<span class="dv">2</span>]]</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>    dat$cc <span class="op">&lt;-</span> generate_binary_outcome3(dat$y, prevalence <span class="op">=</span> prevalence)</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>    res_continuous <span class="op">&lt;-</span> continuous_2sls(dat$x, dat$y, dat$prs_explained)</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>    res_binary <span class="op">&lt;-</span> binary_2sls_probit(dat$x, dat$cc, dat$prs_explained)</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>    tibble(</span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>        prevalence <span class="op">=</span> prevalence,</span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>        method <span class="op">=</span> c(<span class="st">"binary"</span>, <span class="st">"continuous"</span>),</span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>        beta_xy <span class="op">=</span> c(res_binary$beta_xy, res_continuous$beta_xy),</span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>        se_beta_xy <span class="op">=</span> c(res_binary$se_beta_xy, res_continuous$se_beta_xy),</span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>        rep <span class="op">=</span> rep,</span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>        b_xy <span class="op">=</span> b_xy</span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a>}) <span class="op">%&gt;%</span> bind_rows()</span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a><span class="bu">str</span>(binary_res)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning message:
+“UNRELIABLE VALUE: Future (&lt;unnamed-25&gt;) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to "ignore". [future &lt;unnamed-25&gt; (ed502c4b95166bb22746467ddf260d51-25); on ed502c4b95166bb22746467ddf260d51@DT7MTP4F2G&lt;63874&gt;]”
+Warning message:
+“UNRELIABLE VALUE: Future (&lt;unnamed-26&gt;) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to "ignore". [future &lt;unnamed-26&gt; (ed502c4b95166bb22746467ddf260d51-26); on ed502c4b95166bb22746467ddf260d51@DT7MTP4F2G&lt;63874&gt;]”
+Warning message:
+“UNRELIABLE VALUE: Future (&lt;unnamed-27&gt;) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to "ignore". [future &lt;unnamed-27&gt; (ed502c4b95166bb22746467ddf260d51-27); on ed502c4b95166bb22746467ddf260d51@DT7MTP4F2G&lt;63874&gt;]”
+Warning message:
+“UNRELIABLE VALUE: Future (&lt;unnamed-28&gt;) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to "ignore". [future &lt;unnamed-28&gt; (ed502c4b95166bb22746467ddf260d51-28); on ed502c4b95166bb22746467ddf260d51@DT7MTP4F2G&lt;63874&gt;]”
+Warning message:
+“UNRELIABLE VALUE: Future (&lt;unnamed-29&gt;) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to "ignore". [future &lt;unnamed-29&gt; (ed502c4b95166bb22746467ddf260d51-29); on ed502c4b95166bb22746467ddf260d51@DT7MTP4F2G&lt;63874&gt;]”
+Warning message:
+“UNRELIABLE VALUE: Future (&lt;unnamed-30&gt;) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to "ignore". [future &lt;unnamed-30&gt; (ed502c4b95166bb22746467ddf260d51-30); on ed502c4b95166bb22746467ddf260d51@DT7MTP4F2G&lt;63874&gt;]”
+Warning message:
+“UNRELIABLE VALUE: Future (&lt;unnamed-31&gt;) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to "ignore". [future &lt;unnamed-31&gt; (ed502c4b95166bb22746467ddf260d51-31); on ed502c4b95166bb22746467ddf260d51@DT7MTP4F2G&lt;63874&gt;]”
+Warning message:
+“UNRELIABLE VALUE: Future (&lt;unnamed-32&gt;) unexpectedly generated random numbers without specifying argument 'seed'. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'seed=NULL', or set option 'future.rng.onMisuse' to "ignore". [future &lt;unnamed-32&gt; (ed502c4b95166bb22746467ddf260d51-32); on ed502c4b95166bb22746467ddf260d51@DT7MTP4F2G&lt;63874&gt;]”</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tibble [900 × 6] (S3: tbl_df/tbl/data.frame)
+ $ prevalence: num [1:900] 0.01 0.01 0.1 0.1 0.5 0.5 0.01 0.01 0.1 0.1 ...
+ $ method    : chr [1:900] "binary" "continuous" "binary" "continuous" ...
+ $ beta_xy   : num [1:900] -0.444 -0.497 -0.465 -0.51 -0.442 ...
+ $ se_beta_xy: num [1:900] 0.0238 0.00702 0.01087 0.007 0.00797 ...
+ $ rep       : int [1:900] 1 1 1 1 1 1 1 1 1 1 ...
+ $ b_xy      : num [1:900] -0.5 -0.5 -0.5 -0.5 -0.5 -0.5 -0.3 -0.3 -0.3 -0.3 ...</code></pre>
+</div>
+</div>
+<div id="08b20922" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>ggplot(binary_res, aes(x<span class="op">=</span>method, y <span class="op">=</span> beta_xy<span class="op">-</span>b_xy)) <span class="op">+</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    geom_boxplot(aes(colour<span class="op">=</span><span class="im">as</span>.factor(prevalence))) <span class="op">+</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    facet_grid(method <span class="op">~</span> b_xy)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="analysis2_files/figure-html/cell-14-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="5cc1d53e" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to estimate beta_cy from height, PRS, and outcome</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>binary_2sls <span class="op">&lt;-</span> function(x, y, prs, method<span class="op">=</span>c(<span class="st">"probit"</span>, <span class="st">"logistic"</span>, <span class="st">"absolute"</span>)[<span class="dv">1</span>]) {</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(method <span class="op">==</span> <span class="st">"probit"</span>) {</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>        mod <span class="op">&lt;-</span> summary(glm(y <span class="op">~</span> prs, family<span class="op">=</span>binomial(link <span class="op">=</span> <span class="st">"probit"</span>)))</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span>(method <span class="op">==</span> <span class="st">"logistic"</span>) {</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>        mod <span class="op">&lt;-</span> summary(glm(y <span class="op">~</span> prs, family<span class="op">=</span>binomial(link <span class="op">=</span> <span class="st">"logit"</span>)))</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span>(method <span class="op">==</span> <span class="st">"absolute"</span>) {</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>        mod <span class="op">&lt;-</span> summary(lm(y <span class="op">~</span> prs))</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    bgy <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">1</span>]</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    se_bgy <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">2</span>]</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    mod <span class="op">&lt;-</span> summary(lm(x <span class="op">~</span> prs))</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    bgx <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">1</span>]</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    se_bgx <span class="op">&lt;-</span> mod$coefficients[<span class="dv">2</span>, <span class="dv">2</span>]</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    beta_xy <span class="op">&lt;-</span> bgy <span class="op">/</span> bgx</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    se_beta_xy <span class="op">&lt;-</span> sqrt((se_bgy <span class="op">/</span> bgx)<span class="op">^</span><span class="dv">2</span> <span class="op">+</span> (bgy <span class="op">*</span> se_bgx <span class="op">/</span> bgx<span class="op">^</span><span class="dv">2</span>)<span class="op">^</span><span class="dv">2</span>)</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span>(<span class="bu">list</span>(beta_xy <span class="op">=</span> beta_xy, se_beta_xy <span class="op">=</span> se_beta_xy))</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>estimate_beta_cy2 <span class="op">&lt;-</span> function(height, prs, outcome, var_c <span class="op">=</span> <span class="fl">0.15</span>, h2 <span class="op">=</span> <span class="fl">0.7</span>, n_boot <span class="op">=</span> <span class="dv">1000</span>, binary_method<span class="op">=</span><span class="st">"probit"</span>) {</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>    stopifnot(binary_method <span class="op">%</span><span class="kw">in</span><span class="op">%</span> c(<span class="st">"probit"</span>, <span class="st">"logistic"</span>, <span class="st">"absolute"</span>))</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Detect if outcome is binary or continuous</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>    unique_vals <span class="op">&lt;-</span> unique(outcome)</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>    is_binary <span class="op">&lt;-</span> length(unique_vals) <span class="op">==</span> <span class="dv">2</span> <span class="op">&amp;&amp;</span> <span class="bu">all</span>(sort(unique_vals) <span class="op">==</span> c(<span class="dv">0</span>, <span class="dv">1</span>))</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Store original outcome for prevalence calculation</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>    outcome_original <span class="op">&lt;-</span> outcome</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate prevalence if binary</span></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (is_binary) {</span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>        prevalence <span class="op">&lt;-</span> mean(outcome)</span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Calculate liability scale threshold transformation factor</span></span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>        threshold <span class="op">&lt;-</span> qnorm(prevalence)</span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>        liability_scale_factor <span class="op">&lt;-</span> dnorm(threshold)</span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>        cat(sprintf(<span class="st">"Binary outcome detected (prevalence = </span><span class="sc">%.3f</span><span class="st">)</span><span class="ch">\n</span><span class="st">"</span>, prevalence))</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>        cat(sprintf(<span class="st">"Liability scale transformation factor = </span><span class="sc">%.4f</span><span class="ch">\n</span><span class="st">"</span>, liability_scale_factor))</span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Standardize continuous outcome</span></span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>        outcome <span class="op">&lt;-</span> (outcome <span class="op">-</span> mean(outcome)) <span class="op">/</span> sd(outcome)</span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>        cat(<span class="st">"Continuous outcome detected - standardized to mean=0, SD=1</span><span class="ch">\n</span><span class="st">"</span>)</span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>        prevalence <span class="op">&lt;-</span> NA</span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>        liability_scale_factor <span class="op">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Use instrumental variable regression to estimate causal effect</span></span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(is_binary) {</span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a>        iv_res <span class="op">&lt;-</span> binary_2sls(height, outcome, prs, method <span class="op">=</span> binary_method)</span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>        iv_res <span class="op">&lt;-</span> binary_2sls(height, outcome, prs, method <span class="op">=</span> <span class="st">"absolute"</span>)</span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a>    beta_xy_prs <span class="op">&lt;-</span> iv_res$beta_xy</span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a>    se_beta_xy <span class="op">&lt;-</span> iv_res$se_beta_xy</span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate R^2 for PRS</span></span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true" tabindex="-1"></a>    model_prs <span class="op">&lt;-</span> lm(height <span class="op">~</span> prs)</span>
+<span id="cb21-61"><a href="#cb21-61" aria-hidden="true" tabindex="-1"></a>    prs_explained <span class="op">&lt;-</span> fitted.values(model_prs)</span>
+<span id="cb21-62"><a href="#cb21-62" aria-hidden="true" tabindex="-1"></a>    r2_prs <span class="op">&lt;-</span> var(prs_explained) <span class="op">/</span> var(height)</span>
+<span id="cb21-63"><a href="#cb21-63" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-64"><a href="#cb21-64" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Estimate beta_cy using method 1 (from covariance of height and outcome)</span></span>
+<span id="cb21-65"><a href="#cb21-65" aria-hidden="true" tabindex="-1"></a>    beta_cy_method1_observed <span class="op">&lt;-</span> (cov(height, outcome) <span class="op">-</span> beta_xy_prs <span class="op">*</span> var(height)) <span class="op">/</span> var_c</span>
+<span id="cb21-66"><a href="#cb21-66" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-67"><a href="#cb21-67" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Method 2: Using height residual</span></span>
+<span id="cb21-68"><a href="#cb21-68" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Get residual height (height not explained by PRS)</span></span>
+<span id="cb21-69"><a href="#cb21-69" aria-hidden="true" tabindex="-1"></a>    residual_height <span class="op">&lt;-</span> residuals(model_prs)</span>
+<span id="cb21-70"><a href="#cb21-70" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-71"><a href="#cb21-71" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Estimate beta_cy using method 2 (from residual height)</span></span>
+<span id="cb21-72"><a href="#cb21-72" aria-hidden="true" tabindex="-1"></a>    beta_cy_method2_observed <span class="op">&lt;-</span> (cov(residual_height, outcome) <span class="op">-</span> beta_xy_prs_observed <span class="op">*</span> var(residual_height)) <span class="op">/</span> var_c</span>
+<span id="cb21-73"><a href="#cb21-73" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-74"><a href="#cb21-74" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Transform to liability scale if binary</span></span>
+<span id="cb21-75"><a href="#cb21-75" aria-hidden="true" tabindex="-1"></a>    beta_cy_method1 <span class="op">&lt;-</span> beta_cy_method1_observed <span class="op">/</span> liability_scale_factor</span>
+<span id="cb21-76"><a href="#cb21-76" aria-hidden="true" tabindex="-1"></a>    beta_cy_method2 <span class="op">&lt;-</span> beta_cy_method2_observed <span class="op">/</span> liability_scale_factor</span>
+<span id="cb21-77"><a href="#cb21-77" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-78"><a href="#cb21-78" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Parametric bootstrap using 2SLS SE for beta_xy</span></span>
+<span id="cb21-79"><a href="#cb21-79" aria-hidden="true" tabindex="-1"></a>    n <span class="op">&lt;-</span> length(height)</span>
+<span id="cb21-80"><a href="#cb21-80" aria-hidden="true" tabindex="-1"></a>    boot_results <span class="op">&lt;-</span> matrix(NA, n_boot, <span class="dv">2</span>)</span>
+<span id="cb21-81"><a href="#cb21-81" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-82"><a href="#cb21-82" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(i <span class="kw">in</span> <span class="dv">1</span>:n_boot) {</span>
+<span id="cb21-83"><a href="#cb21-83" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Sample with replacement</span></span>
+<span id="cb21-84"><a href="#cb21-84" aria-hidden="true" tabindex="-1"></a>        idx <span class="op">&lt;-</span> sample(<span class="dv">1</span>:n, n, replace <span class="op">=</span> TRUE)</span>
+<span id="cb21-85"><a href="#cb21-85" aria-hidden="true" tabindex="-1"></a>        h_boot <span class="op">&lt;-</span> height[idx]</span>
+<span id="cb21-86"><a href="#cb21-86" aria-hidden="true" tabindex="-1"></a>        p_boot <span class="op">&lt;-</span> prs[idx]</span>
+<span id="cb21-87"><a href="#cb21-87" aria-hidden="true" tabindex="-1"></a>        y_boot <span class="op">&lt;-</span> outcome[idx]</span>
+<span id="cb21-88"><a href="#cb21-88" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb21-89"><a href="#cb21-89" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Parametrically resample beta_xy from its sampling distribution</span></span>
+<span id="cb21-90"><a href="#cb21-90" aria-hidden="true" tabindex="-1"></a>        beta_xy_boot <span class="op">&lt;-</span> rnorm(<span class="dv">1</span>, mean <span class="op">=</span> beta_xy_prs, sd <span class="op">=</span> se_beta_xy)</span>
+<span id="cb21-91"><a href="#cb21-91" aria-hidden="true" tabindex="-1"></a>        beta_xy_boot <span class="op">&lt;-</span> beta_xy_boot <span class="op">/</span> liability_scale_factor</span>
+<span id="cb21-92"><a href="#cb21-92" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb21-93"><a href="#cb21-93" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Method 1 bootstrap</span></span>
+<span id="cb21-94"><a href="#cb21-94" aria-hidden="true" tabindex="-1"></a>        boot_observed_1 <span class="op">&lt;-</span> (cov(h_boot, y_boot) <span class="op">-</span> beta_xy_boot_observed <span class="op">*</span> var(h_boot)) <span class="op">/</span> var_c</span>
+<span id="cb21-95"><a href="#cb21-95" aria-hidden="true" tabindex="-1"></a>        boot_results[i, <span class="dv">1</span>] <span class="op">&lt;-</span> boot_observed_1 <span class="op">/</span> liability_scale_factor</span>
+<span id="cb21-96"><a href="#cb21-96" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb21-97"><a href="#cb21-97" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Method 2 bootstrap</span></span>
+<span id="cb21-98"><a href="#cb21-98" aria-hidden="true" tabindex="-1"></a>        model_prs_boot <span class="op">&lt;-</span> lm(h_boot <span class="op">~</span> p_boot)</span>
+<span id="cb21-99"><a href="#cb21-99" aria-hidden="true" tabindex="-1"></a>        res_boot <span class="op">&lt;-</span> residuals(model_prs_boot)</span>
+<span id="cb21-100"><a href="#cb21-100" aria-hidden="true" tabindex="-1"></a>        boot_observed_2 <span class="op">&lt;-</span> (cov(res_boot, y_boot) <span class="op">-</span> beta_xy_boot_observed <span class="op">*</span> var(res_boot)) <span class="op">/</span> var_c</span>
+<span id="cb21-101"><a href="#cb21-101" aria-hidden="true" tabindex="-1"></a>        boot_results[i, <span class="dv">2</span>] <span class="op">&lt;-</span> boot_observed_2 <span class="op">/</span> liability_scale_factor</span>
+<span id="cb21-102"><a href="#cb21-102" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb21-103"><a href="#cb21-103" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-104"><a href="#cb21-104" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate standard errors</span></span>
+<span id="cb21-105"><a href="#cb21-105" aria-hidden="true" tabindex="-1"></a>    se_method1 <span class="op">&lt;-</span> sd(boot_results[, <span class="dv">1</span>])</span>
+<span id="cb21-106"><a href="#cb21-106" aria-hidden="true" tabindex="-1"></a>    se_method2 <span class="op">&lt;-</span> sd(boot_results[, <span class="dv">2</span>])</span>
+<span id="cb21-107"><a href="#cb21-107" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-108"><a href="#cb21-108" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate covariance between the two estimators using GLS</span></span>
+<span id="cb21-109"><a href="#cb21-109" aria-hidden="true" tabindex="-1"></a>    <span class="co"># cov(β̂_cy,1, β̂_cy,2) ≈ 1/(N·(σ_C²)²) * [var(Y)var(X,X_res) + var(X,Y)var(X_res,Y)]</span></span>
+<span id="cb21-110"><a href="#cb21-110" aria-hidden="true" tabindex="-1"></a>    cov_x_xres <span class="op">&lt;-</span> cov(height, residual_height)</span>
+<span id="cb21-111"><a href="#cb21-111" aria-hidden="true" tabindex="-1"></a>    cov_x_y <span class="op">&lt;-</span> cov(height, outcome)</span>
+<span id="cb21-112"><a href="#cb21-112" aria-hidden="true" tabindex="-1"></a>    cov_xres_y <span class="op">&lt;-</span> cov(residual_height, outcome)</span>
+<span id="cb21-113"><a href="#cb21-113" aria-hidden="true" tabindex="-1"></a>    var_y <span class="op">&lt;-</span> var(outcome)</span>
+<span id="cb21-114"><a href="#cb21-114" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-115"><a href="#cb21-115" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Covariance of the two beta_cy estimates</span></span>
+<span id="cb21-116"><a href="#cb21-116" aria-hidden="true" tabindex="-1"></a>    cov_estimators <span class="op">&lt;-</span> (<span class="dv">1</span> <span class="op">/</span> (n <span class="op">*</span> var_c<span class="op">^</span><span class="dv">2</span>)) <span class="op">*</span> (var_y <span class="op">*</span> cov_x_xres <span class="op">+</span> cov_x_y <span class="op">*</span> cov_xres_y)</span>
+<span id="cb21-117"><a href="#cb21-117" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-118"><a href="#cb21-118" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Build variance-covariance matrix</span></span>
+<span id="cb21-119"><a href="#cb21-119" aria-hidden="true" tabindex="-1"></a>    var_method1 <span class="op">&lt;-</span> se_method1<span class="op">^</span><span class="dv">2</span></span>
+<span id="cb21-120"><a href="#cb21-120" aria-hidden="true" tabindex="-1"></a>    var_method2 <span class="op">&lt;-</span> se_method2<span class="op">^</span><span class="dv">2</span></span>
+<span id="cb21-121"><a href="#cb21-121" aria-hidden="true" tabindex="-1"></a>    Sigma <span class="op">&lt;-</span> matrix(c(var_method1, cov_estimators,</span>
+<span id="cb21-122"><a href="#cb21-122" aria-hidden="true" tabindex="-1"></a>                      cov_estimators, var_method2), nrow <span class="op">=</span> <span class="dv">2</span>)</span>
+<span id="cb21-123"><a href="#cb21-123" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-124"><a href="#cb21-124" aria-hidden="true" tabindex="-1"></a>    <span class="co"># GLS weights (inverse of variance-covariance matrix)</span></span>
+<span id="cb21-125"><a href="#cb21-125" aria-hidden="true" tabindex="-1"></a>    Sigma_inv <span class="op">&lt;-</span> solve(Sigma)</span>
+<span id="cb21-126"><a href="#cb21-126" aria-hidden="true" tabindex="-1"></a>    weights <span class="op">&lt;-</span> Sigma_inv <span class="op">%*%</span> c(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb21-127"><a href="#cb21-127" aria-hidden="true" tabindex="-1"></a>    weight_sum <span class="op">&lt;-</span> <span class="bu">sum</span>(weights)</span>
+<span id="cb21-128"><a href="#cb21-128" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-129"><a href="#cb21-129" aria-hidden="true" tabindex="-1"></a>    <span class="co"># GLS combined estimate</span></span>
+<span id="cb21-130"><a href="#cb21-130" aria-hidden="true" tabindex="-1"></a>    beta_cy_combined <span class="op">&lt;-</span> (weights[<span class="dv">1</span>] <span class="op">*</span> beta_cy_method1 <span class="op">+</span> weights[<span class="dv">2</span>] <span class="op">*</span> beta_cy_method2) <span class="op">/</span> weight_sum</span>
+<span id="cb21-131"><a href="#cb21-131" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-132"><a href="#cb21-132" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Variance of combined estimate: var(β̂_combined) = 1 / (1' Σ^(-1) 1)</span></span>
+<span id="cb21-133"><a href="#cb21-133" aria-hidden="true" tabindex="-1"></a>    var_combined <span class="op">&lt;-</span> <span class="im">as</span>.numeric(<span class="dv">1</span> <span class="op">/</span> (t(c(<span class="dv">1</span>, <span class="dv">1</span>)) <span class="op">%*%</span> Sigma_inv <span class="op">%*%</span> c(<span class="dv">1</span>, <span class="dv">1</span>)))</span>
+<span id="cb21-134"><a href="#cb21-134" aria-hidden="true" tabindex="-1"></a>    se_combined <span class="op">&lt;-</span> sqrt(var_combined)</span>
+<span id="cb21-135"><a href="#cb21-135" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-136"><a href="#cb21-136" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Apply GLS weights to bootstrap distributions</span></span>
+<span id="cb21-137"><a href="#cb21-137" aria-hidden="true" tabindex="-1"></a>    boot_combined <span class="op">&lt;-</span> (weights[<span class="dv">1</span>] <span class="op">*</span> boot_results[, <span class="dv">1</span>] <span class="op">+</span> weights[<span class="dv">2</span>] <span class="op">*</span> boot_results[, <span class="dv">2</span>]) <span class="op">/</span> weight_sum</span>
+<span id="cb21-138"><a href="#cb21-138" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-139"><a href="#cb21-139" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return results</span></span>
+<span id="cb21-140"><a href="#cb21-140" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span>(<span class="bu">list</span>(</span>
+<span id="cb21-141"><a href="#cb21-141" aria-hidden="true" tabindex="-1"></a>        beta_xy <span class="op">=</span> beta_xy_prs,</span>
+<span id="cb21-142"><a href="#cb21-142" aria-hidden="true" tabindex="-1"></a>        se_beta_xy <span class="op">=</span> se_beta_xy,</span>
+<span id="cb21-143"><a href="#cb21-143" aria-hidden="true" tabindex="-1"></a>        beta_cy_method1 <span class="op">=</span> beta_cy_method1,</span>
+<span id="cb21-144"><a href="#cb21-144" aria-hidden="true" tabindex="-1"></a>        beta_cy_method2 <span class="op">=</span> beta_cy_method2,</span>
+<span id="cb21-145"><a href="#cb21-145" aria-hidden="true" tabindex="-1"></a>        beta_cy_combined <span class="op">=</span> beta_cy_combined,</span>
+<span id="cb21-146"><a href="#cb21-146" aria-hidden="true" tabindex="-1"></a>        se_method1 <span class="op">=</span> se_method1,</span>
+<span id="cb21-147"><a href="#cb21-147" aria-hidden="true" tabindex="-1"></a>        se_method2 <span class="op">=</span> se_method2,</span>
+<span id="cb21-148"><a href="#cb21-148" aria-hidden="true" tabindex="-1"></a>        se_combined <span class="op">=</span> se_combined,</span>
+<span id="cb21-149"><a href="#cb21-149" aria-hidden="true" tabindex="-1"></a>        cov_estimators <span class="op">=</span> cov_estimators,</span>
+<span id="cb21-150"><a href="#cb21-150" aria-hidden="true" tabindex="-1"></a>        correlation_estimators <span class="op">=</span> cov_estimators <span class="op">/</span> (se_method1 <span class="op">*</span> se_method2),</span>
+<span id="cb21-151"><a href="#cb21-151" aria-hidden="true" tabindex="-1"></a>        weight_method1 <span class="op">=</span> weights[<span class="dv">1</span>] <span class="op">/</span> weight_sum,</span>
+<span id="cb21-152"><a href="#cb21-152" aria-hidden="true" tabindex="-1"></a>        weight_method2 <span class="op">=</span> weights[<span class="dv">2</span>] <span class="op">/</span> weight_sum,</span>
+<span id="cb21-153"><a href="#cb21-153" aria-hidden="true" tabindex="-1"></a>        r2_prs <span class="op">=</span> r2_prs,</span>
+<span id="cb21-154"><a href="#cb21-154" aria-hidden="true" tabindex="-1"></a>        is_binary <span class="op">=</span> is_binary,</span>
+<span id="cb21-155"><a href="#cb21-155" aria-hidden="true" tabindex="-1"></a>        prevalence <span class="op">=</span> <span class="cf">if</span>(is_binary) prevalence <span class="cf">else</span> NA,</span>
+<span id="cb21-156"><a href="#cb21-156" aria-hidden="true" tabindex="-1"></a>        outcome_scale <span class="op">=</span> <span class="cf">if</span>(is_binary) <span class="st">"liability"</span> <span class="cf">else</span> <span class="st">"standardized"</span>,</span>
+<span id="cb21-157"><a href="#cb21-157" aria-hidden="true" tabindex="-1"></a>        beta_cy_method1_observed <span class="op">=</span> beta_cy_method1_observed,</span>
+<span id="cb21-158"><a href="#cb21-158" aria-hidden="true" tabindex="-1"></a>        beta_cy_method2_observed <span class="op">=</span> beta_cy_method2_observed,</span>
+<span id="cb21-159"><a href="#cb21-159" aria-hidden="true" tabindex="-1"></a>        boot_distribution_method1 <span class="op">=</span> boot_results[, <span class="dv">1</span>],</span>
+<span id="cb21-160"><a href="#cb21-160" aria-hidden="true" tabindex="-1"></a>        boot_distribution_method2 <span class="op">=</span> boot_results[, <span class="dv">2</span>],</span>
+<span id="cb21-161"><a href="#cb21-161" aria-hidden="true" tabindex="-1"></a>        boot_distribution_combined <span class="op">=</span> boot_combined</span>
+<span id="cb21-162"><a href="#cb21-162" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb21-163"><a href="#cb21-163" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="expected-betas-for" class="level2">
+<h2 class="anchored" data-anchor-id="expected-betas-for">Expected betas for</h2>
+<div id="dc53f0d0" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>library(dplyr)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>sim_dan <span class="op">&lt;-</span> function(n<span class="op">=</span><span class="dv">100000</span>, bgx1<span class="op">=</span><span class="fl">0.1</span>, bgx2<span class="op">=</span><span class="fl">0.2</span>, bx1y<span class="op">=</span><span class="fl">0.3</span>, bex2<span class="op">=</span><span class="fl">0.4</span>, bey<span class="op">=</span><span class="fl">0.5</span>) {</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    g <span class="op">&lt;-</span> rbinom(n, <span class="dv">2</span>, <span class="fl">0.4</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    e <span class="op">&lt;-</span> rnorm(n)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    x1 <span class="op">&lt;-</span> bgx1 <span class="op">*</span> g <span class="op">+</span> rnorm(n)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    x2 <span class="op">&lt;-</span> bgx2 <span class="op">*</span> g <span class="op">+</span> bex2 <span class="op">*</span> e <span class="op">+</span> rnorm(n)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    y <span class="op">&lt;-</span> bx1y <span class="op">*</span> x1 <span class="op">+</span> bey <span class="op">*</span> e <span class="op">+</span> rnorm(n)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span>(<span class="bu">list</span>(</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>        dat <span class="op">=</span> tibble(g <span class="op">=</span> g, x1 <span class="op">=</span> x1, x2 <span class="op">=</span> x2, y <span class="op">=</span> y, e <span class="op">=</span> e),</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        param <span class="op">=</span> tibble(bgx1 <span class="op">=</span> bgx1, bgx2 <span class="op">=</span> bgx2, bx1y <span class="op">=</span> bx1y, bex2 <span class="op">=</span> bex2, bey <span class="op">=</span> bey)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>dat <span class="op">&lt;-</span> sim_dan()</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>cov(dat$dat$x2, dat$dat$y)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+0.203145466403477
+</div>
+</div>
+<div id="87052461" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>dat$param$bgx2 <span class="op">*</span> dat$param$bgx1 <span class="op">*</span> dat$param$bx1y <span class="op">*</span> var(dat$dat$g) <span class="op">+</span> dat$param$bex2 <span class="op">*</span> dat$param$bey <span class="op">*</span> var(dat$dat$e)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+0.201365693134032
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

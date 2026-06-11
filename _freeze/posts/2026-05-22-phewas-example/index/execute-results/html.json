@@ -1,0 +1,15 @@
+{
+  "hash": "9f6d9e2b796cc17c0d7a5db2c24dcd89",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"2026-05-22-phewas-example\"\nauthor: Gibran Hemani\ndate: \"2026-06-11\"\ncategories: []\n---\n\n## Background\n\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsessionInfo()\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\nR version 4.6.0 (2026-04-24)\nPlatform: aarch64-apple-darwin23\nRunning under: macOS Sequoia 15.2\n\nMatrix products: default\nBLAS:   /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.0.dylib \nLAPACK: /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1\n\nlocale:\n[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8\n\ntime zone: Europe/London\ntzcode source: internal\n\nattached base packages:\n[1] stats     graphics  grDevices utils     datasets  methods   base     \n\nloaded via a namespace (and not attached):\n [1] htmlwidgets_1.6.4 compiler_4.6.0    fastmap_1.2.0     cli_3.6.6        \n [5] tools_4.6.0       htmltools_0.5.9   otel_0.2.0        yaml_2.3.12      \n [9] rmarkdown_2.31    knitr_1.51        jsonlite_2.0.0    xfun_0.57        \n[13] digest_0.6.39     rlang_1.2.0       evaluate_1.0.5   \n```\n\n\n:::\n:::\n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

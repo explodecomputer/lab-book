@@ -1,0 +1,3040 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>scz_example – Gibran Hemani's lab book</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-1b5cbb678aba238cc9ecc8dbef59e0a8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Gibran Hemani’s lab book</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block"></header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<div id="dd940f3c" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ieugwasr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(TwoSampleMR)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>scz <span class="ot">&lt;-</span> <span class="fu">tophits</span>(<span class="st">"ieu-b-5100"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(scz)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: ‘dplyr’
+
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tibble [204 × 12] (S3: tbl_df/tbl/data.frame)
+ $ id      : chr [1:204] "ieu-b-5100" "ieu-b-5100" "ieu-b-5100" "ieu-b-5100" ...
+ $ trait   : chr [1:204] "Schizophrenia" "Schizophrenia" "Schizophrenia" "Schizophrenia" ...
+ $ chr     : chr [1:204] "6" "7" "10" "15" ...
+ $ position: int [1:204] 27509493 2029867 104793904 91426560 123669235 2330458 26090270 52815905 103188709 58139593 ...
+ $ rsid    : chr [1:204] "rs13195636" "rs58120505" "rs79668541" "rs4702" ...
+ $ ea      : chr [1:204] "C" "C" "T" "A" ...
+ $ nea     : chr [1:204] "A" "T" "C" "G" ...
+ $ eaf     : num [1:204] 0.091 0.446 0.122 0.554 0.741 0.337 0.075 0.476 0.067 0.613 ...
+ $ beta    : num [1:204] -0.2105 -0.0833 -0.1207 -0.0803 -0.086 ...
+ $ se      : num [1:204] 0.0159 0.0078 0.0121 0.0081 0.0087 0.0085 0.0173 0.0077 0.0168 0.0079 ...
+ $ p       : num [1:204] 6.55e-40 1.80e-26 2.11e-23 2.15e-23 3.40e-23 ...
+ $ n       : num [1:204] 130644 161405 161405 161405 161405 ...</code></pre>
+</div>
+</div>
+<div id="5af79c08" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>l <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(scz)) {</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(i)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(scz<span class="sc">$</span>chr[i] <span class="sc">==</span> <span class="dv">6</span> <span class="sc">&amp;</span> scz<span class="sc">$</span>position[i] <span class="sc">&gt;</span> <span class="dv">25000000</span> <span class="sc">&amp;</span> scz<span class="sc">$</span>position[i] <span class="sc">&lt;</span> <span class="dv">35000000</span>) {</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">message</span>(<span class="st">"Skipping MHC region"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">next</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    l[[i]] <span class="ot">&lt;-</span> <span class="fu">phewas</span>(scz<span class="sc">$</span>rsid[i], <span class="at">pval =</span> <span class="fl">1e-8</span>, <span class="at">batch=</span><span class="fu">c</span>(<span class="st">"ukb-b"</span>, <span class="st">"ukb-d"</span>))</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(l)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>phewas_result <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(l)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>1
+
+Skipping MHC region
+
+2
+
+3
+
+4
+
+5
+
+6
+
+7
+
+Skipping MHC region
+
+8
+
+9
+
+10
+
+11
+
+12
+
+13
+
+14
+
+15
+
+16
+
+17
+
+18
+
+19
+
+20
+
+21
+
+22
+
+23
+
+24
+
+25
+
+26
+
+27
+
+28
+
+29
+
+30
+
+31
+
+32
+
+33
+
+34
+
+35
+
+36
+
+37
+
+38
+
+39
+
+40
+
+41
+
+42
+
+43
+
+44
+
+45
+
+46
+
+47
+
+48
+
+49
+
+50
+
+51
+
+52
+
+53
+
+54
+
+55
+
+56
+
+57
+
+58
+
+59
+
+60
+
+61
+
+62
+
+63
+
+64
+
+65
+
+66
+
+67
+
+68
+
+69
+
+70
+
+71
+
+72
+
+73
+
+74
+
+75
+
+76
+
+77
+
+78
+
+79
+
+80
+
+81
+
+82
+
+83
+
+84
+
+85
+
+86
+
+87
+
+88
+
+89
+
+90
+
+91
+
+92
+
+93
+
+94
+
+95
+
+96
+
+97
+
+98
+
+99
+
+100
+
+101
+
+102
+
+103
+
+104
+
+105
+
+106
+
+107
+
+108
+
+109
+
+110
+
+111
+
+112
+
+113
+
+114
+
+115
+
+116
+
+117
+
+118
+
+119
+
+120
+
+121
+
+122
+
+123
+
+124
+
+125
+
+126
+
+127
+
+128
+
+129
+
+130
+
+131
+
+132
+
+133
+
+134
+
+135
+
+136
+
+137
+
+138
+
+139
+
+140
+
+141
+
+142
+
+143
+
+144
+
+145
+
+146
+
+147
+
+148
+
+149
+
+150
+
+151
+
+152
+
+153
+
+154
+
+155
+
+156
+
+157
+
+158
+
+159
+
+160
+
+161
+
+162
+
+163
+
+164
+
+165
+
+166
+
+167
+
+168
+
+169
+
+170
+
+171
+
+172
+
+173
+
+174
+
+175
+
+176
+
+177
+
+178
+
+179
+
+180
+
+181
+
+182
+
+183
+
+184
+
+185
+
+186
+
+187
+
+188
+
+189
+
+190
+
+191
+
+192
+
+193
+
+194
+
+195
+
+196
+
+197
+
+198
+
+199
+
+200
+
+201
+
+202
+
+203
+
+204
+</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>List of 204
+ $ : NULL
+ $ : tibble [3 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:3] "ukb-d-30770_irnt" "ukb-d-30770_raw" "ukb-d-30830_irnt"
+  ..$ trait   : chr [1:3] "IGF-1" "IGF-1" "SHBG"
+  ..$ chr     : chr [1:3] "7" "7" "7"
+  ..$ position: int [1:3] 2029867 2029867 2029867
+  ..$ rsid    : chr [1:3] "rs58120505" "rs58120505" "rs58120505"
+  ..$ ea      : chr [1:3] "C" "C" "C"
+  ..$ nea     : chr [1:3] "T" "T" "T"
+  ..$ eaf     : num [1:3] 0.436 0.436 0.436
+  ..$ beta    : num [1:3] 0.0166 0.0922 -0.0139
+  ..$ se      : num [1:3] 0.00234 0.01328 0.00229
+  ..$ p       : num [1:3] 1.22e-12 3.97e-12 1.04e-09
+  ..$ n       : num [1:3] 342439 342439 312215
+ $ : tibble [41 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:41] "ukb-b-20175" "ukb-b-14057" "ukb-b-14068" "ukb-b-13352" ...
+  ..$ trait   : chr [1:41] "Systolic blood pressure, automated reading" "Non-cancer illness code, self-reported: hypertension" "Impedance of leg (left)" "Vascular/heart problems diagnosed by doctor: None of the above" ...
+  ..$ chr     : chr [1:41] "10" "10" "10" "10" ...
+  ..$ position: int [1:41] 104793904 104793904 104793904 104793904 104793904 104793904 104793904 104793904 104793904 104793904 ...
+  ..$ rsid    : chr [1:41] "rs79668541" "rs79668541" "rs79668541" "rs79668541" ...
+  ..$ ea      : chr [1:41] "T" "T" "T" "T" ...
+  ..$ nea     : chr [1:41] "C" "C" "C" "C" ...
+  ..$ eaf     : num [1:41] 0.0769 0.0768 0.0768 0.0768 0.0768 ...
+  ..$ beta    : num [1:41] -0.0507 -0.0171 -0.0345 0.0177 -0.0172 ...
+  ..$ se      : num [1:41] 0.00389 0.00168 0.00341 0.00175 0.00171 ...
+  ..$ p       : num [1:41] 8.8e-39 2.5e-24 3.7e-24 4.6e-24 8.6e-24 ...
+  ..$ n       : num [1:41] 436419 462933 454857 461880 461880 ...
+ $ : tibble [22 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:22] "ukb-b-20175" "ukb-b-4080" "ukb-b-13352" "ukb-b-14177" ...
+  ..$ trait   : chr [1:22] "Systolic blood pressure, automated reading" "Ankle spacing width" "Vascular/heart problems diagnosed by doctor: None of the above" "Vascular/heart problems diagnosed by doctor: High blood pressure" ...
+  ..$ chr     : chr [1:22] "15" "15" "15" "15" ...
+  ..$ position: int [1:22] 91426560 91426560 91426560 91426560 91426560 91426560 91426560 91426560 91426560 91426560 ...
+  ..$ rsid    : chr [1:22] "rs4702" "rs4702" "rs4702" "rs4702" ...
+  ..$ ea      : chr [1:22] "A" "A" "A" "A" ...
+  ..$ nea     : chr [1:22] "G" "G" "G" "G" ...
+  ..$ eaf     : num [1:22] 0.556 0.557 0.556 0.556 0.556 ...
+  ..$ beta    : num [1:22] 0.01952 -0.0194 -0.00744 0.00724 0.00704 ...
+  ..$ se      : num [1:22] 0.002088 0.002278 0.000941 0.000916 0.000903 ...
+  ..$ p       : num [1:22] 9.0e-21 1.6e-17 2.5e-15 2.6e-15 6.4e-15 ...
+  ..$ n       : num [1:22] 436419 265753 461880 461880 462933 ...
+ $ : tibble [38 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:38] "ukb-b-16881" "ukb-b-10787" "ukb-d-30180_irnt" "ukb-d-30090_irnt" ...
+  ..$ trait   : chr [1:38] "Sitting height" "Standing height" "Lymphocyte percentage" "Platelet crit" ...
+  ..$ chr     : chr [1:38] "12" "12" "12" "12" ...
+  ..$ position: int [1:38] 123669235 123669235 123669235 123669235 123669235 123669235 123669235 123669235 123669235 123669235 ...
+  ..$ rsid    : chr [1:38] "rs1790135" "rs1790135" "rs1790135" "rs1790135" ...
+  ..$ ea      : chr [1:38] "T" "T" "T" "T" ...
+  ..$ nea     : chr [1:38] "C" "C" "C" "C" ...
+  ..$ eaf     : num [1:38] 0.754 0.754 0.756 0.756 0.756 ...
+  ..$ beta    : num [1:38] -0.0273 -0.0193 -0.0275 0.023 0.0224 ...
+  ..$ se      : num [1:38] 0.00174 0.00151 0.00274 0.00264 0.00269 ...
+  ..$ p       : num [1:38] 1.70e-55 2.40e-37 9.51e-24 3.17e-18 9.55e-17 ...
+  ..$ n       : num [1:38] 461536 461950 349861 350471 350474 ...
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : NULL
+ $ : tibble [29 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:29] "ukb-b-19921" "ukb-b-14068" "ukb-b-19379" "ukb-b-7859" ...
+  ..$ trait   : chr [1:29] "Impedance of whole body" "Impedance of leg (left)" "Impedance of arm (left)" "Impedance of arm (right)" ...
+  ..$ chr     : chr [1:29] "3" "3" "3" "3" ...
+  ..$ position: int [1:29] 52815905 52815905 52815905 52815905 52815905 52815905 52815905 52815905 52815905 52815905 ...
+  ..$ rsid    : chr [1:29] "rs2710323" "rs2710323" "rs2710323" "rs2710323" ...
+  ..$ ea      : chr [1:29] "C" "C" "C" "C" ...
+  ..$ nea     : chr [1:29] "T" "T" "T" "T" ...
+  ..$ eaf     : num [1:29] 0.472 0.472 0.472 0.472 0.472 ...
+  ..$ beta    : num [1:29] -0.0185 -0.0194 -0.0151 -0.015 -0.0179 ...
+  ..$ se      : num [1:29] 0.00152 0.00182 0.00141 0.00141 0.0018 ...
+  ..$ p       : num [1:29] 3.6e-34 1.3e-26 1.3e-26 2.5e-26 3.6e-23 ...
+  ..$ n       : num [1:29] 454840 454857 454850 454826 454863 ...
+ $ : tibble [81 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:81] "ukb-d-30760_irnt" "ukb-d-30760_raw" "ukb-d-30630_irnt" "ukb-d-30630_raw" ...
+  ..$ trait   : chr [1:81] "HDL cholesterol" "HDL cholesterol" "Apoliprotein A" "Apoliprotein A" ...
+  ..$ chr     : chr [1:81] "4" "4" "4" "4" ...
+  ..$ position: int [1:81] 103188709 103188709 103188709 103188709 103188709 103188709 103188709 103188709 103188709 103188709 ...
+  ..$ rsid    : chr [1:81] "rs13107325" "rs13107325" "rs13107325" "rs13107325" ...
+  ..$ ea      : chr [1:81] "T" "T" "T" "T" ...
+  ..$ nea     : chr [1:81] "C" "C" "C" "C" ...
+  ..$ eaf     : num [1:81] 0.0749 0.0749 0.0749 0.0749 0.0748 ...
+  ..$ beta    : num [1:81] -0.082 -0.0303 -0.0736 -0.0194 0.0593 ...
+  ..$ se      : num [1:81] 0.00433 0.00167 0.0044 0.00119 0.00435 ...
+  ..$ p       : num [1:81] 7.08e-80 5.05e-74 9.91e-63 1.51e-59 2.96e-42 ...
+  ..$ n       : num [1:81] 315133 315133 313387 313387 342990 ...
+ $ : tibble [12 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:12] "ukb-b-7376" "ukb-b-14068" "ukb-b-4424" "ukb-b-19921" ...
+  ..$ trait   : chr [1:12] "Impedance of leg (right)" "Impedance of leg (left)" "Sleep duration" "Impedance of whole body" ...
+  ..$ chr     : chr [1:12] "2" "2" "2" "2" ...
+  ..$ position: int [1:12] 58139593 58139593 58139593 58139593 58139593 58139593 58139593 58139593 58139593 58139593 ...
+  ..$ rsid    : chr [1:12] "rs1040225" "rs1040225" "rs1040225" "rs1040225" ...
+  ..$ ea      : chr [1:12] "G" "G" "G" "G" ...
+  ..$ nea     : chr [1:12] "A" "A" "A" "A" ...
+  ..$ eaf     : num [1:12] 0.6 0.6 0.6 0.6 0.6 ...
+  ..$ beta    : num [1:12] 0.01655 0.01622 0.01351 0.01138 0.00762 ...
+  ..$ se      : num [1:12] 0.00183 0.00185 0.00163 0.00154 0.00105 ...
+  ..$ p       : num [1:12] 1.6e-19 1.6e-18 1.1e-16 1.4e-13 3.0e-13 ...
+  ..$ n       : num [1:12] 454863 454857 460099 454840 454982 ...
+ $ : tibble [4 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:4] "ukb-b-20544" "ukb-b-16489" "ukb-b-969" "ukb-b-18335"
+  ..$ trait   : chr [1:4] "Nervous feelings" "Qualifications: College or University degree" "Time spend outdoors in summer" "Wheeze or whistling in the chest in last year"
+  ..$ chr     : chr [1:4] "1" "1" "1" "1"
+  ..$ position: int [1:4] 98552832 98552832 98552832 98552832
+  ..$ rsid    : chr [1:4] "rs1198588" "rs1198588" "rs1198588" "rs1198588"
+  ..$ ea      : chr [1:4] "T" "T" "T" "T"
+  ..$ nea     : chr [1:4] "A" "A" "A" "A"
+  ..$ eaf     : num [1:4] 0.797 0.797 0.797 0.797
+  ..$ beta    : num [1:4] 0.00691 0.00699 -0.01409 -0.00605
+  ..$ se      : num [1:4] 0.0011 0.00118 0.00239 0.00105
+  ..$ p       : num [1:4] 3.8e-10 3.0e-09 3.9e-09 9.3e-09
+  ..$ n       : num [1:4] 450700 458079 419314 453959
+ $ : tibble [1 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr "ukb-b-16489"
+  ..$ trait   : chr "Qualifications: College or University degree"
+  ..$ chr     : chr "7"
+  ..$ position: int 137073259
+  ..$ rsid    : chr "rs13230189"
+  ..$ ea      : chr "T"
+  ..$ nea     : chr "C"
+  ..$ eaf     : num 0.365
+  ..$ beta    : num -0.00611
+  ..$ se      : num 0.000996
+  ..$ p       : num 8.6e-10
+  ..$ n       : num 458079
+ $ : tibble [15 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:15] "ukb-b-4522" "ukb-b-4779" "ukb-b-15418" "ukb-b-20544" ...
+  ..$ trait   : chr [1:15] "Time spent using computer" "Plays computer games" "Duration screen displayed" "Nervous feelings" ...
+  ..$ chr     : chr [1:15] "8" "8" "8" "8" ...
+  ..$ position: int [1:15] 143316970 143316970 143316970 143316970 143316970 143316970 143316970 143316970 143316970 143316970 ...
+  ..$ rsid    : chr [1:15] "rs13262595" "rs13262595" "rs13262595" "rs13262595" ...
+  ..$ ea      : chr [1:15] "G" "G" "G" "G" ...
+  ..$ nea     : chr [1:15] "A" "A" "A" "A" ...
+  ..$ eaf     : num [1:15] 0.561 0.561 0.561 0.561 0.561 ...
+  ..$ beta    : num [1:15] 0.01563 0.00784 -0.02597 -0.0064 -0.01473 ...
+  ..$ se      : num [1:15] 0.001837 0.001045 0.003508 0.000895 0.002074 ...
+  ..$ p       : num [1:15] 1.8e-17 6.3e-14 1.3e-13 8.7e-13 1.2e-12 ...
+  ..$ n       : num [1:15] 360895 462433 152605 450700 454157 ...
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [1 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr "ukb-b-4522"
+  ..$ trait   : chr "Time spent using computer"
+  ..$ chr     : chr "2"
+  ..$ position: int 200816382
+  ..$ rsid    : chr "rs1658810"
+  ..$ ea      : chr "T"
+  ..$ nea     : chr "C"
+  ..$ eaf     : num 0.8
+  ..$ beta    : num 0.0131
+  ..$ se      : num 0.00226
+  ..$ p       : num 7.1e-09
+  ..$ n       : num 360895
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [3 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:3] "ukb-b-16881" "ukb-b-10787" "ukb-b-16489"
+  ..$ trait   : chr [1:3] "Sitting height" "Standing height" "Qualifications: College or University degree"
+  ..$ chr     : chr [1:3] "2" "2" "2"
+  ..$ position: int [1:3] 233743109 233743109 233743109
+  ..$ rsid    : chr [1:3] "rs778371" "rs778371" "rs778371"
+  ..$ ea      : chr [1:3] "G" "G" "G"
+  ..$ nea     : chr [1:3] "A" "A" "A"
+  ..$ eaf     : num [1:3] 0.279 0.279 0.279
+  ..$ beta    : num [1:3] 0.01585 0.01076 0.00647
+  ..$ se      : num [1:3] 0.00167 0.00145 0.00106
+  ..$ p       : num [1:3] 1.8e-21 1.0e-13 9.1e-10
+  ..$ n       : num [1:3] 461536 461950 458079
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [10 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:10] "ukb-b-16489" "ukb-b-3768" "ukb-b-17729" "ukb-d-30770_irnt" ...
+  ..$ trait   : chr [1:10] "Qualifications: College or University degree" "Age when periods started (menarche)" "Qualifications: None of the above" "IGF-1" ...
+  ..$ chr     : chr [1:10] "1" "1" "1" "1" ...
+  ..$ position: int [1:10] 44100084 44100084 44100084 44100084 44100084 44100084 44100084 44100084 44100084 44100084
+  ..$ rsid    : chr [1:10] "rs11210892" "rs11210892" "rs11210892" "rs11210892" ...
+  ..$ ea      : chr [1:10] "A" "A" "A" "A" ...
+  ..$ nea     : chr [1:10] "G" "G" "G" "G" ...
+  ..$ eaf     : num [1:10] 0.674 0.673 0.674 0.675 0.674 ...
+  ..$ beta    : num [1:10] 0.0089 -0.01701 -0.00617 0.01709 0.00715 ...
+  ..$ se      : num [1:10] 0.001011 0.002197 0.000833 0.002477 0.001093 ...
+  ..$ p       : num [1:10] 1.4e-18 9.9e-15 1.4e-13 5.2e-12 6.1e-11 ...
+  ..$ n       : num [1:10] 458079 243944 458079 342439 450765 ...
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [16 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:16] "ukb-b-8875" "ukb-b-19234" "ukb-b-20124" "ukb-b-15851" ...
+  ..$ trait   : chr [1:16] "Heel bone mineral density (BMD)" "Heel quantitative ultrasound index (QUI), direct entry" "Heel bone mineral density (BMD) T-score, automated" "Heel Broadband ultrasound attenuation, direct entry" ...
+  ..$ chr     : chr [1:16] "11" "11" "11" "11" ...
+  ..$ position: int [1:16] 46648432 46648432 46648432 46648432 46648432 46648432 46648432 46648432 46648432 46648432 ...
+  ..$ rsid    : chr [1:16] "rs7108770" "rs7108770" "rs7108770" "rs7108770" ...
+  ..$ ea      : chr [1:16] "A" "A" "A" "A" ...
+  ..$ nea     : chr [1:16] "G" "G" "G" "G" ...
+  ..$ eaf     : num [1:16] 0.172 0.172 0.172 0.172 0.172 ...
+  ..$ beta    : num [1:16] 0.0272 0.027 0.027 0.0255 0.019 ...
+  ..$ se      : num [1:16] 0.00338 0.00338 0.00338 0.00333 0.00269 ...
+  ..$ p       : num [1:16] 8.5e-16 1.5e-15 1.5e-15 1.9e-14 1.7e-12 ...
+  ..$ n       : num [1:16] 265627 265753 265753 265737 459281 ...
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [26 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:26] "ukb-b-7376" "ukb-b-14068" "ukb-b-16489" "ukb-b-19921" ...
+  ..$ trait   : chr [1:26] "Impedance of leg (right)" "Impedance of leg (left)" "Qualifications: College or University degree" "Impedance of whole body" ...
+  ..$ chr     : chr [1:26] "5" "5" "5" "5" ...
+  ..$ position: int [1:26] 60620980 60620980 60620980 60620980 60620980 60620980 60620980 60620980 60620980 60620980 ...
+  ..$ rsid    : chr [1:26] "rs7701440" "rs7701440" "rs7701440" "rs7701440" ...
+  ..$ ea      : chr [1:26] "C" "C" "C" "C" ...
+  ..$ nea     : chr [1:26] "T" "T" "T" "T" ...
+  ..$ eaf     : num [1:26] 0.493 0.493 0.493 0.493 0.493 ...
+  ..$ beta    : num [1:26] 0.01717 0.01652 -0.00854 0.01349 -0.01122 ...
+  ..$ se      : num [1:26] 0.0018 0.00181 0.00095 0.00151 0.0013 ...
+  ..$ p       : num [1:26] 1.3e-21 8.1e-20 2.5e-19 4.4e-19 5.9e-18 ...
+  ..$ n       : num [1:26] 454863 454857 458079 454840 454835 ...
+ $ : tibble [2 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:2] "ukb-b-3768" "ukb-b-5945"
+  ..$ trait   : chr [1:2] "Age when periods started (menarche)" "Relative age of first facial hair"
+  ..$ chr     : chr [1:2] "2" "2"
+  ..$ position: int [1:2] 200045258 200045258
+  ..$ rsid    : chr [1:2] "rs2167378" "rs2167378"
+  ..$ ea      : chr [1:2] "T" "T"
+  ..$ nea     : chr [1:2] "C" "C"
+  ..$ eaf     : num [1:2] 0.438 0.437
+  ..$ beta    : num [1:2] -0.01835 -0.00971
+  ..$ se      : num [1:2] 0.00208 0.00137
+  ..$ p       : num [1:2] 9.6e-19 1.3e-12
+  ..$ n       : num [1:2] 243944 204568
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [14 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:14] "ukb-d-30830_irnt" "ukb-d-30830_raw" "ukb-d-30720_irnt" "ukb-d-30720_raw" ...
+  ..$ trait   : chr [1:14] "SHBG" "SHBG" "Cystatin C" "Cystatin C" ...
+  ..$ chr     : chr [1:14] "3" "3" "3" "3" ...
+  ..$ position: int [1:14] 136288405 136288405 136288405 136288405 136288405 136288405 136288405 136288405 136288405 136288405 ...
+  ..$ rsid    : chr [1:14] "rs7432375" "rs7432375" "rs7432375" "rs7432375" ...
+  ..$ ea      : chr [1:14] "A" "A" "A" "A" ...
+  ..$ nea     : chr [1:14] "G" "G" "G" "G" ...
+  ..$ eaf     : num [1:14] 0.398 0.398 0.398 0.398 0.398 ...
+  ..$ beta    : num [1:14] -0.0276 -0.6853 0.0201 0.0031 -0.0182 ...
+  ..$ se      : num [1:14] 0.002312 0.064755 0.002221 0.000397 0.002346 ...
+  ..$ p       : num [1:14] 5.89e-33 3.60e-26 1.46e-19 5.76e-15 7.90e-15 ...
+  ..$ n       : num [1:14] 312215 312215 344264 344264 342829 ...
+ $ : tibble [11 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:11] "ukb-b-4630" "ukb-b-14180" "ukb-b-18994" "ukb-b-9981" ...
+  ..$ trait   : chr [1:11] "Neuroticism score" "Mood swings" "Miserableness" "Sensitivity / hurt feelings" ...
+  ..$ chr     : chr [1:11] "11" "11" "11" "11" ...
+  ..$ position: int [1:11] 113392994 113392994 113392994 113392994 113392994 113392994 113392994 113392994 113392994 113392994 ...
+  ..$ rsid    : chr [1:11] "rs2514218" "rs2514218" "rs2514218" "rs2514218" ...
+  ..$ ea      : chr [1:11] "T" "T" "T" "T" ...
+  ..$ nea     : chr [1:11] "C" "C" "C" "C" ...
+  ..$ eaf     : num [1:11] 0.356 0.356 0.356 0.356 0.356 ...
+  ..$ beta    : num [1:11] -0.06865 -0.00869 -0.00716 -0.00714 -0.00718 ...
+  ..$ se      : num [1:11] 0.00775 0.00109 0.00107 0.00107 0.0011 ...
+  ..$ p       : num [1:11] 8.0e-19 1.9e-15 2.6e-11 3.1e-11 6.1e-11 ...
+  ..$ n       : num [1:11] 374323 451619 454982 449419 443918 ...
+ $ : tibble [54 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:54] "ukb-b-16446" "ukb-b-13354" "ukb-b-14540" "ukb-b-9093" ...
+  ..$ trait   : chr [1:54] "Basal metabolic rate" "Whole body fat-free mass" "Whole body water mass" "Arm predicted mass (left)" ...
+  ..$ chr     : chr [1:54] "16" "16" "16" "16" ...
+  ..$ position: int [1:54] 29994922 29994922 29994922 29994922 29994922 29994922 29994922 29994922 29994922 29994922 ...
+  ..$ rsid    : chr [1:54] "rs3814883" "rs3814883" "rs3814883" "rs3814883" ...
+  ..$ ea      : chr [1:54] "T" "T" "T" "T" ...
+  ..$ nea     : chr [1:54] "C" "C" "C" "C" ...
+  ..$ eaf     : num [1:54] 0.482 0.482 0.482 0.482 0.482 ...
+  ..$ beta    : num [1:54] 0.0211 0.0197 0.0197 0.0196 0.0202 ...
+  ..$ se      : num [1:54] 0.00131 0.00125 0.00125 0.00126 0.00131 ...
+  ..$ p       : num [1:54] 5.0e-58 5.0e-56 5.9e-56 1.6e-54 8.8e-54 ...
+  ..$ n       : num [1:54] 454874 454850 454888 454655 454835 ...
+ $ : tibble [12 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:12] "ukb-b-6019" "ukb-b-7460" "ukb-b-10831" "ukb-b-1572" ...
+  ..$ trait   : chr [1:12] "Number of cigarettes previously smoked daily" "Pack years adult smoking as proportion of life span exposed to smoking" "Pack years of smoking" "Difficulty not smoking for 1 day" ...
+  ..$ chr     : chr [1:12] "15" "15" "15" "15" ...
+  ..$ position: int [1:12] 78910267 78910267 78910267 78910267 78910267 78910267 78910267 78910267 78910267 78910267 ...
+  ..$ rsid    : chr [1:12] "rs28669908" "rs28669908" "rs28669908" "rs28669908" ...
+  ..$ ea      : chr [1:12] "A" "A" "A" "A" ...
+  ..$ nea     : chr [1:12] "C" "C" "C" "C" ...
+  ..$ eaf     : num [1:12] 0.207 0.206 0.206 0.204 0.204 ...
+  ..$ beta    : num [1:12] -0.0683 -0.0593 -0.0552 -0.0773 -0.0601 ...
+  ..$ se      : num [1:12] 0.00444 0.00431 0.00431 0.00864 0.00673 ...
+  ..$ p       : num [1:12] 2.2e-53 3.4e-43 1.9e-37 3.7e-19 4.2e-19 ...
+  ..$ n       : num [1:12] 108946 142387 142387 33404 33229 ...
+ $ : tibble [13 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:13] "ukb-d-30250_irnt" "ukb-d-30240_irnt" "ukb-d-30300_irnt" "ukb-d-30290_irnt" ...
+  ..$ trait   : chr [1:13] "Reticulocyte count" "Reticulocyte percentage" "High light scatter reticulocyte count" "High light scatter reticulocyte percentage" ...
+  ..$ chr     : chr [1:13] "14" "14" "14" "14" ...
+  ..$ position: int [1:13] 104261723 104261723 104261723 104261723 104261723 104261723 104261723 104261723 104261723 104261723 ...
+  ..$ rsid    : chr [1:13] "rs722637" "rs722637" "rs722637" "rs722637" ...
+  ..$ ea      : chr [1:13] "C" "C" "C" "C" ...
+  ..$ nea     : chr [1:13] "A" "A" "A" "A" ...
+  ..$ eaf     : num [1:13] 0.345 0.345 0.345 0.345 0.342 ...
+  ..$ beta    : num [1:13] 0.0209 0.02 0.0191 0.0181 0.0191 ...
+  ..$ se      : num [1:13] 0.0025 0.00253 0.00251 0.00253 0.0027 ...
+  ..$ p       : num [1:13] 5.60e-17 2.97e-15 3.38e-14 8.53e-13 1.40e-12 ...
+  ..$ n       : num [1:13] 344729 344728 344729 344729 265627 ...
+ $ : tibble [1 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr "ukb-b-7859"
+  ..$ trait   : chr "Impedance of arm (right)"
+  ..$ chr     : chr "10"
+  ..$ position: int 18726326
+  ..$ rsid    : chr "rs6482437"
+  ..$ ea      : chr "C"
+  ..$ nea     : chr "A"
+  ..$ eaf     : num 0.889
+  ..$ beta    : num 0.0133
+  ..$ se      : num 0.00225
+  ..$ p       : num 3.3e-09
+  ..$ n       : num 454826
+ $ : tibble [5 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:5] "ukb-b-4080" "ukb-b-8607" "ukb-b-19393" "ukb-b-20044" ...
+  ..$ trait   : chr [1:5] "Ankle spacing width" "Ankle spacing width (right)" "Whole body fat mass" "Trunk fat mass" ...
+  ..$ chr     : chr [1:5] "7" "7" "7" "7" ...
+  ..$ position: int [1:5] 104594253 104594253 104594253 104594253 104594253
+  ..$ rsid    : chr [1:5] "rs2252074" "rs2252074" "rs2252074" "rs2252074" ...
+  ..$ ea      : chr [1:5] "G" "G" "G" "G" ...
+  ..$ nea     : chr [1:5] "T" "T" "T" "T" ...
+  ..$ eaf     : num [1:5] 0.399 0.4 0.399 0.399 0.399
+  ..$ beta    : num [1:5] 0.01424 0.01934 0.01208 0.01233 0.00954
+  ..$ se      : num [1:5] 0.00231 0.00319 0.002 0.00206 0.00162
+  ..$ p       : num [1:5] 7.1e-10 1.3e-09 1.5e-09 2.2e-09 4.0e-09
+  ..$ n       : num [1:5] 265753 146181 454137 454588 454823
+ $ : tibble [7 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:7] "ukb-d-30630_irnt" "ukb-d-30630_raw" "ukb-d-30760_irnt" "ukb-d-30760_raw" ...
+  ..$ trait   : chr [1:7] "Apoliprotein A" "Apoliprotein A" "HDL cholesterol" "HDL cholesterol" ...
+  ..$ chr     : chr [1:7] "12" "12" "12" "12" ...
+  ..$ position: int [1:7] 57682956 57682956 57682956 57682956 57682956 57682956 57682956
+  ..$ rsid    : chr [1:7] "rs61937595" "rs61937595" "rs61937595" "rs61937595" ...
+  ..$ ea      : chr [1:7] "T" "T" "T" "T" ...
+  ..$ nea     : chr [1:7] "C" "C" "C" "C" ...
+  ..$ eaf     : num [1:7] 0.0949 0.0949 0.0949 0.0949 0.095 ...
+  ..$ beta    : num [1:7] -0.02783 -0.00745 -0.02697 -0.00993 -0.02458 ...
+  ..$ se      : num [1:7] 0.00403 0.00109 0.00396 0.00152 0.00398 ...
+  ..$ p       : num [1:7] 4.83e-12 9.06e-12 9.57e-12 7.19e-11 6.33e-10 ...
+  ..$ n       : num [1:7] 313387 313387 315133 315133 342990 ...
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [6 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:6] "ukb-d-30600_irnt" "ukb-d-30600_raw" "ukb-d-30860_irnt" "ukb-d-30860_raw" ...
+  ..$ trait   : chr [1:6] "Albumin" "Albumin" "Total protein" "Total protein" ...
+  ..$ chr     : chr [1:6] "19" "19" "19" "19" ...
+  ..$ position: int [1:6] 50168871 50168871 50168871 50168871 50168871 50168871
+  ..$ rsid    : chr [1:6] "rs2304206" "rs2304206" "rs2304206" "rs2304206" ...
+  ..$ ea      : chr [1:6] "A" "A" "A" "A" ...
+  ..$ nea     : chr [1:6] "G" "G" "G" "G" ...
+  ..$ eaf     : num [1:6] 0.243 0.243 0.242 0.242 0.245 ...
+  ..$ beta    : num [1:6] -0.03094 -0.08019 -0.03022 -0.1204 0.00951 ...
+  ..$ se      : num [1:6] 0.00287 0.00751 0.00293 0.01183 0.00153 ...
+  ..$ p       : num [1:6] 4.79e-27 1.23e-26 6.59e-25 2.48e-24 4.80e-10 ...
+  ..$ n       : num [1:6] 315268 315268 314921 314921 461950 ...
+ $ : tibble [1 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr "ukb-b-14147"
+  ..$ trait   : chr "Risk taking"
+  ..$ chr     : chr "18"
+  ..$ position: int 53200117
+  ..$ rsid    : chr "rs9636107"
+  ..$ ea      : chr "G"
+  ..$ nea     : chr "A"
+  ..$ eaf     : num 0.471
+  ..$ beta    : num 0.00541
+  ..$ se      : num 0.000919
+  ..$ p       : num 4e-09
+  ..$ n       : num 446279
+ $ : tibble [30 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:30] "ukb-d-30090_irnt" "ukb-d-30870_irnt" "ukb-d-30070_irnt" "ukb-d-30870_raw" ...
+  ..$ trait   : chr [1:30] "Platelet crit" "Triglycerides" "Red blood cell (erythrocyte) distribution width" "Triglycerides" ...
+  ..$ chr     : chr [1:30] "19" "19" "19" "19" ...
+  ..$ position: int [1:30] 19497669 19497669 19497669 19497669 19497669 19497669 19497669 19497669 19497669 19497669 ...
+  ..$ rsid    : chr [1:30] "rs1858999" "rs1858999" "rs1858999" "rs1858999" ...
+  ..$ ea      : chr [1:30] "G" "G" "G" "G" ...
+  ..$ nea     : chr [1:30] "C" "C" "C" "C" ...
+  ..$ eaf     : num [1:30] 0.645 0.645 0.645 0.645 0.645 ...
+  ..$ beta    : num [1:30] -0.0294 0.0278 0.0279 0.0275 0.0283 ...
+  ..$ se      : num [1:30] 0.00238 0.00243 0.00248 0.00251 0.00277 ...
+  ..$ p       : num [1:30] 4.93e-35 1.91e-30 2.99e-29 5.67e-28 1.48e-24 ...
+  ..$ n       : num [1:30] 350471 343992 350473 343992 344278 ...
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [5 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:5] "ukb-b-6591" "ukb-b-18335" "ukb-b-6306" "ukb-b-6134" ...
+  ..$ trait   : chr [1:5] "Age first had sexual intercourse" "Wheeze or whistling in the chest in last year" "Overall health rating" "Age completed full time education" ...
+  ..$ chr     : chr [1:5] "18" "18" "18" "18" ...
+  ..$ position: int [1:5] 77579812 77579812 77579812 77579812 77579812
+  ..$ rsid    : chr [1:5] "rs7238071" "rs7238071" "rs7238071" "rs7238071" ...
+  ..$ ea      : chr [1:5] "G" "G" "G" "G" ...
+  ..$ nea     : chr [1:5] "A" "A" "A" "A" ...
+  ..$ eaf     : num [1:5] 0.276 0.276 0.276 0.278 0.276
+  ..$ beta    : num [1:5] -0.018 0.00612 0.00989 -0.01353 -0.0062
+  ..$ se      : num [1:5] 0.002428 0.000955 0.001688 0.002319 0.00107
+  ..$ p       : num [1:5] 1.2e-13 1.5e-10 4.7e-09 5.5e-09 7.0e-09
+  ..$ n       : num [1:5] 406457 453959 460844 307897 458079
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [2 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:2] "ukb-d-30110_irnt" "ukb-b-4080"
+  ..$ trait   : chr [1:2] "Platelet distribution width" "Ankle spacing width"
+  ..$ chr     : chr [1:2] "22" "22"
+  ..$ position: int [1:2] 42370991 42370991
+  ..$ rsid    : chr [1:2] "rs5751191" "rs5751191"
+  ..$ ea      : chr [1:2] "C" "C"
+  ..$ nea     : chr [1:2] "T" "T"
+  ..$ eaf     : num [1:2] 0.505 0.503
+  ..$ beta    : num [1:2] 0.0192 0.0137
+  ..$ se      : num [1:2] 0.00238 0.00228
+  ..$ p       : num [1:2] 6.01e-16 2.00e-09
+  ..$ n       : num [1:2] 350470 265753
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [1 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr "ukb-d-30130_irnt"
+  ..$ trait   : chr "Monocyte count"
+  ..$ chr     : chr "10"
+  ..$ position: int 3821561
+  ..$ rsid    : chr "rs17731"
+  ..$ ea      : chr "A"
+  ..$ nea     : chr "G"
+  ..$ eaf     : num 0.374
+  ..$ beta    : num -0.0144
+  ..$ se      : num 0.00239
+  ..$ p       : num 1.7e-09
+  ..$ n       : num 349856
+ $ : tibble [4 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:4] "ukb-d-20116_0" "ukb-b-2134" "ukb-b-3460" "ukb-b-223"
+  ..$ trait   : chr [1:4] "Smoking status: Never" "Past tobacco smoking" "Alcohol intake versus 10 years previously" "Current tobacco smoking"
+  ..$ chr     : chr [1:4] "8" "8" "8" "8"
+  ..$ position: int [1:4] 27442127 27442127 27442127 27442127
+  ..$ rsid    : chr [1:4] "rs73229090" "rs73229090" "rs73229090" "rs73229090"
+  ..$ ea      : chr [1:4] "A" "A" "A" "A"
+  ..$ nea     : chr [1:4] "C" "C" "C" "C"
+  ..$ eaf     : num [1:4] 0.118 0.118 0.117 0.117
+  ..$ beta    : num [1:4] 0.0137 0.0289 -0.0158 -0.011
+  ..$ se      : num [1:4] 0.00182 0.00423 0.00248 0.00179
+  ..$ p       : num [1:4] 6.02e-14 8.40e-12 1.90e-10 7.80e-10
+  ..$ n       : num [1:4] 359706 424960 428117 462434
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [1 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr "ukb-b-5779"
+  ..$ trait   : chr "Alcohol intake frequency."
+  ..$ chr     : chr "16"
+  ..$ position: int 13753384
+  ..$ rsid    : chr "rs8055219"
+  ..$ ea      : chr "A"
+  ..$ nea     : chr "G"
+  ..$ eaf     : num 0.225
+  ..$ beta    : num -0.021
+  ..$ se      : num 0.00362
+  ..$ p       : num 6.9e-09
+  ..$ n       : num 462346
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [2 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:2] "ukb-d-30070_irnt" "ukb-d-30050_irnt"
+  ..$ trait   : chr [1:2] "Red blood cell (erythrocyte) distribution width" "Mean corpuscular haemoglobin"
+  ..$ chr     : chr [1:2] "8" "8"
+  ..$ position: int [1:2] 26279173 26279173
+  ..$ rsid    : chr [1:2] "rs73219806" "rs73219806"
+  ..$ ea      : chr [1:2] "A" "A"
+  ..$ nea     : chr [1:2] "C" "C"
+  ..$ eaf     : num [1:2] 0.168 0.168
+  ..$ beta    : num [1:2] 0.0253 -0.0218
+  ..$ se      : num [1:2] 0.00325 0.00324
+  ..$ p       : num [1:2] 7.63e-15 1.56e-11
+  ..$ n       : num [1:2] 350473 350472
+ $ : tibble [5 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:5] "ukb-b-4956" "ukb-b-2772" "ukb-b-4256" "ukb-b-6066" ...
+  ..$ trait   : chr [1:5] "Morning/evening person (chronotype)" "Getting up in morning" "Lifetime number of sexual partners" "Tea intake" ...
+  ..$ chr     : chr [1:5] "5" "5" "5" "5" ...
+  ..$ position: int [1:5] 152323236 152323236 152323236 152323236 152323236
+  ..$ rsid    : chr [1:5] "rs10515678" "rs10515678" "rs10515678" "rs10515678" ...
+  ..$ ea      : chr [1:5] "T" "T" "T" "T" ...
+  ..$ nea     : chr [1:5] "C" "C" "C" "C" ...
+  ..$ eaf     : num [1:5] 0.298 0.298 0.299 0.298 0.298
+  ..$ beta    : num [1:5] -0.01858 0.01416 -0.01272 -0.01404 -0.00518
+  ..$ se      : num [1:5] 0.00223 0.00175 0.00202 0.00232 0.00088
+  ..$ p       : num [1:5] 7.5e-17 5.6e-16 3.1e-10 1.4e-09 3.8e-09
+  ..$ n       : num [1:5] 413343 461658 378882 447485 455364
+ $ : tibble [2 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:2] "ukb-b-16489" "ukb-b-4522"
+  ..$ trait   : chr [1:2] "Qualifications: College or University degree" "Time spent using computer"
+  ..$ chr     : chr [1:2] "17" "17"
+  ..$ position: int [1:2] 19142226 19142226
+  ..$ rsid    : chr [1:2] "rs959071" "rs959071"
+  ..$ ea      : chr [1:2] "T" "T"
+  ..$ nea     : chr [1:2] "C" "C"
+  ..$ eaf     : num [1:2] 0.128 0.128
+  ..$ beta    : num [1:2] -0.0085 -0.0158
+  ..$ se      : num [1:2] 0.00143 0.00274
+  ..$ p       : num [1:2] 2.6e-09 7.4e-09
+  ..$ n       : num [1:2] 458079 360895
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [15 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:15] "ukb-b-7859" "ukb-b-19379" "ukb-b-17241" "ukb-b-19921" ...
+  ..$ trait   : chr [1:15] "Impedance of arm (right)" "Impedance of arm (left)" "Blood clot, DVT, bronchitis, emphysema, asthma, rhinitis, eczema, allergy diagnosed by doctor: Hayfever, allerg"| __truncated__ "Impedance of whole body" ...
+  ..$ chr     : chr [1:15] "2" "2" "2" "2" ...
+  ..$ position: int [1:15] 198245965 198245965 198245965 198245965 198245965 198245965 198245965 198245965 198245965 198245965 ...
+  ..$ rsid    : chr [1:15] "rs55775495" "rs55775495" "rs55775495" "rs55775495" ...
+  ..$ ea      : chr [1:15] "T" "T" "T" "T" ...
+  ..$ nea     : chr [1:15] "C" "C" "C" "C" ...
+  ..$ eaf     : num [1:15] 0.647 0.647 0.647 0.647 0.645 ...
+  ..$ beta    : num [1:15] -0.01544 -0.01422 -0.00785 -0.01285 0.01653 ...
+  ..$ se      : num [1:15] 0.00147 0.00147 0.00091 0.00158 0.00228 ...
+  ..$ p       : num [1:15] 6.60e-26 4.50e-22 6.40e-18 4.10e-16 4.24e-13 ...
+  ..$ n       : num [1:15] 454826 454850 462013 454840 344264 ...
+ $ : tibble [36 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:36] "ukb-b-2303" "ukb-b-19953" "ukb-b-6704" "ukb-b-12854" ...
+  ..$ trait   : chr [1:36] "Body mass index (BMI)" "Body mass index (BMI)" "Arm fat mass (right)" "Arm fat percentage (right)" ...
+  ..$ chr     : chr [1:36] "14" "14" "14" "14" ...
+  ..$ position: int [1:36] 33303540 33303540 33303540 33303540 33303540 33303540 33303540 33303540 33303540 33303540 ...
+  ..$ rsid    : chr [1:36] "rs12883788" "rs12883788" "rs12883788" "rs12883788" ...
+  ..$ ea      : chr [1:36] "T" "T" "T" "T" ...
+  ..$ nea     : chr [1:36] "C" "C" "C" "C" ...
+  ..$ eaf     : num [1:36] 0.46 0.46 0.46 0.46 0.46 ...
+  ..$ beta    : num [1:36] 0.0183 0.0179 0.0178 0.0138 0.0176 ...
+  ..$ se      : num [1:36] 0.00201 0.00199 0.00198 0.00154 0.00198 ...
+  ..$ p       : num [1:36] 8.6e-20 2.7e-19 2.8e-19 4.4e-19 7.0e-19 ...
+  ..$ n       : num [1:36] 454884 461460 454757 454789 454684 ...
+ $ : tibble [3 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:3] "ukb-d-30600_irnt" "ukb-d-30600_raw" "ukb-d-30020_irnt"
+  ..$ trait   : chr [1:3] "Albumin" "Albumin" "Haemoglobin concentration"
+  ..$ chr     : chr [1:3] "15" "15" "15"
+  ..$ position: int [1:3] 44250313 44250313 44250313
+  ..$ rsid    : chr [1:3] "rs2929278" "rs2929278" "rs2929278"
+  ..$ ea      : chr [1:3] "T" "T" "T"
+  ..$ nea     : chr [1:3] "C" "C" "C"
+  ..$ eaf     : num [1:3] 0.256 0.256 0.256
+  ..$ beta    : num [1:3] 0.0211 0.0544 -0.0136
+  ..$ se      : num [1:3] 0.00282 0.00737 0.00217
+  ..$ p       : num [1:3] 8.12e-14 1.55e-13 3.47e-10
+  ..$ n       : num [1:3] 315268 315268 350474
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [1 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr "ukb-d-30830_irnt"
+  ..$ trait   : chr "SHBG"
+  ..$ chr     : chr "5"
+  ..$ position: int 137892170
+  ..$ rsid    : chr "rs10117"
+  ..$ ea      : chr "A"
+  ..$ nea     : chr "G"
+  ..$ eaf     : num 0.394
+  ..$ beta    : num -0.014
+  ..$ se      : num 0.00232
+  ..$ p       : num 1.64e-09
+  ..$ n       : num 312215
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [1 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr "ukb-b-4956"
+  ..$ trait   : chr "Morning/evening person (chronotype)"
+  ..$ chr     : chr "3"
+  ..$ position: int 2547786
+  ..$ rsid    : chr "rs17194490"
+  ..$ ea      : chr "T"
+  ..$ nea     : chr "G"
+  ..$ eaf     : num 0.165
+  ..$ beta    : num 0.0162
+  ..$ se      : num 0.00275
+  ..$ p       : num 3.5e-09
+  ..$ n       : num 413343
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [2 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:2] "ukb-b-10787" "ukb-b-4424"
+  ..$ trait   : chr [1:2] "Standing height" "Sleep duration"
+  ..$ chr     : chr [1:2] "6" "6"
+  ..$ position: int [1:2] 43160375 43160375
+  ..$ rsid    : chr [1:2] "rs113113059" "rs113113059"
+  ..$ ea      : chr [1:2] "C" "C"
+  ..$ nea     : chr [1:2] "T" "T"
+  ..$ eaf     : num [1:2] 0.22 0.22
+  ..$ beta    : num [1:2] -0.0117 -0.0111
+  ..$ se      : num [1:2] 0.00157 0.00193
+  ..$ p       : num [1:2] 7.9e-14 8.6e-09
+  ..$ n       : num [1:2] 461950 460099
+ $ : tibble [1 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr "ukb-b-16489"
+  ..$ trait   : chr "Qualifications: College or University degree"
+  ..$ chr     : chr "7"
+  ..$ position: int 24717969
+  ..$ rsid    : chr "rs79210963"
+  ..$ ea      : chr "C"
+  ..$ nea     : chr "T"
+  ..$ eaf     : num 0.117
+  ..$ beta    : num 0.00896
+  ..$ se      : num 0.00149
+  ..$ p       : num 1.7e-09
+  ..$ n       : num 458079
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [1 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr "ukb-d-30730_irnt"
+  ..$ trait   : chr "Gamma glutamyltransferase"
+  ..$ chr     : chr "3"
+  ..$ position: int 36858583
+  ..$ rsid    : chr "rs75968099"
+  ..$ ea      : chr "T"
+  ..$ nea     : chr "C"
+  ..$ eaf     : num 0.347
+  ..$ beta    : num -0.016
+  ..$ se      : num 0.00234
+  ..$ p       : num 8.99e-12
+  ..$ n       : num 344104
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [26 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:26] "ukb-d-30090_irnt" "ukb-d-30080_irnt" "ukb-b-14068" "ukb-b-7376" ...
+  ..$ trait   : chr [1:26] "Platelet crit" "Platelet count" "Impedance of leg (left)" "Impedance of leg (right)" ...
+  ..$ chr     : chr [1:26] "17" "17" "17" "17" ...
+  ..$ position: int [1:26] 2157774 2157774 2157774 2157774 2157774 2157774 2157774 2157774 2157774 2157774 ...
+  ..$ rsid    : chr [1:26] "rs12943566" "rs12943566" "rs12943566" "rs12943566" ...
+  ..$ ea      : chr [1:26] "G" "G" "G" "G" ...
+  ..$ nea     : chr [1:26] "A" "A" "A" "A" ...
+  ..$ eaf     : num [1:26] 0.654 0.654 0.654 0.654 0.654 ...
+  ..$ beta    : num [1:26] 0.0347 0.029 0.0199 0.0191 -0.0251 ...
+  ..$ se      : num [1:26] 0.00239 0.00243 0.00191 0.00189 0.00268 ...
+  ..$ p       : num [1:26] 6.29e-48 7.10e-33 2.30e-25 5.90e-24 8.00e-21 ...
+  ..$ n       : num [1:26] 350471 350474 454857 454863 265627 ...
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [39 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:39] "ukb-d-30270_irnt" "ukb-d-30010_irnt" "ukb-d-30070_irnt" "ukb-d-30260_irnt" ...
+  ..$ trait   : chr [1:39] "Mean sphered cell volume" "Red blood cell (erythrocyte) count" "Red blood cell (erythrocyte) distribution width" "Mean reticulocyte volume" ...
+  ..$ chr     : chr [1:39] "17" "17" "17" "17" ...
+  ..$ position: int [1:39] 44289832 44289832 44289832 44289832 44289832 44289832 44289832 44289832 44289832 44289832 ...
+  ..$ rsid    : chr [1:39] "rs2696466" "rs2696466" "rs2696466" "rs2696466" ...
+  ..$ ea      : chr [1:39] "G" "G" "G" "G" ...
+  ..$ nea     : chr [1:39] "A" "A" "A" "A" ...
+  ..$ eaf     : num [1:39] 0.415 0.415 0.415 0.415 0.414 ...
+  ..$ beta    : num [1:39] -0.0426 0.0358 0.0402 -0.0398 0.02 ...
+  ..$ se      : num [1:39] 0.00245 0.00208 0.00243 0.00245 0.00165 ...
+  ..$ p       : num [1:39] 8.87e-68 5.52e-66 1.75e-61 2.21e-59 1.03e-33 ...
+  ..$ n       : num [1:39] 344729 350475 350473 344728 165649 ...
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [18 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:18] "ukb-d-30070_irnt" "ukb-b-14068" "ukb-b-7376" "ukb-b-14540" ...
+  ..$ trait   : chr [1:18] "Red blood cell (erythrocyte) distribution width" "Impedance of leg (left)" "Impedance of leg (right)" "Whole body water mass" ...
+  ..$ chr     : chr [1:18] "8" "8" "8" "8" ...
+  ..$ position: int [1:18] 38257506 38257506 38257506 38257506 38257506 38257506 38257506 38257506 38257506 38257506 ...
+  ..$ rsid    : chr [1:18] "rs7816998" "rs7816998" "rs7816998" "rs7816998" ...
+  ..$ ea      : chr [1:18] "A" "A" "A" "A" ...
+  ..$ nea     : chr [1:18] "G" "G" "G" "G" ...
+  ..$ eaf     : num [1:18] 0.232 0.23 0.23 0.23 0.23 ...
+  ..$ beta    : num [1:18] -0.0215 0.0155 0.0154 -0.0106 -0.011 ...
+  ..$ se      : num [1:18] 0.00281 0.00216 0.00214 0.00148 0.00154 ...
+  ..$ p       : num [1:18] 2.25e-14 6.60e-13 6.60e-13 7.70e-13 8.50e-13 ...
+  ..$ n       : num [1:18] 350473 454857 454863 454888 454834 ...
+ $ : tibble [4 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:4] "ukb-b-7376" "ukb-b-14068" "ukb-b-19921" "ukb-b-19379"
+  ..$ trait   : chr [1:4] "Impedance of leg (right)" "Impedance of leg (left)" "Impedance of whole body" "Impedance of arm (left)"
+  ..$ chr     : chr [1:4] "8" "8" "8" "8"
+  ..$ position: int [1:4] 89283689 89283689 89283689 89283689
+  ..$ rsid    : chr [1:4] "rs1915019" "rs1915019" "rs1915019" "rs1915019"
+  ..$ ea      : chr [1:4] "G" "G" "G" "G"
+  ..$ nea     : chr [1:4] "A" "A" "A" "A"
+  ..$ eaf     : num [1:4] 0.76 0.76 0.76 0.76
+  ..$ beta    : num [1:4] -0.018 -0.0178 -0.0137 -0.0101
+  ..$ se      : num [1:4] 0.00211 0.00213 0.00178 0.00165
+  ..$ p       : num [1:4] 1.8e-17 8.0e-17 1.2e-14 1.2e-09
+  ..$ n       : num [1:4] 454863 454857 454840 454850
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [1 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr "ukb-b-4616"
+  ..$ trait   : chr "Nap during day"
+  ..$ chr     : chr "6"
+  ..$ position: int 84294486
+  ..$ rsid    : chr "rs9283801"
+  ..$ ea      : chr "C"
+  ..$ nea     : chr "T"
+  ..$ eaf     : num 0.453
+  ..$ beta    : num 0.00841
+  ..$ se      : num 0.00123
+  ..$ p       : num 7.6e-12
+  ..$ n       : num 462400
+ $ : tibble [4 × 12] (S3: tbl_df/tbl/data.frame)
+  ..$ id      : chr [1:4] "ukb-d-30140_irnt" "ukb-d-30000_irnt" "ukb-d-30190_irnt" "ukb-d-30200_irnt"
+  ..$ trait   : chr [1:4] "Neutrophill count" "White blood cell (leukocyte) count" "Monocyte percentage" "Neutrophill percentage"
+  ..$ chr     : chr [1:4] "4" "4" "4" "4"
+  ..$ position: int [1:4] 706700 706700 706700 706700
+  ..$ rsid    : chr [1:4] "rs35734242" "rs35734242" "rs35734242" "rs35734242"
+  ..$ ea      : chr [1:4] "C" "C" "C" "C"
+  ..$ nea     : chr [1:4] "T" "T" "T" "T"
+  ..$ eaf     : num [1:4] 0.428 0.428 0.428 0.428
+  ..$ beta    : num [1:4] 0.0213 0.0188 -0.0153 0.0147
+  ..$ se      : num [1:4] 0.0024 0.00241 0.00234 0.0024
+  ..$ p       : num [1:4] 7.74e-19 5.07e-15 6.26e-11 8.76e-10
+  ..$ n       : num [1:4] 349856 350470 349861 349861
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+ $ : tibble [0 × 0] (S3: tbl_df/tbl/data.frame)
+ Named list()
+  [list output truncated]</code></pre>
+</div>
+</div>
+<div id="2bce1833" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># group_by(phewas_result, id) %&gt;%</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co">#     summarise(n = n(), minp = min(p), trait=trait[1]) %&gt;%</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">#     arrange(desc(n)) %&gt;%</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#     select(id, trait, minp, n) %&gt;%</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#     write.csv("phewas_result.csv", row.names = FALSE)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="8384b964" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>phewas_result_filtered <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"phewas_result.csv"</span>) <span class="sc">%&gt;%</span> <span class="fu">filter</span>(keep <span class="sc">==</span> <span class="st">"y"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(phewas_result_filtered)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   34 obs. of  5 variables:
+ $ id   : chr  "ukb-b-19921" "ukb-b-10787" "ukb-b-16446" "ukb-b-16489" ...
+ $ trait: chr  "Impedance of whole body" "Standing height" "Basal metabolic rate" "Qualifications: College or University degree" ...
+ $ minp : num  3.6e-34 2.4e-37 5.0e-58 2.5e-19 7.1e-33 ...
+ $ n    : int  21 13 12 11 9 8 7 6 6 6 ...
+ $ keep : chr  "y" "y" "y" "y" ...</code></pre>
+</div>
+</div>
+<div id="2fdf69eb" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>allintids <span class="ot">&lt;-</span> <span class="fu">unique</span>(phewas_result_filtered<span class="sc">$</span>id)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>int_inst <span class="ot">&lt;-</span> <span class="fu">extract_instruments</span>(allintids)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>outdat <span class="ot">&lt;-</span> <span class="fu">extract_outcome_data</span>(int_inst<span class="sc">$</span>SNP, <span class="st">"ieu-b-5100"</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">save</span>(scz, outdat, int_inst, allintids, phewas_result_filtered, <span class="at">file =</span> <span class="st">"phewas_result.Rdata"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning message in FUN(X[[i]], ...):
+“Duplicated SNPs present in exposure data for phenotype 'Diastolic blood pressure, automated reading || id:ukb-b-7992. Just keeping the first instance:
+rs28752924”
+Warning message in FUN(X[[i]], ...):
+“Duplicated SNPs present in exposure data for phenotype 'Mean corpuscular haemoglobin || id:ukb-d-30050_irnt. Just keeping the first instance:
+rs2291429”
+Extracting data for 7661 SNP(s) from 1 GWAS(s)
+
+Querying id chunk 1 of 1
+
+Querying variant chunk 1 of 120
+
+Querying variant chunk 2 of 120
+
+Querying variant chunk 3 of 120
+
+Querying variant chunk 4 of 120
+
+Querying variant chunk 5 of 120
+
+Querying variant chunk 6 of 120
+
+Querying variant chunk 7 of 120
+
+Querying variant chunk 8 of 120
+
+Querying variant chunk 9 of 120
+
+Querying variant chunk 10 of 120
+
+Querying variant chunk 11 of 120
+
+Querying variant chunk 12 of 120
+
+Querying variant chunk 13 of 120
+
+Querying variant chunk 14 of 120
+
+Querying variant chunk 15 of 120
+
+Querying variant chunk 16 of 120
+
+Querying variant chunk 17 of 120
+
+Querying variant chunk 18 of 120
+
+Querying variant chunk 19 of 120
+
+Querying variant chunk 20 of 120
+
+Querying variant chunk 21 of 120
+
+Querying variant chunk 22 of 120
+
+Querying variant chunk 23 of 120
+
+Querying variant chunk 24 of 120
+
+Querying variant chunk 25 of 120
+
+Querying variant chunk 26 of 120
+
+Querying variant chunk 27 of 120
+
+Querying variant chunk 28 of 120
+
+Querying variant chunk 29 of 120
+
+Querying variant chunk 30 of 120
+
+Querying variant chunk 31 of 120
+
+Querying variant chunk 32 of 120
+
+Querying variant chunk 33 of 120
+
+Querying variant chunk 34 of 120
+
+Querying variant chunk 35 of 120
+
+Querying variant chunk 36 of 120
+
+Querying variant chunk 37 of 120
+
+Querying variant chunk 38 of 120
+
+Querying variant chunk 39 of 120
+
+Querying variant chunk 40 of 120
+
+Querying variant chunk 41 of 120
+
+Querying variant chunk 42 of 120
+
+Querying variant chunk 43 of 120
+
+Querying variant chunk 44 of 120
+
+Querying variant chunk 45 of 120
+
+Querying variant chunk 46 of 120
+
+Querying variant chunk 47 of 120
+
+Querying variant chunk 48 of 120
+
+Querying variant chunk 49 of 120
+
+Querying variant chunk 50 of 120
+
+Querying variant chunk 51 of 120
+
+Querying variant chunk 52 of 120
+
+Querying variant chunk 53 of 120
+
+Querying variant chunk 54 of 120
+
+Querying variant chunk 55 of 120
+
+Querying variant chunk 56 of 120
+
+Querying variant chunk 57 of 120
+
+Querying variant chunk 58 of 120
+
+Querying variant chunk 59 of 120
+
+Querying variant chunk 60 of 120
+
+Querying variant chunk 61 of 120
+
+Querying variant chunk 62 of 120
+
+Querying variant chunk 63 of 120
+
+Querying variant chunk 64 of 120
+
+Querying variant chunk 65 of 120
+
+Querying variant chunk 66 of 120
+
+Querying variant chunk 67 of 120
+
+Querying variant chunk 68 of 120
+
+Querying variant chunk 69 of 120
+
+Querying variant chunk 70 of 120
+
+Querying variant chunk 71 of 120
+
+Querying variant chunk 72 of 120
+
+Querying variant chunk 73 of 120
+
+Querying variant chunk 74 of 120
+
+Querying variant chunk 75 of 120
+
+Querying variant chunk 76 of 120
+
+Querying variant chunk 77 of 120
+
+Querying variant chunk 78 of 120
+
+Querying variant chunk 79 of 120
+
+Querying variant chunk 80 of 120
+
+Querying variant chunk 81 of 120
+
+Querying variant chunk 82 of 120
+
+Querying variant chunk 83 of 120
+
+Querying variant chunk 84 of 120
+
+Querying variant chunk 85 of 120
+
+Querying variant chunk 86 of 120
+
+Querying variant chunk 87 of 120
+
+Querying variant chunk 88 of 120
+
+Querying variant chunk 89 of 120
+
+Querying variant chunk 90 of 120
+
+Querying variant chunk 91 of 120
+
+Querying variant chunk 92 of 120
+
+Querying variant chunk 93 of 120
+
+Querying variant chunk 94 of 120
+
+Querying variant chunk 95 of 120
+
+Querying variant chunk 96 of 120
+
+Querying variant chunk 97 of 120
+
+Querying variant chunk 98 of 120
+
+Querying variant chunk 99 of 120
+
+Querying variant chunk 100 of 120
+
+Querying variant chunk 101 of 120
+
+Querying variant chunk 102 of 120
+
+Querying variant chunk 103 of 120
+
+Querying variant chunk 104 of 120
+
+Querying variant chunk 105 of 120
+
+Querying variant chunk 106 of 120
+
+Querying variant chunk 107 of 120
+
+Querying variant chunk 108 of 120
+
+Querying variant chunk 109 of 120
+
+Querying variant chunk 110 of 120
+
+Querying variant chunk 111 of 120
+
+Querying variant chunk 112 of 120
+
+Querying variant chunk 113 of 120
+
+Querying variant chunk 114 of 120
+
+Querying variant chunk 115 of 120
+
+Querying variant chunk 116 of 120
+
+Querying variant chunk 117 of 120
+
+Querying variant chunk 118 of 120
+
+Querying variant chunk 119 of 120
+
+Querying variant chunk 120 of 120
+
+Finding proxies for 1122 SNPs in outcome ieu-b-5100
+
+Extracting data for 1122 SNP(s) from 1 GWAS(s)
+
+1 of 1 outcomes
+
+ [&gt;] 1 of 3 chunks
+
+Querying id chunk 1 of 1
+
+Querying variant chunk 1 of 8
+
+Querying variant chunk 2 of 8
+
+Querying variant chunk 3 of 8
+
+Querying variant chunk 4 of 8
+
+Querying variant chunk 5 of 8
+
+Querying variant chunk 6 of 8
+
+Querying variant chunk 7 of 8
+
+Querying variant chunk 8 of 8
+
+ [&gt;] 2 of 3 chunks
+
+Querying id chunk 1 of 1
+
+Querying variant chunk 1 of 8
+
+Querying variant chunk 2 of 8
+
+Querying variant chunk 3 of 8
+
+Querying variant chunk 4 of 8
+
+Querying variant chunk 5 of 8
+
+Querying variant chunk 6 of 8
+
+Querying variant chunk 7 of 8
+
+Querying variant chunk 8 of 8
+
+ [&gt;] 3 of 3 chunks
+
+Querying id chunk 1 of 1
+
+Querying variant chunk 1 of 2
+
+Querying variant chunk 2 of 2
+
+Warning message in `[.data.table`(d, !duplicated(proxy_snp.outcome), , by = outcome):
+“Ignoring by/keyby because 'j' is not supplied”</code></pre>
+</div>
+</div>
+<div id="a01053b9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>dat1 <span class="ot">&lt;-</span> <span class="fu">harmonise_data</span>(int_inst, outdat, <span class="at">action=</span><span class="dv">3</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>int_mr_res <span class="ot">&lt;-</span> <span class="fu">mr</span>(dat1, <span class="at">method_list=</span><span class="fu">c</span>(<span class="st">"mr_ivw"</span>, <span class="st">"mr_wald_ratio"</span>))</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>int_mr_res <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(pval) <span class="sc">%&gt;%</span> <span class="fu">select</span>(exposure, nsnp, b, se, pval)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Harmonising Eosinophill percentage || id:ukb-d-30210_irnt (ukb-d-30210_irnt) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs1000263, rs10810657, rs10893844, rs11071528, rs11236814, rs1131199, rs11701383, rs11701383, rs11807602, rs12206050, rs12463097, rs13045492, rs13078336, rs13251643, rs140074, rs1401884, rs16843291, rs1689510, rs16903574, rs171270, rs17364861, rs175705, rs2158799, rs2383686, rs2807738, rs28421324, rs28469316, rs34053836, rs35311230, rs3848232, rs56195271, rs57199846, rs6013210, rs6031302, rs6672031, rs6820414, rs72771440, rs73681119, rs74612091, rs7649812, rs7789337, rs7846314, rs7986971, rs8140573, rs9266321, rs9468858, rs952558
+
+Removing the following SNPs for incompatible alleles:
+rs11701383
+
+Harmonising Total protein || id:ukb-d-30860_irnt (ukb-d-30860_irnt) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10745495, rs10882100, rs10887917, rs10898811, rs11118320, rs12363520, rs12386224, rs13266875, rs138833981, rs1801282, rs2283620, rs2295701, rs2518710, rs2972156, rs2991971, rs303929, rs3781351, rs3798556, rs3870401, rs41444548, rs4482257, rs62131205, rs6547599, rs6557616, rs679574, rs7197422, rs72704062, rs75899192, rs7774393, rs7821812, rs876039, rs9390661, rs9554186
+
+Harmonising Age first had sexual intercourse || id:ukb-b-6591 (ukb-b-6591) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10496949, rs10922907, rs11030102, rs11770163, rs1226414, rs12523398, rs12614621, rs12653396, rs1454687, rs1547351, rs1585634, rs1891588, rs2025151, rs206005, rs2130893, rs2176337, rs2382440, rs2553041, rs298247, rs435538, rs4602427, rs4961705, rs6744794, rs6748341, rs67723420, rs702, rs710297, rs7381195, rs75501781, rs77214504, rs7815125, rs8133065, rs9514600, rs976179, rs9873182, rs9904818
+
+Harmonising Standing height || id:ukb-b-10787 (ukb-b-10787) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10046853, rs10061757, rs10207736, rs10228350, rs1043413, rs1043463, rs10498672, rs1074683, rs10811092, rs10832961, rs10943915, rs11122824, rs11144782, rs11664336, rs11708810, rs11947952, rs12055151, rs12132534, rs12185993, rs12452505, rs12459155, rs12572775, rs12668269, rs1291066, rs13041213, rs13102005, rs13406427, rs1353778, rs1420150, rs1467847, rs149802978, rs153661, rs1573891, rs16905189, rs172179, rs17454369, rs17511102, rs17855988, rs184090834, rs1867780, rs1875969, rs2006122, rs2061708, rs2138628, rs219162, rs2270894, rs227745, rs2384145, rs2410728, rs2648725, rs2663335, rs2763263, rs2793007, rs28503877, rs28625289, rs2993548, rs34587452, rs34970912, rs35990522, rs3771382, rs3790086, rs3812163, rs3866205, rs418280, rs4302014, rs4510865, rs4723399, rs4865956, rs4870941, rs4938330, rs4969471, rs519384, rs55837722, rs56128104, rs5759006, rs578475, rs610798, rs61919240, rs62010237, rs62277396, rs62358929, rs62390617, rs62396185, rs6464921, rs66461782, rs6689375, rs67012296, rs6824592, rs6981529, rs703998, rs7071655, rs709631, rs7239515, rs72887152, rs73074166, rs734764, rs7469817, rs75111710, rs7627625, rs7652177, rs76887969, rs77672559, rs7847059, rs79621178, rs8033211, rs822530, rs832806, rs9352895, rs9442571, rs9574556, rs9576134, rs9976812
+
+Harmonising White blood cell (leukocyte) count || id:ukb-d-30000_irnt (ukb-d-30000_irnt) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10488881, rs10757287, rs11160839, rs1227996, rs12987470, rs13028833, rs144317085, rs180943, rs1947897, rs2068330, rs2075864, rs2158799, rs2223670, rs2243602, rs2293890, rs2570947, rs2631367, rs2910580, rs3917932, rs3937387, rs4844392, rs56340469, rs61878772, rs62089694, rs6731993, rs67684915, rs72973711, rs73016721, rs7398356, rs75475627, rs7564652, rs7572278, rs7641045, rs7846314, rs9305530, rs9902102, rs9970896
+
+Harmonising Fluid intelligence score || id:ukb-b-5238 (ukb-b-5238) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10786662, rs13117856, rs190925241, rs6799069, rs72839495, rs7809889, rs9597254
+
+Harmonising Ankle spacing width || id:ukb-b-4080 (ukb-b-4080) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10018649, rs1038196, rs10993097, rs11076065, rs116920211, rs11770163, rs12051649, rs13007086, rs1454687, rs1498786, rs1583974, rs1858138, rs1924936, rs1969111, rs198428, rs2106930, rs2270894, rs2593169, rs2812208, rs2964131, rs3213217, rs512692, rs573187, rs57893585, rs6124961, rs62072974, rs62396185, rs62493792, rs6847, rs7229491, rs72789541, rs72868839, rs7309492, rs75728676, rs7614498, rs7652177, rs78267487, rs7837090, rs7844179, rs9379130
+
+Removing the following SNPs for incompatible alleles:
+rs3732360
+
+Harmonising Apoliprotein A || id:ukb-d-30630_irnt (ukb-d-30630_irnt) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10901802, rs11226108, rs12976395, rs12987470, rs17138358, rs2281718, rs2923097, rs34184867, rs35198201, rs4820324, rs4860948, rs59347135, rs600518, rs62114506, rs7783857, rs851132, rs9647335
+
+Harmonising Basal metabolic rate || id:ukb-b-16446 (ukb-b-16446) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10188231, rs10740991, rs10883560, rs10909950, rs10939792, rs11018104, rs111640872, rs113619763, rs11680549, rs11997525, rs12123505, rs12129705, rs12445679, rs12926311, rs1316312, rs13264909, rs13392666, rs1478575, rs1573891, rs165656, rs17010961, rs17069647, rs1717726, rs1846221, rs1924936, rs2095812, rs2270894, rs2952615, rs3212260, rs34227797, rs3744806, rs3771382, rs37964, rs41458449, rs4268495, rs4776970, rs485554, rs4865956, rs4899012, rs4912905, rs4968799, rs58857770, rs6026578, rs6235, rs62396185, rs62439025, rs62621400, rs6597975, rs667515, rs700768, rs72703409, rs72801843, rs73093103, rs73213484, rs7546249, rs754635, rs7619139, rs76307059, rs77093479, rs7740107, rs7815955, rs7842996, rs7969505, rs843374, rs9513510, rs968821, rs9882731, rs9976812
+
+Harmonising Impedance of whole body || id:ukb-b-19921 (ukb-b-19921) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10761155, rs1080347, rs10824307, rs10858095, rs10878301, rs10918158, rs11205679, rs11222084, rs115342405, rs11638944, rs11712037, rs117427771, rs11756783, rs117602889, rs11868042, rs11997525, rs12319419, rs12507026, rs1252218, rs12621949, rs12706937, rs12761779, rs13006493, rs13264909, rs1423424, rs1443641, rs1460678, rs1580100, rs17364861, rs1905095, rs1925834, rs2278557, rs2733534, rs2739206, rs2791547, rs339702, rs35523808, rs3767783, rs4413296, rs4766833, rs4820324, rs55928095, rs56210800, rs62102718, rs62136802, rs657936, rs6599205, rs66613476, rs6693820, rs6860245, rs6894011, rs7121646, rs7158176, rs72694139, rs7310615, rs731758, rs7323, rs74370230, rs74827081, rs7548692, rs7619139, rs7902581, rs80307954, rs9835772, rs9844972
+
+Harmonising Neuroticism score || id:ukb-b-4630 (ukb-b-4630) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10032297, rs113199002, rs12601333, rs167915, rs2407746, rs34668726, rs4534926, rs77867423, rs9516861, rs9517313
+
+Harmonising Mean corpuscular haemoglobin || id:ukb-d-30050_irnt (ukb-d-30050_irnt) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10793565, rs10974716, rs113809617, rs115045996, rs11807602, rs12232375, rs1330826, rs141866277, rs143857717, rs150197496, rs150425398, rs17001607, rs1992383, rs2224539, rs2701119, rs2834705, rs2836422, rs28588570, rs34195613, rs3812847, rs3812847, rs4541821, rs4663199, rs4680338, rs4815606, rs56273049, rs56397034, rs6060987, rs60697121, rs60757417, rs6084653, rs6103573, rs6854749, rs6987558, rs7258141, rs72843799, rs762679, rs7641761, rs78843371, rs911000, rs9833388
+
+Removing the following SNPs for incompatible alleles:
+rs2291429, rs3812847
+
+Harmonising Cystatin C || id:ukb-d-30720_raw (ukb-d-30720_raw) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10782784, rs11172134, rs11636220, rs12081098, rs12149203, rs12247543, rs12536253, rs12721051, rs13230509, rs17693971, rs223331, rs2241358, rs2791642, rs34536443, rs3790585, rs4149067, rs6499244, rs6774621, rs71359461, rs73089698, rs7327210, rs80282103, rs9273453
+
+Harmonising Birth weight || id:ukb-b-13378 (ukb-b-13378) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10499659, rs10505073, rs11187141, rs11222084, rs11698914, rs12205495, rs13034367, rs2049939, rs2229742, rs2296528, rs2608029, rs2934844, rs3095318, rs5030317, rs6971880, rs7854962, rs8106744, rs836559, rs9399373
+
+Harmonising Triglycerides || id:ukb-d-30870_irnt (ukb-d-30870_irnt) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs1009590, rs1044808, rs10872003, rs114165349, rs11664106, rs11688682, rs11722924, rs11752394, rs12119979, rs12749691, rs1292065, rs142047875, rs1471251, rs1561748, rs1561748, rs17091412, rs17138358, rs1800978, rs1853413, rs2071887, rs261342, rs2812208, rs28601761, rs328, rs4760254, rs5112, rs5755799, rs62102718, rs62112763, rs6916318, rs7167078, rs73224072, rs7735249, rs7826687, rs964184, rs9844972
+
+Removing the following SNPs for incompatible alleles:
+rs1561748, rs28752924
+
+Harmonising Platelet count || id:ukb-d-30080_irnt (ukb-d-30080_irnt) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10865130, rs11204543, rs113693454, rs115243514, rs11882796, rs11917130, rs12052715, rs12136856, rs12343705, rs12490795, rs12542032, rs13224082, rs13357739, rs144317085, rs151234, rs17687755, rs183811190, rs1926310, rs1982101, rs2097598, rs2243103, rs2246090, rs2297066, rs2301825, rs2315560, rs2355710, rs249681, rs2546979, rs28505677, rs28538623, rs28706215, rs342293, rs34536443, rs3901421, rs4061659, rs42033, rs4783183, rs55664157, rs55679363, rs56333341, rs58405523, rs60757417, rs62240976, rs6547617, rs67149561, rs6993770, rs7033052, rs7132697, rs7233932, rs7254827, rs725529, rs7640747, rs7641761, rs7665147, rs7966357, rs893808, rs939136, rs964184, rs9919955
+
+Removing the following SNPs for incompatible alleles:
+rs62251184
+
+Harmonising Diastolic blood pressure, automated reading || id:ukb-b-7992 (ukb-b-7992) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10260816, rs10850529, rs10890238, rs11021221, rs11026585, rs11222084, rs1123037, rs11592442, rs12258967, rs12611608, rs12905116, rs13004226, rs13163533, rs1325345, rs13429113, rs200373, rs2164820, rs2229902, rs2612016, rs28667801, rs34966754, rs35021474, rs4306343, rs4507656, rs57333327, rs633185, rs7125487, rs7129204, rs7230482, rs72812818, rs73234219, rs773432, rs7938342, rs7944584, rs9467545, rs951914, rs997988
+
+Removing the following SNPs for incompatible alleles:
+rs17304212, rs28752924
+
+Harmonising Mean time to correctly identify matches || id:ukb-b-16287 (ukb-b-16287) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10051345, rs10125715, rs140216924, rs2034718, rs25791, rs414383, rs4728514, rs61427468, rs6781150, rs73464507
+
+Harmonising Age when periods started (menarche) || id:ukb-b-3768 (ukb-b-3768) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10063744, rs1010961, rs10150677, rs111401540, rs11678561, rs1172955, rs11746435, rs11875135, rs13233916, rs142058842, rs190286519, rs2049618, rs2076308, rs2123990, rs2234362, rs35375873, rs35605425, rs4818008, rs4877593, rs545075, rs56360935, rs6499244, rs7560791, rs7652234, rs7852169, rs7854743, rs815715, rs9361178, rs9790189
+
+Harmonising Heel bone mineral density (BMD) || id:ukb-b-8875 (ukb-b-8875) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10800531, rs111838776, rs116228246, rs11915970, rs12127020, rs12733821, rs12941874, rs13379119, rs1382376, rs1444436, rs1533142, rs1555958, rs159408, rs16857021, rs17152567, rs1716169, rs17680862, rs1834554, rs189267552, rs2066829, rs2238688, rs2337106, rs2639935, rs2836620, rs2887569, rs2929308, rs347609, rs34965590, rs35531047, rs4820346, rs4876858, rs553051, rs56360935, rs58552741, rs60891864, rs62178780, rs6475068, rs660877, rs68119427, rs6976382, rs6977448, rs7125361, rs71390846, rs71569053, rs7255601, rs73029259, rs751979, rs7520984, rs75230517, rs7703751, rs77431781, rs7816131, rs847148, rs9375422
+
+Harmonising Cholesterol || id:ukb-d-30690_irnt (ukb-d-30690_irnt) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs115478735, rs12989783, rs141213470, rs148601586, rs1883711, rs2354351, rs28601761, rs34071855, rs34470922, rs34828430, rs4782568, rs56130071, rs615031, rs72791135, rs75398113, rs964184
+
+Harmonising Qualifications: College or University degree || id:ukb-b-16489 (ukb-b-16489) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs1020875, rs10931821, rs10934957, rs11540358, rs118083122, rs12421006, rs12534506, rs13018621, rs1340799, rs13425585, rs1689510, rs1702293, rs175325, rs1968526, rs2299098, rs2478208, rs2606913, rs2923431, rs35518360, rs35623690, rs3747631, rs3751661, rs38853, rs422115, rs4246176, rs4457062, rs4887925, rs57985238, rs58601596, rs62477728, rs6440053, rs6867851, rs7047015, rs72748120, rs7624274, rs76577427, rs77719387, rs7920624, rs938964, rs9517313
+
+Harmonising Comparative body size at age 10 || id:ukb-b-4650 (ukb-b-4650) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs1013737, rs10821163, rs10946577, rs115319174, rs11662171, rs12738523, rs13047416, rs13382346, rs1516728, rs16996644, rs2034963, rs2238435, rs2409743, rs2594994, rs2953016, rs3817428, rs4735652, rs55928579, rs59714050, rs62048187, rs678653, rs6894675, rs6993956, rs7020564, rs7163692, rs7305424, rs7619139, rs8096658, rs9835772, rs9843007
+
+Removing the following SNPs for incompatible alleles:
+rs34555420, rs7989098
+
+Harmonising Calcium || id:ukb-d-30680_irnt (ukb-d-30680_irnt) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs11671393, rs11743466, rs1497826, rs17580, rs1763519, rs1801282, rs2001884, rs2241699, rs2249825, rs257380, rs3129959, rs34042070, rs34290411, rs34395935, rs34614231, rs3795243, rs4721467, rs4938642, rs6127099, rs634916, rs71658797, rs73001065, rs75895430, rs778368, rs945890, rs949300
+
+Harmonising Duration to first press of snap-button in each round || id:ukb-b-19373 (ukb-b-19373) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10125715, rs13188413, rs140216924, rs1565412, rs2143975, rs35697571, rs414383, rs4728514, rs6752103, rs6781150, rs73464507, rs7783359, rs77917390
+
+Harmonising IGF-1 || id:ukb-d-30770_irnt (ukb-d-30770_irnt) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs11208537, rs112941090, rs114165349, rs1150781, rs117120687, rs11757793, rs11967262, rs12051698, rs125124, rs13232120, rs13237149, rs13284903, rs1351893, rs142039417, rs142414167, rs17597773, rs1994147, rs2450137, rs2716929, rs273951, rs329123, rs34536443, rs35713203, rs35958394, rs3858525, rs4466086, rs4782568, rs4860987, rs539687, rs55843942, rs57267144, rs5755943, rs61115258, rs61780440, rs62518386, rs6822348, rs6913063, rs7012213, rs7122769, rs72884378, rs73373089, rs7662792, rs77704058, rs78511209, rs7952602, rs8055075, rs9886703, rs9896243
+
+Harmonising C-reactive protein || id:ukb-d-30710_irnt (ukb-d-30710_irnt) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs10175899, rs10203386, rs10769254, rs10810455, rs112303588, rs11265157, rs11605427, rs12944581, rs13242809, rs150649461, rs1580300, rs1883711, rs2030291, rs2049045, rs2057069, rs2166625, rs4790286, rs519790, rs67581262, rs72636674, rs73001065, rs746839, rs79225028
+
+Harmonising Past tobacco smoking || id:ukb-b-2134 (ukb-b-2134) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs1040070, rs11693702, rs1492546, rs2155290, rs2186122, rs67336646, rs6828849, rs7216173, rs7596680, rs77878475, rs837335, rs9423279, rs9835772
+
+Harmonising Alcohol intake frequency. || id:ukb-b-5779 (ukb-b-5779) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs1104608, rs1894544, rs2977454, rs62305780, rs72769229, rs780569, rs8043563
+
+Removing the following SNPs for incompatible alleles:
+rs9958320
+
+Harmonising Pack years of smoking || id:ukb-b-10831 (ukb-b-10831) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs7581162, rs9358909
+
+Harmonising Neutrophill count || id:ukb-d-30140_irnt (ukb-d-30140_irnt) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs112783548, rs11574938, rs116009633, rs11733920, rs13243989, rs1423648, rs180943, rs2158799, rs218264, rs2184658, rs2243602, rs2293890, rs2296028, rs2570947, rs2824337, rs34433787, rs35955747, rs36026517, rs3856364, rs3917932, rs4147906, rs42033, rs4458624, rs4682868, rs4910421, rs59922886, rs6731993, rs6993770, rs7398356, rs75290071, rs75475627, rs7626444, rs77389, rs7846314, rs7876011, rs8083350, rs8113925, rs9970896
+
+Harmonising LDL direct || id:ukb-d-30780_irnt (ukb-d-30780_irnt) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs115478735, rs148601586, rs149394327, rs1883711, rs28601761, rs34071855, rs3752448, rs56130071, rs72631343, rs964184
+
+Harmonising Sleep duration || id:ukb-b-4424 (ukb-b-4424) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs113021516, rs11643715, rs17732997, rs2079070, rs2186122, rs2279681, rs2683630, rs35662245, rs6561715, rs72831782, rs915416
+
+Harmonising Usual walking pace || id:ukb-b-4711 (ukb-b-4711) and Schizophrenia || id:ieu-b-5100 (ieu-b-5100)
+
+Removing the following SNPs for being palindromic:
+rs11881338, rs12747822, rs139398785, rs2644135, rs45583845, rs7795394
+
+Analysing 'ukb-d-30210_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30860_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-6591' on 'ieu-b-5100'
+
+Analysing 'ukb-b-10787' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30000_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-5238' on 'ieu-b-5100'
+
+Analysing 'ukb-b-4080' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30630_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-16446' on 'ieu-b-5100'
+
+Analysing 'ukb-b-19921' on 'ieu-b-5100'
+
+Analysing 'ukb-b-4630' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30050_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30720_raw' on 'ieu-b-5100'
+
+Analysing 'ukb-b-13378' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30870_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30080_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-7992' on 'ieu-b-5100'
+
+Analysing 'ukb-b-16287' on 'ieu-b-5100'
+
+Analysing 'ukb-b-3768' on 'ieu-b-5100'
+
+Analysing 'ukb-b-8875' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30690_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-16489' on 'ieu-b-5100'
+
+Analysing 'ukb-b-4650' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30680_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-19373' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30770_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30710_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-2134' on 'ieu-b-5100'
+
+Analysing 'ukb-b-5779' on 'ieu-b-5100'
+
+Analysing 'ukb-b-10831' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30140_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30780_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-4424' on 'ieu-b-5100'
+
+Analysing 'ukb-b-4711' on 'ieu-b-5100'
+</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<table class="dataframe caption-top table table-sm table-striped small">
+<caption>A data.frame: 34 × 5</caption>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" scope="col">exposure</th>
+<th data-quarto-table-cell-role="th" scope="col">nsnp</th>
+<th data-quarto-table-cell-role="th" scope="col">b</th>
+<th data-quarto-table-cell-role="th" scope="col">se</th>
+<th data-quarto-table-cell-role="th" scope="col">pval</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th" scope="col">&lt;chr&gt;</th>
+<th data-quarto-table-cell-role="th" scope="col">&lt;dbl&gt;</th>
+<th data-quarto-table-cell-role="th" scope="col">&lt;dbl&gt;</th>
+<th data-quarto-table-cell-role="th" scope="col">&lt;dbl&gt;</th>
+<th data-quarto-table-cell-role="th" scope="col">&lt;dbl&gt;</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Duration to first press of snap-button in each round || id:ukb-b-19373</td>
+<td>65</td>
+<td>0.925718524</td>
+<td>0.17124245</td>
+<td>6.448595e-08</td>
+</tr>
+<tr class="even">
+<td>Neuroticism score || id:ukb-b-4630</td>
+<td>105</td>
+<td>0.223358364</td>
+<td>0.04377137</td>
+<td>3.345906e-07</td>
+</tr>
+<tr class="odd">
+<td>Mean time to correctly identify matches || id:ukb-b-16287</td>
+<td>63</td>
+<td>0.952603628</td>
+<td>0.19091258</td>
+<td>6.046149e-07</td>
+</tr>
+<tr class="even">
+<td>Age first had sexual intercourse || id:ukb-b-6591</td>
+<td>161</td>
+<td>-0.439073284</td>
+<td>0.10745736</td>
+<td>4.388295e-05</td>
+</tr>
+<tr class="odd">
+<td>Fluid intelligence score || id:ukb-b-5238</td>
+<td>71</td>
+<td>-0.220840919</td>
+<td>0.06156656</td>
+<td>3.344695e-04</td>
+</tr>
+<tr class="even">
+<td>Past tobacco smoking || id:ukb-b-2134</td>
+<td>86</td>
+<td>-0.402252907</td>
+<td>0.13760590</td>
+<td>3.464268e-03</td>
+</tr>
+<tr class="odd">
+<td>Impedance of whole body || id:ukb-b-19921</td>
+<td>454</td>
+<td>0.164831081</td>
+<td>0.05883142</td>
+<td>5.082583e-03</td>
+</tr>
+<tr class="even">
+<td>Basal metabolic rate || id:ukb-b-16446</td>
+<td>463</td>
+<td>-0.163262988</td>
+<td>0.05887147</td>
+<td>5.550617e-03</td>
+</tr>
+<tr class="odd">
+<td>Standing height || id:ukb-b-10787</td>
+<td>650</td>
+<td>-0.089620748</td>
+<td>0.03312827</td>
+<td>6.824984e-03</td>
+</tr>
+<tr class="even">
+<td>C-reactive protein || id:ukb-d-30710_irnt</td>
+<td>161</td>
+<td>-0.079026699</td>
+<td>0.03285404</td>
+<td>1.615532e-02</td>
+</tr>
+<tr class="odd">
+<td>Sleep duration || id:ukb-b-4424</td>
+<td>57</td>
+<td>0.618106022</td>
+<td>0.28922353</td>
+<td>3.258806e-02</td>
+</tr>
+<tr class="even">
+<td>Total protein || id:ukb-d-30860_irnt</td>
+<td>184</td>
+<td>0.090016310</td>
+<td>0.05137994</td>
+<td>7.977828e-02</td>
+</tr>
+<tr class="odd">
+<td>Pack years of smoking || id:ukb-b-10831</td>
+<td>9</td>
+<td>0.350188742</td>
+<td>0.21814455</td>
+<td>1.084265e-01</td>
+</tr>
+<tr class="even">
+<td>Qualifications: College or University degree || id:ukb-b-16489</td>
+<td>215</td>
+<td>0.335867577</td>
+<td>0.20979273</td>
+<td>1.093881e-01</td>
+</tr>
+<tr class="odd">
+<td>Age when periods started (menarche) || id:ukb-b-3768</td>
+<td>164</td>
+<td>0.109884016</td>
+<td>0.07879016</td>
+<td>1.631240e-01</td>
+</tr>
+<tr class="even">
+<td>Calcium || id:ukb-d-30680_irnt</td>
+<td>165</td>
+<td>-0.065868304</td>
+<td>0.04837996</td>
+<td>1.733623e-01</td>
+</tr>
+<tr class="odd">
+<td>White blood cell (leukocyte) count || id:ukb-d-30000_irnt</td>
+<td>261</td>
+<td>0.049359662</td>
+<td>0.03826118</td>
+<td>1.970257e-01</td>
+</tr>
+<tr class="even">
+<td>Eosinophill percentage || id:ukb-d-30210_irnt</td>
+<td>243</td>
+<td>0.042618144</td>
+<td>0.03343104</td>
+<td>2.023774e-01</td>
+</tr>
+<tr class="odd">
+<td>LDL direct || id:ukb-d-30780_irnt</td>
+<td>131</td>
+<td>-0.029376268</td>
+<td>0.02965529</td>
+<td>3.218853e-01</td>
+</tr>
+<tr class="even">
+<td>Usual walking pace || id:ukb-b-4711</td>
+<td>49</td>
+<td>-0.338329145</td>
+<td>0.38559767</td>
+<td>3.802613e-01</td>
+</tr>
+<tr class="odd">
+<td>Birth weight || id:ukb-b-13378</td>
+<td>117</td>
+<td>-0.059799969</td>
+<td>0.07129716</td>
+<td>4.016138e-01</td>
+</tr>
+<tr class="even">
+<td>Cholesterol || id:ukb-d-30690_irnt</td>
+<td>140</td>
+<td>-0.030564616</td>
+<td>0.04001928</td>
+<td>4.450178e-01</td>
+</tr>
+<tr class="odd">
+<td>IGF-1 || id:ukb-d-30770_irnt</td>
+<td>262</td>
+<td>-0.028347114</td>
+<td>0.04134478</td>
+<td>4.929481e-01</td>
+</tr>
+<tr class="even">
+<td>Platelet count || id:ukb-d-30080_irnt</td>
+<td>335</td>
+<td>-0.016765653</td>
+<td>0.02724127</td>
+<td>5.382573e-01</td>
+</tr>
+<tr class="odd">
+<td>Ankle spacing width || id:ukb-b-4080</td>
+<td>322</td>
+<td>-0.025741405</td>
+<td>0.04286499</td>
+<td>5.481578e-01</td>
+</tr>
+<tr class="even">
+<td>Cystatin C || id:ukb-d-30720_raw</td>
+<td>151</td>
+<td>-0.144011108</td>
+<td>0.25387782</td>
+<td>5.705472e-01</td>
+</tr>
+<tr class="odd">
+<td>Mean corpuscular haemoglobin || id:ukb-d-30050_irnt</td>
+<td>285</td>
+<td>-0.013721111</td>
+<td>0.02493536</td>
+<td>5.821361e-01</td>
+</tr>
+<tr class="even">
+<td>Diastolic blood pressure, automated reading || id:ukb-b-7992</td>
+<td>221</td>
+<td>-0.033065786</td>
+<td>0.07351136</td>
+<td>6.528510e-01</td>
+</tr>
+<tr class="odd">
+<td>Alcohol intake frequency. || id:ukb-b-5779</td>
+<td>91</td>
+<td>-0.039371409</td>
+<td>0.09180027</td>
+<td>6.680097e-01</td>
+</tr>
+<tr class="even">
+<td>Comparative body size at age 10 || id:ukb-b-4650</td>
+<td>190</td>
+<td>-0.034289406</td>
+<td>0.10005581</td>
+<td>7.318221e-01</td>
+</tr>
+<tr class="odd">
+<td>Triglycerides || id:ukb-d-30870_irnt</td>
+<td>178</td>
+<td>-0.013805053</td>
+<td>0.04418986</td>
+<td>7.547341e-01</td>
+</tr>
+<tr class="even">
+<td>Neutrophill count || id:ukb-d-30140_irnt</td>
+<td>224</td>
+<td>0.006709578</td>
+<td>0.04464261</td>
+<td>8.805316e-01</td>
+</tr>
+<tr class="odd">
+<td>Apoliprotein A || id:ukb-d-30630_irnt</td>
+<td>207</td>
+<td>-0.004367366</td>
+<td>0.03606463</td>
+<td>9.036132e-01</td>
+</tr>
+<tr class="even">
+<td>Heel bone mineral density (BMD) || id:ukb-b-8875</td>
+<td>300</td>
+<td>-0.002837534</td>
+<td>0.02715602</td>
+<td>9.167804e-01</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="a2a99ef1" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>int_mr_res <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(., <span class="fu">aes</span>(<span class="at">x=</span>b, <span class="at">y=</span>exposure)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span> <span class="fu">geom_errorbarh</span>(<span class="fu">aes</span>(<span class="at">xmin=</span>b<span class="fl">-1.96</span><span class="sc">*</span>se, <span class="at">xmax=</span>b<span class="fl">+1.96</span><span class="sc">*</span>se), <span class="at">height=</span><span class="fl">0.2</span>) <span class="sc">+</span> <span class="fu">theme_bw</span>() <span class="sc">+</span> <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linetype=</span><span class="st">"dashed"</span>) <span class="sc">+</span> <span class="fu">xlab</span>(<span class="st">"Effect of trait on schizophrenia (log OR)"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"Trait"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<div class="ansi-escaped-output">
+<pre>`height` was translated to `width`.
+</pre>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="scz_example_files/figure-html/cell-8-output-2.png" width="420" height="420" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="64ed4494" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>dat1 <span class="ot">&lt;-</span> <span class="fu">steiger_filtering</span>(dat1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="b2875ceb" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(dat1<span class="sc">$</span>steiger_dir)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<pre><code>
+FALSE  TRUE 
+  283  7569 </code></pre>
+</div>
+</div>
+<div id="f4fc24d6" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;vscode&quot;,&quot;value&quot;:{&quot;languageId&quot;:&quot;r&quot;}}" data-execution_count="22">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>int_mr_res <span class="ot">&lt;-</span> <span class="fu">mr</span>(dat1 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(steiger_dir), <span class="at">method_list=</span><span class="fu">c</span>(<span class="st">"mr_ivw"</span>, <span class="st">"mr_wald_ratio"</span>))</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>int_mr_res <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(pval) <span class="sc">%&gt;%</span> <span class="fu">select</span>(exposure, nsnp, b, se, pval) <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">fdr =</span> <span class="fu">p.adjust</span>(pval, <span class="at">method=</span><span class="st">"fdr"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Analysing 'ukb-d-30210_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30860_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-6591' on 'ieu-b-5100'
+
+Analysing 'ukb-b-10787' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30000_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-5238' on 'ieu-b-5100'
+
+Analysing 'ukb-b-4080' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30630_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-16446' on 'ieu-b-5100'
+
+Analysing 'ukb-b-19921' on 'ieu-b-5100'
+
+Analysing 'ukb-b-4630' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30050_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30720_raw' on 'ieu-b-5100'
+
+Analysing 'ukb-b-13378' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30870_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30080_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-7992' on 'ieu-b-5100'
+
+Analysing 'ukb-b-16287' on 'ieu-b-5100'
+
+Analysing 'ukb-b-3768' on 'ieu-b-5100'
+
+Analysing 'ukb-b-8875' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30690_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-16489' on 'ieu-b-5100'
+
+Analysing 'ukb-b-4650' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30680_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-19373' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30770_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30710_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-2134' on 'ieu-b-5100'
+
+Analysing 'ukb-b-5779' on 'ieu-b-5100'
+
+Analysing 'ukb-b-10831' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30140_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-d-30780_irnt' on 'ieu-b-5100'
+
+Analysing 'ukb-b-4424' on 'ieu-b-5100'
+
+Analysing 'ukb-b-4711' on 'ieu-b-5100'
+</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<table class="dataframe caption-top table table-sm table-striped small">
+<caption>A data.frame: 34 × 6</caption>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" scope="col">exposure</th>
+<th data-quarto-table-cell-role="th" scope="col">nsnp</th>
+<th data-quarto-table-cell-role="th" scope="col">b</th>
+<th data-quarto-table-cell-role="th" scope="col">se</th>
+<th data-quarto-table-cell-role="th" scope="col">pval</th>
+<th data-quarto-table-cell-role="th" scope="col">fdr</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th" scope="col">&lt;chr&gt;</th>
+<th data-quarto-table-cell-role="th" scope="col">&lt;dbl&gt;</th>
+<th data-quarto-table-cell-role="th" scope="col">&lt;dbl&gt;</th>
+<th data-quarto-table-cell-role="th" scope="col">&lt;dbl&gt;</th>
+<th data-quarto-table-cell-role="th" scope="col">&lt;dbl&gt;</th>
+<th data-quarto-table-cell-role="th" scope="col">&lt;dbl&gt;</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Duration to first press of snap-button in each round || id:ukb-b-19373</td>
+<td>51</td>
+<td>0.5015324595</td>
+<td>0.11393322</td>
+<td>1.072644e-05</td>
+<td>0.0003646988</td>
+</tr>
+<tr class="even">
+<td>Neuroticism score || id:ukb-b-4630</td>
+<td>88</td>
+<td>0.1191708142</td>
+<td>0.03132806</td>
+<td>1.423989e-04</td>
+<td>0.0024207814</td>
+</tr>
+<tr class="odd">
+<td>Age first had sexual intercourse || id:ukb-b-6591</td>
+<td>142</td>
+<td>-0.2985911373</td>
+<td>0.08157183</td>
+<td>2.517544e-04</td>
+<td>0.0028532164</td>
+</tr>
+<tr class="even">
+<td>Fluid intelligence score || id:ukb-b-5238</td>
+<td>67</td>
+<td>-0.1396769146</td>
+<td>0.05050734</td>
+<td>5.683950e-03</td>
+<td>0.0483135776</td>
+</tr>
+<tr class="odd">
+<td>Standing height || id:ukb-b-10787</td>
+<td>645</td>
+<td>-0.0855744417</td>
+<td>0.03228298</td>
+<td>8.031074e-03</td>
+<td>0.0546113025</td>
+</tr>
+<tr class="even">
+<td>Basal metabolic rate || id:ukb-b-16446</td>
+<td>452</td>
+<td>-0.1365709996</td>
+<td>0.05398119</td>
+<td>1.140710e-02</td>
+<td>0.0595155242</td>
+</tr>
+<tr class="odd">
+<td>Mean time to correctly identify matches || id:ukb-b-16287</td>
+<td>48</td>
+<td>0.4024310873</td>
+<td>0.16144740</td>
+<td>1.267955e-02</td>
+<td>0.0595155242</td>
+</tr>
+<tr class="even">
+<td>C-reactive protein || id:ukb-d-30710_irnt</td>
+<td>157</td>
+<td>-0.0728971496</td>
+<td>0.02966712</td>
+<td>1.400365e-02</td>
+<td>0.0595155242</td>
+</tr>
+<tr class="odd">
+<td>Past tobacco smoking || id:ukb-b-2134</td>
+<td>69</td>
+<td>-0.1865347038</td>
+<td>0.09252131</td>
+<td>4.378670e-02</td>
+<td>0.1587745321</td>
+</tr>
+<tr class="even">
+<td>Total protein || id:ukb-d-30860_irnt</td>
+<td>180</td>
+<td>0.0952435911</td>
+<td>0.04788455</td>
+<td>4.669839e-02</td>
+<td>0.1587745321</td>
+</tr>
+<tr class="odd">
+<td>Impedance of whole body || id:ukb-b-19921</td>
+<td>437</td>
+<td>0.0854111814</td>
+<td>0.05107892</td>
+<td>9.449643e-02</td>
+<td>0.2734242314</td>
+</tr>
+<tr class="even">
+<td>Eosinophill percentage || id:ukb-d-30210_irnt</td>
+<td>240</td>
+<td>0.0495774573</td>
+<td>0.02982909</td>
+<td>9.650267e-02</td>
+<td>0.2734242314</td>
+</tr>
+<tr class="odd">
+<td>Pack years of smoking || id:ukb-b-10831</td>
+<td>8</td>
+<td>0.2340383567</td>
+<td>0.14717304</td>
+<td>1.117839e-01</td>
+<td>0.2923579550</td>
+</tr>
+<tr class="even">
+<td>Birth weight || id:ukb-b-13378</td>
+<td>115</td>
+<td>-0.0939315316</td>
+<td>0.06327413</td>
+<td>1.376718e-01</td>
+<td>0.3301021010</td>
+</tr>
+<tr class="odd">
+<td>White blood cell (leukocyte) count || id:ukb-d-30000_irnt</td>
+<td>258</td>
+<td>0.0531393769</td>
+<td>0.03651865</td>
+<td>1.456333e-01</td>
+<td>0.3301021010</td>
+</tr>
+<tr class="even">
+<td>Diastolic blood pressure, automated reading || id:ukb-b-7992</td>
+<td>208</td>
+<td>-0.0793461787</td>
+<td>0.05736335</td>
+<td>1.665972e-01</td>
+<td>0.3540189662</td>
+</tr>
+<tr class="odd">
+<td>Cholesterol || id:ukb-d-30690_irnt</td>
+<td>137</td>
+<td>-0.0354323581</td>
+<td>0.03116046</td>
+<td>2.554992e-01</td>
+<td>0.4960446949</td>
+</tr>
+<tr class="even">
+<td>LDL direct || id:ukb-d-30780_irnt</td>
+<td>129</td>
+<td>-0.0305335934</td>
+<td>0.02725632</td>
+<td>2.626119e-01</td>
+<td>0.4960446949</td>
+</tr>
+<tr class="odd">
+<td>Sleep duration || id:ukb-b-4424</td>
+<td>45</td>
+<td>0.1817483697</td>
+<td>0.18706906</td>
+<td>3.312707e-01</td>
+<td>0.5572163749</td>
+</tr>
+<tr class="even">
+<td>Calcium || id:ukb-d-30680_irnt</td>
+<td>160</td>
+<td>-0.0371692529</td>
+<td>0.03869984</td>
+<td>3.368289e-01</td>
+<td>0.5572163749</td>
+</tr>
+<tr class="odd">
+<td>Ankle spacing width || id:ukb-b-4080</td>
+<td>318</td>
+<td>-0.0367768006</td>
+<td>0.03887728</td>
+<td>3.441631e-01</td>
+<td>0.5572163749</td>
+</tr>
+<tr class="even">
+<td>IGF-1 || id:ukb-d-30770_irnt</td>
+<td>256</td>
+<td>-0.0312310951</td>
+<td>0.03696303</td>
+<td>3.981511e-01</td>
+<td>0.5958011464</td>
+</tr>
+<tr class="odd">
+<td>Age when periods started (menarche) || id:ukb-b-3768</td>
+<td>161</td>
+<td>0.0606521399</td>
+<td>0.07323854</td>
+<td>4.075883e-01</td>
+<td>0.5958011464</td>
+</tr>
+<tr class="even">
+<td>Mean corpuscular haemoglobin || id:ukb-d-30050_irnt</td>
+<td>283</td>
+<td>-0.0192936181</td>
+<td>0.02395412</td>
+<td>4.205655e-01</td>
+<td>0.5958011464</td>
+</tr>
+<tr class="odd">
+<td>Platelet count || id:ukb-d-30080_irnt</td>
+<td>332</td>
+<td>-0.0200629758</td>
+<td>0.02615776</td>
+<td>4.430821e-01</td>
+<td>0.6025917166</td>
+</tr>
+<tr class="even">
+<td>Qualifications: College or University degree || id:ukb-b-16489</td>
+<td>190</td>
+<td>0.1152155658</td>
+<td>0.16292960</td>
+<td>4.794736e-01</td>
+<td>0.6183844728</td>
+</tr>
+<tr class="odd">
+<td>Usual walking pace || id:ukb-b-4711</td>
+<td>44</td>
+<td>0.1707677536</td>
+<td>0.24798981</td>
+<td>4.910700e-01</td>
+<td>0.6183844728</td>
+</tr>
+<tr class="even">
+<td>Alcohol intake frequency. || id:ukb-b-5779</td>
+<td>78</td>
+<td>0.0207249476</td>
+<td>0.05825873</td>
+<td>7.220355e-01</td>
+<td>0.8767573419</td>
+</tr>
+<tr class="odd">
+<td>Neutrophill count || id:ukb-d-30140_irnt</td>
+<td>220</td>
+<td>0.0104925272</td>
+<td>0.03926553</td>
+<td>7.893000e-01</td>
+<td>0.9199437246</td>
+</tr>
+<tr class="even">
+<td>Cystatin C || id:ukb-d-30720_raw</td>
+<td>148</td>
+<td>-0.0551985067</td>
+<td>0.23171806</td>
+<td>8.117151e-01</td>
+<td>0.9199437246</td>
+</tr>
+<tr class="odd">
+<td>Comparative body size at age 10 || id:ukb-b-4650</td>
+<td>181</td>
+<td>-0.0038091093</td>
+<td>0.07641711</td>
+<td>9.602449e-01</td>
+<td>0.9888752918</td>
+</tr>
+<tr class="even">
+<td>Heel bone mineral density (BMD) || id:ukb-b-8875</td>
+<td>298</td>
+<td>-0.0012552182</td>
+<td>0.02573073</td>
+<td>9.610923e-01</td>
+<td>0.9888752918</td>
+</tr>
+<tr class="odd">
+<td>Triglycerides || id:ukb-d-30870_irnt</td>
+<td>173</td>
+<td>-0.0016850981</td>
+<td>0.03654748</td>
+<td>9.632249e-01</td>
+<td>0.9888752918</td>
+</tr>
+<tr class="even">
+<td>Apoliprotein A || id:ukb-d-30630_irnt</td>
+<td>206</td>
+<td>-0.0004872396</td>
+<td>0.03494459</td>
+<td>9.888753e-01</td>
+<td>0.9888752918</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
