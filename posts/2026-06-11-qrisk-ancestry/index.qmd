@@ -1,0 +1,50 @@
+---
+title: "2026-06-11-qrisk-ancestry"
+author: Gibran Hemani
+date: "`r Sys.Date()`"
+categories: []
+---
+
+## Background
+
+Data taken from https://www.nature.com/articles/s41591-024-02905-y/tables/6
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+    
+a <- read.table("qrisk.csv", header = TRUE, sep = ",")
+
+b <- subset(a, Model == "QR4") %>%
+  mutate(group = paste(Ethnicity, Sex)) %>%
+  arrange(desc(C_stat))
+
+b$group <- factor(b$group, levels = b$group)
+ggplot(b, aes(x = C_stat, y = group, colour = Sex)) +
+  geom_vline(xintercept = 0.75, linetype = "dashed", linewidth = 0.3) +
+  geom_errorbarh(
+    aes(xmin = CI_lower, xmax = CI_upper),
+    height = 0.18,
+    position = position_dodge(width = 0.6)
+  ) +
+  geom_point(
+    position = position_dodge(width = 0.6),
+    size = 2
+  ) +
+  scale_x_continuous(
+    limits = c(0.65, 0.92),
+    breaks = seq(0.65, 0.90, 0.05)
+  ) +
+  labs(
+    x = "C statistic (95% CI)",
+    y = NULL
+  )
+
+```
+
+---
+
+```{r}
+sessionInfo()
+```

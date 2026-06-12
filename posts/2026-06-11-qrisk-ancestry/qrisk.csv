@@ -1,0 +1,61 @@
+Sex,Ethnicity,Model,C_stat,CI_lower,CI_upper
+Women,Overall,QR4,0.781,0.778,0.784
+Women,White,QR4,0.777,0.773,0.780
+Women,Indian,QR4,0.802,0.785,0.820
+Women,Pakistani,QR4,0.779,0.755,0.803
+Women,Bangladeshi,QR4,0.739,0.698,0.779
+Women,Other Asian,QR4,0.800,0.777,0.824
+Women,Caribbean,QR4,0.771,0.751,0.791
+Women,Black African,QR4,0.790,0.766,0.813
+Women,Chinese,QR4,0.863,0.822,0.905
+Women,Other,QR4,0.771,0.750,0.791
+Women,Overall,ASCVD,0.767,0.764,0.770
+Women,White,ASCVD,0.764,0.761,0.767
+Women,Indian,ASCVD,0.792,0.774,0.810
+Women,Pakistani,ASCVD,0.751,0.724,0.778
+Women,Bangladeshi,ASCVD,0.714,0.669,0.759
+Women,Other Asian,ASCVD,0.791,0.766,0.816
+Women,Caribbean,ASCVD,0.754,0.732,0.775
+Women,Black African,ASCVD,0.772,0.747,0.797
+Women,Chinese,ASCVD,0.856,0.814,0.898
+Women,Other,ASCVD,0.747,0.724,0.769
+Women,Overall,SCORE2,0.767,0.764,0.770
+Women,White,SCORE2,0.763,0.760,0.767
+Women,Indian,SCORE2,0.792,0.773,0.811
+Women,Pakistani,SCORE2,0.754,0.727,0.780
+Women,Bangladeshi,SCORE2,0.710,0.664,0.757
+Women,Other Asian,SCORE2,0.794,0.770,0.819
+Women,Caribbean,SCORE2,0.750,0.728,0.773
+Women,Black African,SCORE2,0.762,0.735,0.789
+Women,Chinese,SCORE2,0.849,0.807,0.891
+Women,Other,SCORE2,0.751,0.728,0.773
+Men,Overall,QR4,0.741,0.739,0.744
+Men,White,QR4,0.737,0.734,0.740
+Men,Indian,QR4,0.736,0.720,0.753
+Men,Pakistani,QR4,0.735,0.714,0.756
+Men,Bangladeshi,QR4,0.701,0.674,0.729
+Men,Other Asian,QR4,0.729,0.706,0.752
+Men,Caribbean,QR4,0.735,0.714,0.756
+Men,Black African,QR4,0.745,0.724,0.767
+Men,Chinese,QR4,0.759,0.704,0.814
+Men,Other,QR4,0.743,0.727,0.760
+Men,Overall,ASCVD,0.727,0.725,0.730
+Men,White,ASCVD,0.727,0.724,0.730
+Men,Indian,ASCVD,0.727,0.710,0.743
+Men,Pakistani,ASCVD,0.721,0.699,0.742
+Men,Bangladeshi,ASCVD,0.692,0.664,0.721
+Men,Other Asian,ASCVD,0.712,0.688,0.736
+Men,Caribbean,ASCVD,0.730,0.708,0.751
+Men,Black African,ASCVD,0.733,0.712,0.755
+Men,Chinese,ASCVD,0.741,0.685,0.798
+Men,Other,ASCVD,0.725,0.708,0.742
+Men,Overall,SCORE2,0.728,0.725,0.730
+Men,White,SCORE2,0.725,0.722,0.728
+Men,Indian,SCORE2,0.724,0.708,0.741
+Men,Pakistani,SCORE2,0.718,0.696,0.740
+Men,Bangladeshi,SCORE2,0.687,0.659,0.716
+Men,Other Asian,SCORE2,0.711,0.686,0.735
+Men,Caribbean,SCORE2,0.725,0.703,0.746
+Men,Black African,SCORE2,0.710,0.686,0.733
+Men,Chinese,SCORE2,0.735,0.677,0.793
+Men,Other,SCORE2,0.721,0.703,0.738
