@@ -3,3 +3,7 @@
 .DS_Store
 
 **/*.quarto_ipynb
+
+*vcf.gz
+*vcf.gz.tbi
+*_report.html

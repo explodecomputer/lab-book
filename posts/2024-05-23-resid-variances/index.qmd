@@ -1,7 +1,7 @@
 ---
 title: "2024-05-23-resid-variances"
 author: Gibran Hemani
-date: "`r Sys.Date()`"
+date: "2024-05-23"
 categories: []
 draft: true
 eval: false

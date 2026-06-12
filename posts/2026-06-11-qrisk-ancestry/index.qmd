@@ -1,7 +1,7 @@
 ---
-title: "2026-06-11-qrisk-ancestry"
+title: "QRISK3 performance by demographic group"
 author: Gibran Hemani
-date: "`r Sys.Date()`"
+date: "2026-06-11"
 categories: []
 ---
 
