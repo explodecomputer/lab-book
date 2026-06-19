@@ -194,13 +194,10 @@ results |>
   )) |>
   ggplot(aes(gen, estimate, colour = analysis)) +
   geom_line(linewidth = 0.7) +
+  geom_smooth(se=FALSE) +
   geom_hline(yintercept = c(0, -0.5), linetype = "dashed", alpha = 0.4) +
   facet_wrap(~label, ncol = 1) +
-  scale_colour_manual(values = c(
-    "Head → Pelvic (total)"          = "#e07b54",
-    "Head → Pelvic (resid, LD-null)" = "#d4a06a",
-    "Pelvic → Loco (true = −0.5)"    = "#4c8fbd"
-  )) +
+  scale_colour_brewer(palette = "Dark2") +
   labs(x = "Generation", y = "MR estimate (IVW)", colour = NULL) +
   theme_bw(base_size = 13) +
   theme(legend.position = "bottom")
