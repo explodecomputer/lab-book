@@ -1,0 +1,151 @@
+---
+title: "Conditioning on the exposure"
+author: Gibran Hemani
+date: "2026-06-22"
+categories: []
+---
+
+## Background
+
+A tempting solution to the pleiotropy problem in MR is to check if the instrument associates with the outcome conditioning on the exposure. Under the assumption that X and Y are confounded, this opens a collider path to Y. Meaning that by default we expect the instrument to associate with the outcome conditional on the exposure. This is a problem because it means that we cannot use this as a test for pleiotropy.
+
+This simulation examines how sensitive the association between the instrument and outcome is to conditioning on the exposure. The simulation is based on a simple model where X and Y are confounded by U, and the instrument Z is associated with X but not Y. i.e. There is no pleiotropy - so any association between Z and Y conditional on X is due to the collider path, and will lead to erroneously disgarding the instrument.
+
+## Simulation
+
+```{r}
+library(tidyverse)
+library(furrr)
+library(here)
+
+fast_assoc <- function(y, x)
+{
+	index <- is.finite(y) & is.finite(x)
+	n <- sum(index)
+	y <- y[index]
+	x <- x[index]
+	vx <- var(x)
+	bhat <- stats::cov(y, x) / vx
+	ahat <- mean(y) - bhat * mean(x)
+	# fitted <- ahat + x * bhat
+	# residuals <- y - fitted
+	# SSR <- sum((residuals - mean(residuals))^2)
+	# SSF <- sum((fitted - mean(fitted))^2)
+
+	rsq <- (bhat * vx)^2 / (vx * var(y))
+	fval <- rsq * (n-2) / (1-rsq)
+	tval <- sqrt(fval)
+	se <- abs(bhat / tval)
+
+	# Fval <- (SSF) / (SSR/(n-2))
+	# pval <- pf(Fval, 1, n-2, lowe=F)
+	p <- stats::pf(fval, 1, n-2, lower.tail=FALSE)
+	return(list(
+		ahat=ahat, bhat=bhat, se=se, fval=fval, pval=p, n=n
+	))
+}
+
+make_dat <- function(n=1000, bxy=0.5, bxz=0.5, byu=0.5, bxu=0.5)
+{
+    u <- rnorm(n)
+    z <- rnorm(n)
+    x <- bxz * z + bxu * u + rnorm(n)
+    y <- bxy * x + byu * u + rnorm(n)
+
+    dat <- data.frame(u=u, z=z, x=x, y=y)
+    return(dat)
+}
+
+estimation <- function(dat)
+{
+    # estimate the association between Z and Y
+    res1 <- fast_assoc(dat$y, dat$z)
+    res2 <- fast_assoc(dat$x, dat$z)
+
+    # estimate the association between Z and Y conditional on X
+    res2 <- fast_assoc(lm(y ~ x, data=dat)$residuals, dat$z)
+
+    tibble(
+        rsq_xy=cor(dat$x, dat$y)^2,
+        rsq_xz=cor(dat$x, dat$z)^2,
+        rsq_yz=cor(dat$y, dat$z)^2,
+        rsq_yu=cor(dat$y, dat$u)^2,
+        rsq_xu=cor(dat$x, dat$u)^2,
+        pval_xz=res1$pval,
+        fval=res1$fval,
+        pval=res1$pval,
+        pval_cond=res2$pval
+    )
+}
+
+sim <- function(n=1000, bxy=0.5, bxz=0.5, byu=0.5, bxu=0.5)
+{
+    dat <- make_dat(n=n, bxy=bxy, bxz=bxz, byu=byu, bxu=bxu)
+    res <- estimation(dat)
+    return(res)
+}
+
+sim(n=100000, bxy=0.5, bxz=0.2, byu=0.5, bxu=0.5)
+
+```
+
+
+```{r, eval=FALSE}
+params <- expand.grid(
+    n=c(100000),
+    bxy=c(0),
+    bxz=seq(0, 0.04, by=0.01),
+    byu=seq(0, 1, by=0.2),
+    bxu=seq(0, 1, by=0.2),
+    simrep=1:100
+)
+
+dim(params)
+plan(multisession, workers=8)
+results <- future_pmap(
+    params,
+    function(n, bxy, bxz, byu, bxu, simrep) {
+        sim(n=n, bxy=bxy, bxz=bxz, byu=byu, bxu=bxu)
+    }, .options = furrr_options(seed = TRUE), .progress = TRUE
+) %>% bind_rows()
+
+# results <- params[1:100,] |>
+#   rowwise() |>
+#   mutate(sim = list(sim(n=n, bxy=bxy, bxz=bxz, byu=byu, bxu=bxu))) |>
+#   unnest(sim)
+
+results <- bind_cols(results, params)
+saveRDS(results, here("posts/2026-06-22-conditioning-ont-he-exposure", "results.rds"))
+```
+
+
+```{r}
+results <- readRDS(here("posts/2026-06-22-conditioning-ont-he-exposure", "results.rds"))
+sumres <- results %>%
+    group_by(bxu) %>% mutate(rsq_xu = mean(rsq_xu) %>% round(2)) %>%
+    group_by(byu) %>% mutate(rsq_yu = mean(rsq_yu) %>% round(2)) %>%
+    ungroup() %>%
+    group_by(bxz, rsq_yu, rsq_xu) %>%
+    summarise(
+        mean_rsq_xz = mean(rsq_xz),
+        mean_pval_xz = mean(-log10(pval_xz)),
+        mean_pval_cond = mean(pval_cond),
+        pow_cond = mean(pval_cond < 0.05)
+    ) %>%
+    ungroup()
+
+
+ggplot(sumres, aes(x=mean_rsq_xz, y=pow_cond)) +
+  geom_point() +
+  geom_line() +
+  labs(x="SNP-exposure R2", y="Power for Z-Y association conditional on X") +
+  geom_hline(yintercept=0.05, linetype="dashed", alpha=0.5) +
+  facet_grid(rsq_yu ~ rsq_xu, labeller = label_both)
+
+```
+
+---
+
+```{r}
+sessionInfo()
+```
