@@ -22,10 +22,11 @@ This creates a natural contrast: MR should recover the pelvic→loco effect corr
 
 ### Fitness function
 
-Fitness has three components
-- Locomotion: directional selection for better locomotion
-- Head size: directional selection for larger heads
-- Birth penalty: linear penalty when head size exceeds mother's pelvic width
+Fitness has three components:
+
+- **Locomotion**: directional selection for better locomotion
+- **Head size**: directional selection for larger heads
+- **Birth penalty**: linear penalty when head size exceeds mother's pelvic width
 
 Use a multiplicative, exponential scaling. For offspring $i$ born to mother $m$:
 
@@ -41,7 +42,7 @@ where $H_i$ is head size, $L_i$ is locomotion, and $P_m$ is the mother's pelvic 
 | $s_\text{loco} = 0.1$ | Directional selection for locomotion |
 | $s_\text{birth} = 0.5$ | Linear birth penalty when $H_i > P_m$ |
 
-The one-sided penalty $\max(0, H_i - P_m)$ captures the asymmetry of the obstetric constraint: when the pelvis is wider than the head ($H_i \leq P_m$) birth is unimpeded and there is no fitness cost; when the head exceeds the pelvis ($H_i > P_m$) fitness falls linearly with the excess. This creates the epistatic interaction needed to generate genetic correlation — the selection gradient on head size is $s_\text{head}$ when $H_i \leq P_m$ and $s_\text{head} - s_\text{birth}$ when $H_i > P_m$, so the marginal cost of a larger head depends on the mother's pelvic width.
+The one-sided penalty $\max(0, H_i - P_m)$ captures the asymmetry of the obstetric constraint: when the pelvis is wider than the head ($H_i \leq P_m$) birth is unimpeded and there is no fitness cost; when the head exceeds the pelvis ($H_i > P_m$) fitness falls linearly with the excess.
 
 ### Simulation parameters
 
@@ -62,11 +63,13 @@ IVW using all 25 trait-specific SNPs as instruments, run at each generation:
 #| message: false
 
 library(tidyverse)
+library(here)
 ```
 
 ```{r}
 #| label: simulation
 #| cache: true
+#| eval: false
 
 transmit <- function(geno) {
   matrix(rbinom(length(geno), 1L, geno / 2), nrow(geno), ncol(geno))
@@ -167,21 +170,27 @@ run_sim <- function(
 
 params <- tribble(
   ~s_head, ~s_loco, ~label,
-  0.1,     0.2,     "s_head < s_loco (narrowing)",
-  0.2,     0.2,     "s_head = s_loco (stasis)",
-  0.4,     0.2,     "s_head > s_loco (widening)"
+  0.01,     0.02,     "s_head < s_loco (narrowing)",
+  0.02,     0.02,     "s_head = s_loco (stasis)",
+  0.04,     0.02,     "s_head > s_loco (widening)"
 )
+params <- lapply(c(20000), \(N) params |> mutate(N=N)) |> bind_rows()
 
-results <- params |>
+params2 <- params %>%
+  mutate(s_head = s_head * 10, s_loco = s_loco * 10, label = paste0(label, " larger s"))
+
+results <- bind_rows(params, params2) |>
   rowwise() |>
-  mutate(sim = list(run_sim(s_head = s_head, s_loco = s_loco))) |>
+  mutate(sim = list(run_sim(s_head = s_head, s_loco = s_loco, N = N))) |>
   unnest(sim)
+saveRDS(results, file = here("posts/2026-06-18-coevolution-of-head-size-and-pelvic-shape","results-2.rds"))
 ```
 
 ```{r}
 #| label: fig-mr-trajectories
 #| fig-cap: "MR estimates across generations by selection regime. Head→pelvic true effect is 0; pelvic→loco true effect is −0.5."
 #| fig-height: 7
+results <- readRDS(here("posts/2026-06-18-coevolution-of-head-size-and-pelvic-shape/results-2.rds"))
 
 results |>
   select(gen, label, mr_head_pelvic, mr_head_pelvic_resid, mr_pelvic_loco) |>
@@ -196,12 +205,14 @@ results |>
   geom_line(linewidth = 0.7) +
   geom_smooth(se=FALSE) +
   geom_hline(yintercept = c(0, -0.5), linetype = "dashed", alpha = 0.4) +
-  facet_wrap(~label, ncol = 1) +
+  facet_wrap(~label, ncol = 2) +
   scale_colour_brewer(palette = "Dark2") +
   labs(x = "Generation", y = "MR estimate (IVW)", colour = NULL) +
   theme_bw(base_size = 13) +
   theme(legend.position = "bottom")
 ```
+
+Here the `larger s` labelled plots make the s_head and s_loco coefficients same order of magnitude of s_birth, whereas the other plots have s_head and s_loco x10 smaller (meaning s_birth is substantially more important).
 
 ```{r}
 #| label: fig-trait-means
@@ -219,7 +230,7 @@ results |>
   )) |>
   ggplot(aes(gen, mean, colour = trait)) +
   geom_line(linewidth = 0.7) +
-  facet_wrap(~label, ncol = 1) +
+  facet_wrap(~label, ncol = 2) +
   scale_colour_brewer(palette = "Dark2") +
   labs(x = "Generation", y = "Mean trait value", colour = NULL) +
   theme_bw(base_size = 13) +
@@ -235,6 +246,45 @@ results |>
 - MR of head size on pelvic shape appears to be weakly positive.
 - It appears that this is entirely due to LD between head size and pelvic shape SNPs, as MR of head size on pelvic shape residuals (after regressing out pelvic shape SNPs) is null.
 - As all the variants are independent, the LD generated is weak and reset every generation, so the MR signal is weak. If there were pleiotropic variants that affected both head size and pelvic shape, or variants for both traits in close proximity, the MR signal would be stronger.
+
+
+## Additional examination of the cliff edge model
+
+The cliff edge model implies that as infant head circumference increases beyond birth canal width there is extremely strong negative selection, but the selection coefficient is zero prior to that point. The obstetrical dilemma invokes added parameters - that narrower mother's pelvic width imposes a selective benefit through locomotion, and larger infant head circumferance imposes a selective benefit through cognition. So there is a sharp early life advantage to smaller head / larger pelvic width, but this selective advantage is reversed after birth.
+
+Currently the cliff edge model is implemented with the following shape:
+
+```{r}
+#| label: cliff-edge-model
+library(dplyr)
+library(ggplot2)
+library(lattice)
+a <- expand.grid(
+  infant_head_circumference = seq(0, 10, by = 0.25),
+  mother_pelvic_width = seq(0, 10, by = 0.25)) %>%
+  mutate(fitness = pmax(0, mother_pelvic_width - infant_head_circumference) * -0.5) %>%
+  mutate(rel_fitness = exp(fitness - max(fitness)), rel_fitness = rel_fitness / sum(rel_fitness))
+str(a)
+
+b <- expand.grid(
+  infant_head_circumference = seq(0, 10, by = 0.25),
+  mother_pelvic_width = seq(0, 10, by = 0.25)) %>%
+  mutate(fitness = mother_pelvic_width * -0.03) %>%
+  mutate(rel_fitness = exp(fitness - max(fitness)), rel_fitness = rel_fitness / sum(rel_fitness))
+str(a)
+
+a$component <- "birth"
+b$component <- "locomotion"
+ab <- rbind(a, b) %>%
+  mutate(rel_fitness = exp(fitness - max(fitness)), rel_fitness = rel_fitness / sum(rel_fitness))
+
+```
+
+```{r}
+#| label: cliff-edge-wireframe
+#| fig-width: 10
+wireframe(rel_fitness ~ infant_head_circumference * mother_pelvic_width | ab$component, data = ab, main = "Relative fitness", screen = list(z = 40, x = -60))
+```
 
 
 ```{r}

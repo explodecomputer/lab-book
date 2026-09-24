@@ -144,6 +144,169 @@ ggplot(sumres, aes(x=mean_rsq_xz, y=pow_cond)) +
 
 ```
 
+
+## What if we have lots of instruments?
+
+Is there a constant collider bias, meaning that all residual effects of instrument on Y will be the same + horizontal pleiotropy?
+
+```{r}
+
+gwas <- function(z, y) {
+    for(i in 1:ncol(z)) {
+        Z <- as.numeric(unlist(z[,i]))
+        res <- fast_assoc(y, Z)
+        if (i == 1) {
+            out <- as_tibble(res) %>% mutate(snp=i)
+        } else {
+            out <- bind_rows(out, as_tibble(res) %>% mutate(snp=i))
+        }
+    }
+    return(out)
+}
+
+make_dat <- function(params)
+{
+    nsnp <- params$nsnp
+    prop_pleio <- params$prop_pleio
+    n <- params$n
+    bxy <- params$bxy
+    bxz <- params$bxz
+    byu <- params$byu
+    bxu <- params$bxu
+    bzx <- params$bzx
+    bzy <- params$bzy
+
+    u <- rnorm(n)
+    z <- matrix(rnorm(n * nsnp), nrow=n, ncol=nsnp)
+    zx <- z %*% bzx %>% drop
+    zy <- z %*% bzy %>% drop
+    x <- bxz * zx + bxu * u + rnorm(n)
+    y <- bxy * x + zy + byu * u + rnorm(n)
+
+    z <- as.data.frame(z)
+    names(z) <- paste0("z", 1:nsnp)
+
+    dat <- tibble(u=u, x=x, y=y) %>% bind_cols(z)
+    return(dat)
+}
+
+
+make_params <- function(nsnp=100, prop_pleio=0.5, n=1000, bxy=0.5, bxz=0.5, byu=0.5, bxu=0.5) {
+    bzx <- rnorm(nsnp, 0, 0.1)
+    bzy <- rnorm(nsnp, 0, 0.1) * sample(c(0,1), nsnp, replace=TRUE, prob=c(1-prop_pleio, prop_pleio))
+
+    list(
+        nsnp=nsnp,
+        prop_pleio=prop_pleio,
+        n=n,
+        bxy=bxy,
+        bxz=bxz,
+        byu=byu,
+        bxu=bxu,
+        bzx=bzx,
+        bzy=bzy
+    )
+}
+
+estimation <- function(dat)
+{
+    # estimate the association between Z and Y
+    # res1 <- gwas(dat[,4:ncol(dat)], dat$y)
+    # res2 <- gwas(dat[,4:ncol(dat)], dat$x)
+
+    # estimate the association between Z and Y conditional on X
+    res3 <- gwas(dat[,4:ncol(dat)], lm(y ~ x, data=dat)$residuals)
+    return(res3)
+    bind_rows(
+        res1 %>% mutate(type="Z-Y"),
+        res2 %>% mutate(type="Z-X"),
+        res3 %>% mutate(type="Z-Y|X")
+    )
+}
+```
+
+
+```{r}
+p <- make_params(n=100000)
+dat <- make_dat(p)
+res <- estimation(dat)
+plot(res$bhat ~ p$bzy)
+```
+
+```{r}
+p <- make_params(n=100000, byu = 1, bxu = 1, bxy=0.5, prop_pleio = 0.5)
+dat <- make_dat(p)
+res <- estimation(dat)
+plot(I(res$bhat) ~ p$bzy)
+plot(I(res$bhat) ~ p$bzx)
+summary(lm(I(res$bhat/p$bzx) ~ p$bzy))
+```
+
+```{r}
+lapply(1:10, \(i) {
+    p <- make_params(n=100000, nsnp=1, byu=)
+})
+```
+
+
+
+Expected collider bias = buy * bux / (bux^2 + var(x)) * bgx
+
+```{r}
+sim <- function(buy=0.1, bux=0.1, vx=4, bgx=1) {
+    n <- 100000
+    u <- rnorm(n)
+    g <- rnorm(n)
+    gpred <- bgx * g
+    uxpred <- bux * u
+    resid <- rnorm(n, 0, sqrt(vx - var(gpred)) - var(uxpred))
+    x <- gpred + uxpred + resid
+    y <- buy * u + rnorm(n)
+    cond <- residuals(lm(y ~ x))
+    bhat <- lm(cond ~ g)$coef[2]
+    exp <- -buy * bux / (bux^2 + var(resid)) * bgx
+    tibble(
+        buy=buy, bux=bux, vx=vx, bgx=bgx,
+        varx=var(x), varu=var(u), varg=var(g),
+        exp=exp, obs=bhat
+    )
+}
+
+param <- expand.grid(
+    buy=seq(0, 1, by=0.1),
+    bux=seq(0, 1, by=0.1),
+    vx=c(4),
+    bgx=c(0.5, 1)
+)
+
+theoretical_res <- lapply(1:nrow(param), \(i) {
+    sim(param$buy[i], param$bux[i], param$vx[i], param$bgx[i])
+}) %>% bind_rows()
+
+ggplot(theoretical_res, aes(x=exp, y=obs)) +
+    geom_point() +
+    geom_abline(slope=1, intercept=0, linetype="dashed", alpha=0.5) +
+    facet_grid(bgx ~ vx, labeller = label_both) +
+    labs(x="Expected collider bias", y="Observed collider bias")
+
+```
+
+
+In MR there is a question of how much horizontal
+  pleiotropy is going to bias the IV estimate. I am starting to have the opinion
+  that when you have a large number of SNPs, there are two classes of pleiotropy
+  to be concerned about. 1) The SNP impacts Y through multiple independent
+  paths, i.e. it is biologically complex; 2) The SNP more influences a confounder
+  of X and Y, and arises as an instrument for Y.
+
+  One way to estimate the extent of (1) happening, would be to test if SNPs
+  associate with Y conditional on X. A big problem with this approach is that X
+  and Y are typically confounded, so conditioning on X will induce an association
+  between the SNP and Y through the backdoor path via the confounder. But this
+  bias would be a constant bias * the bgx effect, so it could be possible to (a)
+  determine the extent of confounding and (b) determine the extent of deviation
+  of all SNPs from the expected collider effect.
+
 ---
 
 ```{r}

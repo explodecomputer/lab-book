@@ -1,0 +1,173 @@
+---
+title: "Quantile regression GWAS"
+author: Gibran Hemani
+date: "2026-07-09"
+categories: []
+---
+
+## Background
+
+
+```{r}
+rif_quantile <- function(Y, tau = 0.5, na.rm = TRUE, bw = "nrd0") {
+  stopifnot(is.numeric(Y))
+  stopifnot(length(tau) == 1, tau > 0, tau < 1)
+  
+  # Keep track of missingness
+  out <- rep(NA_real_, length(Y))
+  ok <- !is.na(Y)
+  Y0 <- Y[ok]
+  
+  # Estimate empirical quantile
+  q_tau <- as.numeric(quantile(Y0, probs = tau, na.rm = na.rm, type = 7))
+  
+  # Estimate density at the quantile
+  dens <- density(Y0, na.rm = na.rm, bw = bw)
+  f_q <- approx(dens$x, dens$y, xout = q_tau, rule = 2)$y
+  
+  # RIF for quantile
+  out[ok] <- q_tau + (tau - as.numeric(Y0 <= q_tau)) / f_q
+  
+  attr(out, "tau") <- tau
+  attr(out, "q_tau") <- q_tau
+  attr(out, "f_q") <- f_q
+  
+  return(out)
+}
+
+a <- rnorm(1000)
+hist(rif_quantile(a, tau = 0.2))
+```
+
+
+```{r}
+set.seed(1)
+
+set.seed(123)
+
+# -----------------------------
+# 1. Simulate data
+# -----------------------------
+
+n <- 20000
+
+sex <- rbinom(n, 1, 0.5)  # 0 = female, 1 = male
+G   <- rbinom(n, 2, 0.3)  # SNP dosage: 0, 1, 2
+
+# Parameters
+mu_female <- 0
+mu_male   <- 3
+sd_y      <- 1
+
+beta_female <- 0
+beta_male   <- 0.5
+
+# Phenotype: bimodal due to sex, SNP effect only in males
+Y <- mu_female * (1 - sex) +
+     mu_male   * sex +
+     beta_female * G * (1 - sex) +
+     beta_male   * G * sex +
+     rnorm(n, mean = 0, sd = sd_y)
+
+dat <- data.frame(Y, G, sex = factor(sex, labels = c("female", "male")))
+
+hist(dat$Y, breaks = 80, col = "grey80", border = "white",
+     main = "Bimodal phenotype distribution",
+     xlab = "Y")
+
+hist(dat$Y[dat$sex == "female"], breaks = 60, col = rgb(1, 0, 0, 0.4),
+     add = TRUE)
+hist(dat$Y[dat$sex == "male"], breaks = 60, col = rgb(0, 0, 1, 0.4),
+     add = TRUE)
+
+legend("topright",
+       legend = c("female", "male"),
+       fill = c(rgb(1, 0, 0, 0.4), rgb(0, 0, 1, 0.4)))
+```
+
+
+```{r}
+summary(lm(Y ~ G * sex, data = dat))
+```
+
+
+```{r}
+taus <- seq(0.05, 0.95, by = 0.05)
+
+rif_results_pooled <- lapply(taus, function(tau) {
+  dat$rif <- rif_quantile(dat$Y, tau = tau)
+  fit <- lm(rif ~ G, data = dat)
+  
+  data.frame(
+    tau = tau,
+    q_tau = attr(dat$rif, "q_tau"),
+    f_q = attr(dat$rif, "f_q"),
+    beta_G = coef(fit)["G"],
+    se_G = summary(fit)$coefficients["G", "Std. Error"]
+  )
+})
+
+rif_results_pooled <- do.call(rbind, rif_results_pooled)
+rif_results_pooled
+```
+
+
+```{r}
+plot(rif_results_pooled$tau,
+     rif_results_pooled$beta_G,
+     type = "b",
+     pch = 16,
+     xlab = "Pooled quantile",
+     ylab = "Pooled RIF SNP effect",
+     main = "Pooled RIF effect of male-specific SNP")
+abline(h = 0, lty = 2)
+abline(h = beta_male * mean(sex), lty = 3)
+```
+
+
+
+```{r}
+quantile_map <- lapply(taus, function(tau) {
+  q_tau <- as.numeric(quantile(dat$Y, tau))
+  
+  data.frame(
+    tau_pooled = tau,
+    q_tau = q_tau,
+    female_quantile = mean(dat$Y[dat$sex == "female"] <= q_tau),
+    male_quantile = mean(dat$Y[dat$sex == "male"] <= q_tau)
+  )
+})
+
+quantile_map <- do.call(rbind, quantile_map)
+quantile_map
+```
+
+
+```{r}
+plot(quantile_map$tau_pooled,
+     quantile_map$female_quantile,
+     type = "b",
+     pch = 16,
+     ylim = c(0, 1),
+     xlab = "Pooled quantile",
+     ylab = "Sex-specific quantile",
+     main = "Mapping pooled quantiles to sex-specific quantiles")
+
+lines(quantile_map$tau_pooled,
+      quantile_map$male_quantile,
+      type = "b",
+      pch = 16)
+
+abline(0, 1, lty = 2)
+
+legend("topleft",
+       legend = c("female quantile", "male quantile", "identity line"),
+       lty = c(1, 1, 2),
+       pch = c(16, 16, NA))
+```
+
+---
+
+```{r}
+sessionInfo()
+```
