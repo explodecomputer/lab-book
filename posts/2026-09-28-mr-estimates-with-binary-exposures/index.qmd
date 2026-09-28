@@ -1,0 +1,88 @@
+---
+title: "MR estimates with binary exposures"
+author: Gibran Hemani
+date: "2026-09-28"
+categories: []
+---
+
+## Background
+
+If we perform 2 sample MR analysis where exposure and outcome are both binary, and both are estimated on the log odds scale, the effect estimate will be in different units when comparing against observational logistic regression. In the latter case, the outcome is on the logistic scale but the exposure is on the risk difference scale.
+
+So the solution is to convert the MR estimate by transforming the SNP-exposure estimate on the risk difference scale, or to convert the observational estimate with the inverse.
+
+## Example
+
+```{r}
+set.seed(1234)
+
+# Sample size
+n <- 1000000
+
+# Simulate a genotype
+g <- rbinom(n, 2, 0.5)
+
+# Try effect of SNP on the exposure on the liability scale (not the risk difference scale)
+b_gx <- 0.8
+
+# Generate liability for X
+x_liability <- g * b_gx
+
+# Generate X using logistic transformation
+x <- rbinom(n, 1, plogis(x_liability))
+```
+
+Note that the risk difference scale gives a different estimate to the logistic scale. Here's the risk difference scale:
+
+```{r}
+summary(lm(x ~ g))$coef[2]
+```
+
+Here's the logistic scale, which matches the simulated beta:
+
+```{r}
+summary(glm(x ~ g, family = "binomial"))$coef[2]
+```
+
+Now make X causal for Y. The observational logistic regression estimate matches the simulation.
+
+```{r}
+b_xy <- 0.1
+y <- rbinom(n, 1, plogis(x * b_xy))
+# y <- as.integer(x * b_xy + rlogis(n)>0) # note this is equivalent to above
+glm(y ~ x, family = "binomial")$coef[2]
+```
+
+Let's make the MR estimate
+
+```{r}
+bgx <- glm(x ~ g, family = "binomial")$coef[2]
+bgy <- glm(y ~ g, family = "binomial")$coef[2]
+bgy/bgx
+```
+
+This doesn't match the simulated beta. That's because we're asking "how much does Y change per liability change in X", rather than "how much does Y change per unit change in X". So we need to change `bgx` to be in unit change scale (risk difference scale).
+
+```{r}
+px <- mean(x)
+scale_factor <- px * (1-px)
+bgx_transform <- bgx * scale_factor
+bgy / bgx_transform
+```
+
+Or we can convert the observational estimate onto the same scale as the naive MR estimate (effect on log-odds of Y per unit change in log-odds of X), which should match bgy/bgx:
+
+```{r}
+obs_risk_diff <- glm(y ~ x, family = "binomial")$coef[2]
+obs_liability_scale <- obs_risk_diff * scale_factor
+obs_liability_scale
+```
+
+Note that the transformation assumes that the disease isn't rare and the effect sizes are small.
+
+
+---
+
+```{r}
+sessionInfo()
+```
