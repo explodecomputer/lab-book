@@ -1,0 +1,11 @@
+"source","queried","found"
+"saved_pair_identities",23,23
+"exact_mediator_associations",23,23
+"saved_instrument_identities",1002,1002
+"instrument_vcf_associations",1002,1008
+"lead_inventory",41,41
+"outcome_query_loci",1032,1032
+"outcome_vcf_associations",1032,1027
+"outcome_leads_found",41,40
+"outcome_instruments_found",992,984
+"outcome_target_snps_found",18,18

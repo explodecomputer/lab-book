@@ -1,0 +1,13 @@
+"family","inventory","tested","unavailable","nominal_below_005","bh_below_005"
+"unique_pair_heterogeneity",23,22,1,15,15
+"pooled_mediator_mr",5,5,0,5,5
+"unique_pair_indirect_component",23,22,1,22,22
+"unique_pair_residual_component",23,22,1,15,15
+"sensitivity_pair_heterogeneity_2mb",23,22,1,15,15
+"sensitivity_pair_heterogeneity_2mb_mhc",23,22,1,15,15
+"unique_pair_indirect_component_hypothetical_rho_-0.3",23,22,1,21,21
+"unique_pair_indirect_component_hypothetical_rho_0",23,22,1,22,22
+"unique_pair_indirect_component_hypothetical_rho_0.3",23,22,1,21,21
+"unique_pair_residual_component_hypothetical_rho_-0.3",23,22,1,15,15
+"unique_pair_residual_component_hypothetical_rho_0",23,22,1,15,15
+"unique_pair_residual_component_hypothetical_rho_0.3",23,22,1,16,15

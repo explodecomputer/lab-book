@@ -1,0 +1,86 @@
+"path","md5","size_bytes","build","header","index_type"
+"chd_phewas_result.Rdata","bf24e918d4260b78cea34a68f7f928e6",133102,,,
+"ieu-b-5138.vcf.gz","258ce25bc4a579f25875ae9eb9b3619c",381542280,"GRCh37","class: VCFHeader  Seqinfo object with 84 sequences from HG19/GRCh37 genome:
+samples(1): ieu-b-5138   seqnames   seqlengths isCircular      genome
+meta(4): fileformat META SAMPLE contig   1           249250621       <NA> HG19/GRCh37
+fixed(1): FILTER   2           243199373       <NA> HG19/GRCh37
+info(1): AF   3           198022430       <NA> HG19/GRCh37
+geno(9): ES SE ... NC ID   4           191154276       <NA> HG19/GRCh37
+class: VCFHeader    5           180915260       <NA> HG19/GRCh37
+samples(1): ieu-b-5138   ...               ...        ...         ...
+meta(4): fileformat META SAMPLE contig   GL000200.1     187035       <NA> HG19/GRCh37
+fixed(1): FILTER   GL000193.1     189789       <NA> HG19/GRCh37
+info(1): AF   GL000194.1     191469       <NA> HG19/GRCh37
+geno(9): ES SE ... NC ID   GL000225.1     211173       <NA> HG19/GRCh37
+class: VCFHeader    GL000192.1     547496       <NA> HG19/GRCh37","Tabix .tbi; indexed coordinate query via gwasvcf/Rsamtools"
+"ukb-d-30780_raw.vcf.gz","c5b45e60c3007204468a9e70f906d37f",450434142,"GRCh37","class: VCFHeader  Seqinfo object with 84 sequences from HG19/GRCh37 genome:
+samples(1): ukb-d-30780_raw   seqnames   seqlengths isCircular      genome
+meta(4): fileformat META SAMPLE contig   1           249250621       <NA> HG19/GRCh37
+fixed(1): FILTER   2           243199373       <NA> HG19/GRCh37
+info(1): AF   3           198022430       <NA> HG19/GRCh37
+geno(9): ES SE ... NC ID   4           191154276       <NA> HG19/GRCh37
+class: VCFHeader    5           180915260       <NA> HG19/GRCh37
+samples(1): ukb-d-30780_raw   ...               ...        ...         ...
+meta(4): fileformat META SAMPLE contig   GL000200.1     187035       <NA> HG19/GRCh37
+fixed(1): FILTER   GL000193.1     189789       <NA> HG19/GRCh37
+info(1): AF   GL000194.1     191469       <NA> HG19/GRCh37
+geno(9): ES SE ... NC ID   GL000225.1     211173       <NA> HG19/GRCh37
+class: VCFHeader    GL000192.1     547496       <NA> HG19/GRCh37","Tabix .tbi; indexed coordinate query via gwasvcf/Rsamtools"
+"ukb-b-10831.vcf.gz","e0df60e9a0a08c0ebc38c2b58adf27bc",283310544,"GRCh37","class: VCFHeader  Seqinfo object with 84 sequences from GRCh37 genome:
+samples(1): UKB-b-10831   seqnames   seqlengths isCircular genome
+meta(4): fileformat META SAMPLE contig   1           249250621       <NA> GRCh37
+fixed(1): FILTER   2           243199373       <NA> GRCh37
+info(1): AF   3           198022430       <NA> GRCh37
+geno(9): ES SE ... NC ID   4           191154276       <NA> GRCh37
+class: VCFHeader    5           180915260       <NA> GRCh37
+samples(1): UKB-b-10831   ...               ...        ...    ...
+meta(4): fileformat META SAMPLE contig   GL000200.1     187035       <NA> GRCh37
+fixed(1): FILTER   GL000193.1     189789       <NA> GRCh37
+info(1): AF   GL000194.1     191469       <NA> GRCh37
+geno(9): ES SE ... NC ID   GL000225.1     211173       <NA> GRCh37
+class: VCFHeader    GL000192.1     547496       <NA> GRCh37","Tabix .tbi; indexed coordinate query via gwasvcf/Rsamtools"
+"ukb-b-5779.vcf.gz","fbb2bf4490886d56062772fd2180a0ef",301755794,"GRCh37","class: VCFHeader  Seqinfo object with 84 sequences from GRCh37 genome:
+samples(1): UKB-b-5779   seqnames   seqlengths isCircular genome
+meta(4): fileformat META SAMPLE contig   1           249250621       <NA> GRCh37
+fixed(1): FILTER   2           243199373       <NA> GRCh37
+info(1): AF   3           198022430       <NA> GRCh37
+geno(9): ES SE ... NC ID   4           191154276       <NA> GRCh37
+class: VCFHeader    5           180915260       <NA> GRCh37
+samples(1): UKB-b-5779   ...               ...        ...    ...
+meta(4): fileformat META SAMPLE contig   GL000200.1     187035       <NA> GRCh37
+fixed(1): FILTER   GL000193.1     189789       <NA> GRCh37
+info(1): AF   GL000194.1     191469       <NA> GRCh37
+geno(9): ES SE ... NC ID   GL000225.1     211173       <NA> GRCh37
+class: VCFHeader    GL000192.1     547496       <NA> GRCh37","Tabix .tbi; indexed coordinate query via gwasvcf/Rsamtools"
+"ukb-b-2303.vcf.gz","ad1d81ec23d9f689b93450a4c6384510",301937067,"GRCh37","class: VCFHeader  Seqinfo object with 84 sequences from GRCh37 genome:
+samples(1): UKB-b-2303   seqnames   seqlengths isCircular genome
+meta(4): fileformat META SAMPLE contig   1           249250621       <NA> GRCh37
+fixed(1): FILTER   2           243199373       <NA> GRCh37
+info(1): AF   3           198022430       <NA> GRCh37
+geno(9): ES SE ... NC ID   4           191154276       <NA> GRCh37
+class: VCFHeader    5           180915260       <NA> GRCh37
+samples(1): UKB-b-2303   ...               ...        ...    ...
+meta(4): fileformat META SAMPLE contig   GL000200.1     187035       <NA> GRCh37
+fixed(1): FILTER   GL000193.1     189789       <NA> GRCh37
+info(1): AF   GL000194.1     191469       <NA> GRCh37
+geno(9): ES SE ... NC ID   GL000225.1     211173       <NA> GRCh37
+class: VCFHeader    GL000192.1     547496       <NA> GRCh37","Tabix .tbi; indexed coordinate query via gwasvcf/Rsamtools"
+"ukb-d-I9_IHD.vcf.gz","c443e4c134bcb50a42173064e33d9b89",482242076,"GRCh37","class: VCFHeader  Seqinfo object with 84 sequences from HG19/GRCh37 genome:
+samples(1): ukb-d-I9_IHD   seqnames   seqlengths isCircular      genome
+meta(4): fileformat META SAMPLE contig   1           249250621       <NA> HG19/GRCh37
+fixed(1): FILTER   2           243199373       <NA> HG19/GRCh37
+info(1): AF   3           198022430       <NA> HG19/GRCh37
+geno(9): ES SE ... NC ID   4           191154276       <NA> HG19/GRCh37
+class: VCFHeader    5           180915260       <NA> HG19/GRCh37
+samples(1): ukb-d-I9_IHD   ...               ...        ...         ...
+meta(4): fileformat META SAMPLE contig   GL000200.1     187035       <NA> HG19/GRCh37
+fixed(1): FILTER   GL000193.1     189789       <NA> HG19/GRCh37
+info(1): AF   GL000194.1     191469       <NA> HG19/GRCh37
+geno(9): ES SE ... NC ID   GL000225.1     211173       <NA> HG19/GRCh37
+class: VCFHeader    GL000192.1     547496       <NA> HG19/GRCh37","Tabix .tbi; indexed coordinate query via gwasvcf/Rsamtools"
+"ieu-b-5138.vcf.gz.tbi","f2d4f1605b5f7e7aa493c05b260a0b01",1662610,"GRCh37",,"Tabix index paired with source VCF"
+"ukb-d-30780_raw.vcf.gz.tbi","255dcbad5e1e19bcbcfccf546ab6477a",1678389,"GRCh37",,"Tabix index paired with source VCF"
+"ukb-b-10831.vcf.gz.tbi","55af5d9ebaf6a343760c6be881811dd3",1550207,"GRCh37",,"Tabix index paired with source VCF"
+"ukb-b-5779.vcf.gz.tbi","85c579aaac73e7f38a3ba4ef4c0773a9",1556875,"GRCh37",,"Tabix index paired with source VCF"
+"ukb-b-2303.vcf.gz.tbi","d76cf691005ceb3706463ed6690aeba8",1557071,"GRCh37",,"Tabix index paired with source VCF"
+"ukb-d-I9_IHD.vcf.gz.tbi","b0b182f22720fda569f50902ee6e1fae",1685834,"GRCh37",,"Tabix index paired with source VCF"

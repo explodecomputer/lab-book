@@ -1,0 +1,244 @@
+---
+title: "CHD PheWAS follow-up: exact hits and shared comparators"
+author: Gibran Hemani
+date: "2026-10-09"
+categories: [MR, PheWAS]
+format:
+  html:
+    toc: true
+    embed-resources: true
+    html-math-method: mathml
+    code-fold: true
+execute:
+  cache: false
+  freeze: false
+  warning: false
+  message: false
+---
+
+This report supersedes the regional-target, per-target-complement and proxy
+follow-up results in `chd_example.ipynb`. That notebook is retained as historical
+acquisition context; none of its acquisition, metadata, LD, proxy or gene calls
+execute here. Every result below is recomputed from the existing local inputs.
+
+```{r}
+#| label: fresh-offline-analysis
+source("offline/R/offline-pipeline.R")
+disable_remote_access()
+source("offline/R/chd-inputs.R")
+inputs <- reconstruct_chd_inputs(".")
+analysis <- run_offline_analysis(inputs)
+stopifnot(nrow(analysis$tables$lead_inventory) == 41L,
+          nrow(analysis$comparisons) == 23L,
+          length(unique(analysis$comparisons$target_snp)) == 18L,
+          nrow(analysis$pooled) == 5L)
+show_table <- function(x, digits = 4) knitr::kable(x, digits = digits, row.names = FALSE)
+```
+
+## Inputs and analysis policy
+
+The **41 discovery leads** come from saved `ieu-a-7` CHD results. Follow-up uses
+the separate **`ukb-d-I9_IHD` outcome GWAS**. Its VCF declares
+`StudyType=Continuous`; the saved effect scale is unavailable. The figures
+therefore report saved outcome GWAS units, with no log-odds interpretation.
+Mediator transformations are also explicitly unknown unless documented in the
+local source metadata. VCF `LP` is converted from −log10(P) using `10^-LP`;
+missing P values remain missing.
+
+The selected input is exactly **`chd_phewas_result.Rdata`** (singular).
+`chd_phewas_results.Rdata` has different contents and is not used. The selected
+file supplies the full lead coordinates, saved instrument identities, and the
+retained SNP–mediator pair inventory; its `int_chd` contains identities rather
+than association statistics. Indexed local mediator and outcome VCFs supply
+fresh beta, SE, alleles and coordinates. The compact association CSVs below
+are traceable derived inputs, not cached result tables.
+
+```{r}
+#| label: extraction-counts
+show_table(analysis$tables$extraction_counts)
+```
+
+“Queried” counts saved requested identities; “found” counts association records
+or matched SNP identities as indicated by the row. The 1,002 saved instrument
+rows yield 1,008 VCF association records because duplicate records are retained
+for explicit validation. These are not 1,008 independent instruments.
+Outcome coverage is 40/41 leads, 984/992 distinct instrument SNPs and 18/18
+retained target SNPs. Harmonisation and conflict checks determine the usable
+instrument counts shown below.
+
+All 41 leads and their **inclusive ±1 Mb** regions are excluded directly from
+each mediator's instruments before outcome matching and harmonisation.
+`rs17678683` remains in this exclusion inventory even though its outcome row
+is absent. Missing or conflicting exclusion coordinates cannot certify a
+comparator. Coordinate/build checks use the local saved coordinate system;
+there is no liftover or independent validation against an LD reference.
+Geographic windows do not establish LD independence.
+
+Each mediator has one shared comparator, reused exactly across all of its
+targets, pooled MR, heterogeneity tests and decomposition. Each exact-hit
+estimate uses only its named SNP. Conservative harmonisation discards every
+A/T or C/G palindrome and rejects conflicting associations and proxy
+substitutions. A one-SNP comparator uses a Wald ratio; a multiple-SNP
+comparator uses IVW with multiplicative random effects.
+
+## Complete discovery inventory
+
+The 41-lead discovery inventory is distinct from the **18 retained target
+SNPs**, **23 unique SNP–mediator pairs** and **five mediators**. A lead without a
+retained mediator pair is still excluded from every comparator.
+
+```{r}
+#| label: complete-lead-inventory
+show_table(analysis$tables$lead_inventory)
+```
+
+## Pooled mediator MR
+
+These are the same estimates shown as “Other SNPs” in the comparison panels.
+Units are outcome GWAS units per the corresponding mediator GWAS unit;
+different mediator panels need not share an x-axis scale. Instrument F
+diagnostics describe the retained harmonised instruments and do not by
+themselves establish instrument validity.
+
+```{r}
+#| label: pooled-diagnostics
+show_table(analysis$pooled[, c("mediator_id", "nsnp", "n_saved_before_exclusions",
+  "n_excluded_target", "n_excluded_region", "n_retained_before_outcome_matching",
+  "n_harmonised", "F_min", "F_mean", "n_weak_F", "b", "se", "pval_bh", "status")])
+```
+
+```{r}
+#| label: pooled-figure
+#| echo: false
+#| out-width: 100%
+knitr::include_graphics(analysis$plots$pooled)
+```
+
+[Download pooled PDF](chd-followup-results/figures/pooled.pdf) ·
+[Pooled source CSV](chd-followup-results/pooled_mr.csv)
+
+## Exact-hit comparisons
+
+One panel per mediator contains every retained exact-hit row and exactly one
+shared comparator. Heterogeneity uses
+$Q=(\hat b_{\mathrm{target}}-\hat b_{\mathrm{other}})^2/(SE_{\mathrm{target}}^2+SE_{\mathrm{other}}^2)$,
+under a zero-covariance working assumption. BH adjustment uses available
+unique-pair tests. A significant Q indicates incompatibility with a common
+effect under the model assumptions; it does not uniquely identify a direct
+pathway. Nonsignificance does not establish mediation or equivalence.
+
+```{r}
+#| label: comparison-availability
+unavailable <- analysis$comparisons[analysis$comparisons$status != "available", ]
+show_table(unavailable[, c("mediator_id", "target_snp", "target_status", "comparator_status", "reason")])
+cat("\nAvailable comparisons:", sum(analysis$comparisons$status == "available"), "of", nrow(analysis$comparisons), ".\n")
+```
+
+The feasibility baseline was 22 usable pairs, with SBP/`rs10139550`
+unavailable under conservative palindrome/conflicting-association checks.
+The table above reports the recomputed status without forcing that count or
+rescuing ambiguous alleles. All 23 identities remain in the CSV and figures.
+
+```{r}
+#| label: comparison-figures
+#| echo: false
+#| out-width: 100%
+knitr::include_graphics(analysis$plots$comparisons)
+```
+
+[Download all comparison pages as PDF](chd-followup-results/figures/comparisons.pdf) ·
+[Comparison source CSV](chd-followup-results/comparisons.csv)
+
+## Total, indirect and model-based residual components
+
+For each pair, aligned $a$ is SNP→mediator, $t$ is SNP→outcome, and $b$ is the
+shared mediator→outcome comparator. The indirect component is $i=ab$ and the
+model-based residual is $d=t-i$. All components use outcome GWAS units per the
+recorded target effect allele. Signed opposing pathways are preserved; indirect
+effects across mediators are not summed and mediation percentages are not
+calculated. These residuals are not identified natural direct effects.
+
+The primary delta method assumes zero Cov(a,b), Cov(a,t) and Cov(b,t):
+$\operatorname{Var}(i)=b^2\operatorname{Var}(a)+a^2\operatorname{Var}(b)$ and
+$\operatorname{Var}(d)=\operatorname{Var}(t)+\operatorname{Var}(i)$.
+Normal 95% intervals and nominal tests are approximate. Unusable components
+remain unavailable; an independently available total association remains
+visible. Instrument validity, nonlinearity, population differences and the
+unknown outcome scale limit causal interpretation.
+
+```{r}
+#| label: decomposition-figures
+#| echo: false
+#| out-width: 100%
+knitr::include_graphics(analysis$plots$decomposition)
+```
+
+[Download all decomposition pages as PDF](chd-followup-results/figures/decomposition.pdf) ·
+[Decomposition source CSV](chd-followup-results/decomposition.csv)
+
+## Multiplicity and sensitivities
+
+Primary Q, pooled MR, indirect-component and residual-component tests form
+**four separate BH families**. Unavailable tests do not enter a family's
+tested denominator. There is no claim of joint error control across families.
+Each geographic and hypothetical covariance scenario has its own family.
+
+```{r}
+#| label: all-inference-families
+show_table(analysis$summary$families)
+```
+
+The geographic sensitivity repeats the comparisons with ±2 Mb exclusions,
+then ±2 Mb plus extended MHC (chr6:25–34 Mb). It uses the same complete lead
+inventory and conservative allele policy. These are saved-coordinate
+sensitivities rather than verified LD/build independence checks.
+
+The covariance sensitivity uses hypothetical equicorrelation matrices for
+(a,b,t), with rho = −0.3, 0 and +0.3. Each matrix is positive definite
+(eigenvalues 1−rho, 1−rho and 1+2rho). The propagated component SEs include
+the relevant covariance terms. These are illustrative assumptions, not
+empirical sample-overlap or covariance estimates.
+
+[Geographic sensitivity CSV](chd-followup-results/window_sensitivity.csv) ·
+[Hypothetical covariance sensitivity CSV](chd-followup-results/covariance_sensitivity.csv) ·
+[Family denominators CSV](chd-followup-results/inference_families.csv)
+
+## Reproduction and downloads
+
+From the repository root, run:
+
+```{.bash}
+cd posts/2026-05-22-phewas-example
+Rscript offline/run-tests.R
+Rscript offline/run-analysis.R
+sh offline/render-report.sh
+```
+
+The render wrapper stages this document outside the website project, performs
+a fresh report-only render, and writes `chd_followup.html` beside this source.
+It blocks scientific remote API/download/install functions and sets loopback
+proxies. Local VCFs, indices and the selected Rdata must already exist; no
+packages or data are downloaded or installed. The shared runner also accepts
+normalized inputs with explicit lead inventory and outcome metadata through
+`run_offline_analysis(inputs, output_dir, figures_dir)`.
+
+The repo-local statistical implementation derives from
+[MRCIEU/gbc-mr commit 3bbac89](https://github.com/MRCIEU/gbc-mr/tree/3bbac89e254acfbfa3385aae9b4520e4e8b5932c),
+with adaptations documented in `offline/README.md`. Statistical formulas live
+in shared modules rather than document cells. Large VCFs stay outside Git.
+
+```{r}
+#| label: installed-dependencies
+show_table(analysis$tables$package_versions)
+```
+
+```{r}
+#| label: all-downloads
+#| results: asis
+#| echo: false
+for (name in names(analysis$tables))
+  cat(sprintf("- [%s CSV](chd-followup-results/%s.csv)\n", gsub("_", " ", name), name))
+cat("- [Session information](chd-followup-results/session-info.txt)\n")
+for (paths in analysis$plots) for (path in paths)
+  cat(sprintf("- [%s](%s)\n", basename(path), path))
+```
