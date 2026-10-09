@@ -2,6 +2,9 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/2026-05-22-phewas-example/offline/validation.html",
+      "/posts/2026-05-22-phewas-example/chd_followup.html",
+      "/posts/2026-10-07-index-event-bias-mr/index.html",
       "/posts/2026-09-28-mr-estimates-with-binary-exposures/index.html",
       "/posts/2026-07-20-fixed-effects-family-model-simulation/index.html",
       "/posts/2026-07-09-quantile-regression-gwas/index.html",

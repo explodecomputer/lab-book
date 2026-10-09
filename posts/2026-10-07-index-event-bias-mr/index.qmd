@@ -1,0 +1,519 @@
+---
+title: "Index event bias in MR of disease progression"
+author: Gibran Hemani
+date: "2026-10-07"
+categories: [Mendelian randomisation, selection bias, simulation]
+format:
+  html:
+    toc: true
+---
+
+## Background
+
+MR of disease progression is usually restricted to people who have developed the disease. If the exposure affects disease incidence, this restriction can induce associations between its genetic instruments and other causes of incidence. When those other causes also affect progression, the SNP-progression associations can be biased by **index event bias** ([Dudbridge et al., 2019](https://doi.org/10.1038/s41467-019-09381-w)).
+
+For example, consider BMI and mortality after colorectal cancer diagnosis. The relevant path is:
+
+$$
+G \rightarrow \mathrm{BMI} \rightarrow D \leftarrow U \rightarrow Y,
+$$
+
+where $G$ is a BMI instrument, $D$ is cancer incidence and $U$ is a common cause of incidence and progression $Y$. Conditioning on $D=1$ can open this path even though $G$ and $U$ are independent in the population.
+
+One proposed diagnostic is to compare SNP-BMI associations in cases, controls and the whole sample. Here we use a basic simulation to show the selection mechanism, its effect on MR, and what that diagnostic can and cannot establish.
+
+## A simple model with no BMI effect on progression
+
+We simulate one SNP and an independent risk factor $U$. BMI is measured before diagnosis. Both BMI and $U$ increase disease incidence, but only $U$ affects progression:
+
+$$
+\begin{aligned}
+G &\sim \operatorname{Binomial}(2, 0.3), \qquad U \sim N(0,1), \\
+X &= 0.4(G-0.6) + \epsilon_X, \\
+\Pr(D=1 \mid X,U) &= \operatorname{expit}(-2 + X + U), \\
+Y &= 0 \times X + U + \epsilon_Y.
+\end{aligned}
+$$
+
+The two errors are independent standard normal variables, independent of $G$ and $U$. Thus the true BMI-progression effect is exactly zero, the population SNP-BMI coefficient is 0.4, and the SNP has no direct effect on incidence or progression.
+
+We use a continuous progression score rather than a binary death outcome or survival time so that the MR ratio has a simple linear interpretation. This is a toy model with deliberately large effects to make the mechanism visible, not a calibrated model of colorectal cancer. We generate the score for everyone as a simulation benchmark; in an actual progression study it would only be observed or defined among cases. The whole sample is a population sample, not a case-control sample enriched for disease.
+
+```{r}
+#| label: simulate
+
+set.seed(20261007)
+n <- 500000
+
+g <- rbinom(n, 2, 0.3)
+u <- rnorm(n)
+bmi <- 0.4 * (g - 0.6) + rnorm(n)
+progression_error <- rnorm(n)
+progression <- 0 * bmi + u + progression_error
+
+# Reuse these draws below when changing the selection mechanism.
+selection_draw <- runif(n)
+case <- selection_draw < plogis(-2 + bmi + u)
+
+dat <- data.frame(g, u, bmi, progression, case)
+
+knitr::kable(
+  data.frame(
+    sample = c("Whole sample", "Controls", "Cases"),
+    n = c(n, sum(!case), sum(case))
+  ),
+  col.names = c("Sample", "N")
+)
+```
+
+The simulated case fraction is `r round(100 * mean(case), 1)`%.
+
+## Compare SNP associations across samples
+
+Estimate the association of the SNP with BMI, $U$ and the progression score in each sample. The function below is just a univariable linear regression with an intercept.
+
+```{r}
+#| label: associations
+
+association <- function(outcome, genotype) {
+  result <- summary(lm(outcome ~ genotype))$coefficients[2, ]
+  c(
+    beta = unname(result["Estimate"]),
+    se = unname(result["Std. Error"])
+  )
+}
+
+samples <- list(
+  "Whole sample" = dat,
+  "Controls" = dat[!case, ],
+  "Cases" = dat[case, ]
+)
+
+associations <- do.call(rbind, lapply(names(samples), function(sample) {
+  d <- samples[[sample]]
+  gx <- association(d$bmi, d$g)
+  gu <- association(d$u, d$g)
+  gy <- association(d$progression, d$g)
+  data.frame(
+    sample,
+    beta_gx = gx["beta"], se_gx = gx["se"],
+    beta_gu = gu["beta"], se_gu = gu["se"],
+    beta_gy = gy["beta"], se_gy = gy["se"]
+  )
+}))
+rownames(associations) <- NULL
+
+knitr::kable(
+  associations[c("sample", "beta_gx", "beta_gu", "beta_gy")],
+  digits = 4,
+  col.names = c("Sample", "SNP-BMI", "SNP-U", "SNP-progression")
+)
+```
+
+```{r}
+#| label: fig-snp-associations
+#| fig-width: 10
+#| fig-height: 4
+#| fig-cap: "SNP associations and approximate 95% confidence intervals. Dashed lines show the population coefficients specified in the simulation."
+
+plot_association <- function(beta, se, reference, title, xlab) {
+  positions <- 3:1
+  limits <- range(beta - 1.96 * se, beta + 1.96 * se, reference)
+  plot(
+    beta, positions, xlim = limits, ylim = c(0.5, 3.5),
+    yaxt = "n", ylab = "", xlab = xlab, main = title,
+    pch = 19, col = c("#4477AA", "#228833", "#CC6677")
+  )
+  axis(2, at = positions, labels = associations$sample, las = 1)
+  abline(v = reference, lty = 2, col = "grey50")
+  segments(beta - 1.96 * se, positions, beta + 1.96 * se, positions)
+}
+
+par(mfrow = c(1, 2), mar = c(4, 7, 3, 1))
+plot_association(
+  associations$beta_gx, associations$se_gx, 0.4,
+  "SNP-BMI association", "BMI units per allele"
+)
+plot_association(
+  associations$beta_gu, associations$se_gu, 0,
+  "SNP-U association", "U units per allele"
+)
+```
+
+In the whole sample, $G$ and $U$ are approximately independent and the SNP-BMI coefficient is close to 0.4. Among cases, the SNP becomes negatively associated with $U$: people with more genetically influenced BMI need less contribution from $U$ to become cases in this model. Since $U$ increases progression, an apparent protective SNP-progression association appears.
+
+The SNP-BMI association is also attenuated among cases. Conditioning on disease status changes the relationship between $G$ and the other component of BMI, $\epsilon_X$. This happens despite the structural genetic effect on BMI remaining 0.4 for every individual. Controls are selected on $D=0$ and can also show altered associations.
+
+### Diagnostic: is the SNP-BMI association different in cases and controls?
+
+The diagnostic directly tests the null hypothesis that the SNP-BMI coefficients are equal in cases and controls:
+
+$$
+H_0: \beta_{GX\mid D=1} = \beta_{GX\mid D=0}.
+$$
+
+Cases and controls are disjoint strata, so we use the sum of their slope variances for an approximate test of their difference. The whole sample overlaps both strata and is not an independent third comparison.
+
+```{r}
+#| label: heterogeneity
+
+population <- associations[associations$sample == "Whole sample", ]
+controls <- associations[associations$sample == "Controls", ]
+cases <- associations[associations$sample == "Cases", ]
+
+difference <- cases$beta_gx - controls$beta_gx
+difference_se <- sqrt(cases$se_gx^2 + controls$se_gx^2)
+difference_p <- 2 * pnorm(-abs(difference / difference_se))
+
+knitr::kable(
+  data.frame(
+    comparison = "Cases minus controls",
+    difference,
+    se = difference_se,
+    p = format.pval(difference_p, digits = 3)
+  ),
+  digits = 4,
+  col.names = c("Comparison", "SNP-BMI difference", "SE", "P")
+)
+```
+
+The estimated SNP-BMI coefficient is **`r round(cases$beta_gx, 3)` in cases** and **`r round(controls$beta_gx, 3)` in controls**. The case-control difference is `r round(difference, 4)` (P = `r format.pval(difference_p, digits = 3)`), providing evidence of heterogeneity in this simulated sample. This difference arises from selection even though the structural SNP effect on BMI is 0.4 in every individual.
+
+## What happens to the MR estimate?
+
+With one instrument, the MR estimate is the Wald ratio:
+
+$$
+\widehat\beta_{XY} = \frac{\widehat\beta_{GY}}{\widehat\beta_{GX}}.
+$$
+
+Compare the population benchmark with two versions of case-only MR: one using the population SNP-BMI estimate and one estimating both associations among cases. The former illustrates the selection problem in two-sample MR, although here the samples overlap for simplicity.
+
+```{r}
+#| label: mr-estimates
+
+mr <- data.frame(
+  outcome_sample = c("Whole sample (benchmark)", "Cases", "Cases"),
+  exposure_sample = c("Whole sample", "Whole sample", "Cases"),
+  estimate = c(
+    population$beta_gy / population$beta_gx,
+    cases$beta_gy / population$beta_gx,
+    cases$beta_gy / cases$beta_gx
+  ),
+  true_effect = 0
+)
+
+knitr::kable(
+  mr, digits = 4,
+  col.names = c("SNP-progression sample", "SNP-BMI sample", "MR estimate", "True effect")
+)
+```
+
+The population benchmark is close to zero. The case-only estimate is `r round(mr$estimate[2], 3)` using the population SNP-BMI coefficient and `r round(mr$estimate[3], 3)` using the case coefficient. Both suggest a protective BMI effect even though BMI has no effect on progression. Using the population SNP-BMI association does not remove the bias in the SNP-progression association. Re-estimating the denominator among cases does not restore instrument independence either.
+
+## Two simple checks on the mechanism
+
+Keep the same underlying individuals and random draws, but remove one arrow at a time:
+
+1. Remove **BMI $\rightarrow$ incidence**. Selection then depends only on $U$, so it does not induce an association between $G$ and $U$.
+2. Remove **$U \rightarrow$ progression**. Selection still changes SNP-BMI associations and induces a SNP-$U$ association, but $U$ no longer transmits that association to progression.
+
+The true BMI-progression effect remains zero in every scenario. In the table, GX denotes the SNP-BMI coefficient and GU denotes the SNP-$U$ coefficient.
+
+```{r}
+#| label: mechanism-checks
+
+scenarios <- data.frame(
+  scenario = c("Both arrows present", "No BMI -> incidence", "No U -> progression"),
+  bmi_incidence = c(1, 0, 1),
+  u_progression = c(1, 1, 0)
+)
+
+checks <- do.call(rbind, lapply(seq_len(nrow(scenarios)), function(i) {
+  selected <- selection_draw < plogis(-2 + scenarios$bmi_incidence[i] * bmi + u)
+  y <- scenarios$u_progression[i] * u + progression_error
+  gx_cases <- association(bmi[selected], g[selected])["beta"]
+  gx_controls <- association(bmi[!selected], g[!selected])["beta"]
+  gu_cases <- association(u[selected], g[selected])["beta"]
+  gy_cases <- association(y[selected], g[selected])["beta"]
+
+  data.frame(
+    scenario = scenarios$scenario[i],
+    bmi_difference = unname(gx_cases - gx_controls),
+    gu_cases = unname(gu_cases),
+    mr_population_gx = unname(gy_cases / population$beta_gx),
+    mr_cases_gx = unname(gy_cases / gx_cases)
+  )
+}))
+
+knitr::kable(
+  checks, digits = 4,
+  col.names = c(
+    "Scenario", "GX: cases minus controls", "GU: cases",
+    "MR: population GX", "MR: case GX"
+  )
+)
+```
+
+Removing the BMI effect on incidence eliminates the systematic distortion, up to sampling variation. Removing the $U$ effect on progression leaves SNP-BMI heterogeneity but eliminates the systematic MR bias. Thus heterogeneity alone does not establish that progression MR is biased.
+
+## Does SNP-BMI heterogeneity predict MR bias?
+
+To test predictive value directly, we need to vary more than one aspect of the selection mechanism. Write the model as:
+
+$$
+\begin{aligned}
+\Pr(D=1 \mid X,U) &= \operatorname{expit}(\alpha + bX + aU), \\
+Y &= cU + \epsilon_Y.
+\end{aligned}
+$$
+
+Here $b$ is the BMI effect on incidence, $a$ is the effect of $U$ on incidence, and $c$ is its effect on progression. The true BMI-progression effect remains zero. The original example has $a=b=c=1$. We first give a simple counterexample to a universal relationship, then compare heterogeneity directly with MR bias across a grid of all three parameters.
+
+### Same heterogeneity, different MR bias
+
+Keep $a=1$, the same BMI measurements and exactly the same cases and controls. Change $c$ from 0 to 2. Nothing in the SNP-BMI diagnostic depends on the progression score, so its case-control difference must remain unchanged.
+
+For these linear regressions, the SNP-progression coefficient obeys an exact identity within the selected sample:
+
+$$
+\widehat\beta_{GY\mid D=1}
+= c\widehat\beta_{GU\mid D=1}
++ \widehat\beta_{G\epsilon_Y\mid D=1}.
+$$
+
+The last term is sampling noise with expectation zero. We can calculate the sweep directly from this identity, without generating any new individuals.
+
+```{r}
+#| label: progression-strength-sweep
+
+beta_g_error_cases <- association(progression_error[case], g[case])["beta"]
+
+progression_sweep <- data.frame(
+  u_progression = seq(0, 2, by = 0.25),
+  gx_cases = cases$beta_gx,
+  gx_controls = controls$beta_gx,
+  gx_difference = difference
+)
+progression_sweep$mr <- (
+  progression_sweep$u_progression * cases$beta_gu + beta_g_error_cases
+) / population$beta_gx
+
+knitr::kable(
+  progression_sweep[progression_sweep$u_progression %in% c(0, 1, 2), ],
+  digits = 4,
+  row.names = FALSE,
+  col.names = c("U -> progression", "GX: cases", "GX: controls", "GX difference", "MR")
+)
+```
+
+```{r}
+#| label: fig-progression-strength
+#| fig-width: 10
+#| fig-height: 4
+#| fig-cap: "Increasing the shared cause's effect on progression changes the MR estimate but leaves SNP-BMI heterogeneity exactly unchanged. The same cases and controls are used at every point."
+
+par(mfrow = c(1, 2), mar = c(4, 5, 3, 1))
+plot(
+  progression_sweep$u_progression, progression_sweep$gx_difference,
+  type = "b", pch = 19, col = "#4477AA",
+  ylim = range(c(0, 1.2 * progression_sweep$gx_difference)),
+  xlab = "U effect on progression (c)",
+  ylab = "SNP-BMI: cases minus controls", main = "Heterogeneity diagnostic"
+)
+abline(h = 0, lty = 2, col = "grey50")
+plot(
+  progression_sweep$u_progression, progression_sweep$mr,
+  type = "b", pch = 19, col = "#CC6677",
+  xlab = "U effect on progression (c)",
+  ylab = "MR estimate (true effect = 0)", main = "Case-only MR"
+)
+abline(h = 0, lty = 2, col = "grey50")
+```
+
+With $c=0$ there is no common cause of incidence and progression, yet the SNP-BMI heterogeneity remains. Increasing $c$ from 1 to 2 changes the MR estimate from `r round(progression_sweep$mr[progression_sweep$u_progression == 1], 3)` to `r round(progression_sweep$mr[progression_sweep$u_progression == 2], 3)`, while the diagnostic difference stays at `r round(difference, 4)`. Thus it cannot measure the strength of incidence-progression confounding in general.
+
+### Compare heterogeneity and bias across scenarios
+
+Define the diagnostic as the case-control difference in SNP-BMI coefficients. Define MR bias as the expected MR estimate minus the known true effect:
+
+$$
+\begin{aligned}
+\Delta_{GX} &= \beta_{GX\mid D=1} - \beta_{GX\mid D=0}, \\
+\operatorname{Bias}_{MR} &= E(\widehat\beta_{XY}) - \beta_{XY}^{\mathrm{true}}.
+\end{aligned}
+$$
+
+We simulate 30 independent populations of 100,000 individuals. Within each population, we evaluate all 64 combinations of $a,b,c \in \{0, 0.5, 1, 2\}$. The incidence intercept is calibrated to keep expected prevalence at 18.6% in every setting. The SNP-BMI effect, exposure variance and progression error variance remain fixed. Settings within a replicate reuse the same individuals and random draws; different replicates are independent.
+
+The MR estimate uses a population SNP-BMI denominator and a case-only progression numerator. We use the linear identity above to calculate the numerator as $c\widehat\beta_{GU\mid D=1}+\widehat\beta_{G\epsilon_Y\mid D=1}$. This is exactly the coefficient that a separate regression on $Y=cU+\epsilon_Y$ would give.
+
+```{r}
+#| label: predictive-grid
+
+set.seed(202610071)
+slope <- function(outcome, genotype) cov(outcome, genotype) / var(genotype)
+grid_results <- vector("list", 30 * 4 * 4)
+result_i <- 0
+
+for (replicate_id in seq_len(30)) {
+  n_grid <- 100000
+  g_grid <- rbinom(n_grid, 2, 0.3)
+  u_grid <- rnorm(n_grid)
+  x_grid <- 0.4 * (g_grid - 0.6) + rnorm(n_grid)
+  e_grid <- rnorm(n_grid)
+  selection_grid <- runif(n_grid)
+  gx_population <- slope(x_grid, g_grid)
+
+  for (bmi_incidence in c(0, 0.5, 1, 2)) {
+    for (u_incidence in c(0, 0.5, 1, 2)) {
+      linear_predictor <- bmi_incidence * x_grid + u_incidence * u_grid
+      intercept <- uniroot(
+        function(alpha) mean(plogis(alpha + linear_predictor)) - 0.186,
+        interval = c(-30, 30), tol = 1e-7
+      )$root
+      selected <- selection_grid < plogis(intercept + linear_predictor)
+
+      gx_difference <- slope(x_grid[selected], g_grid[selected]) -
+        slope(x_grid[!selected], g_grid[!selected])
+      gu_cases <- slope(u_grid[selected], g_grid[selected])
+      ge_cases <- slope(e_grid[selected], g_grid[selected])
+      u_progression <- c(0, 0.5, 1, 2)
+
+      result_i <- result_i + 1
+      grid_results[[result_i]] <- data.frame(
+        replicate_id, bmi_incidence, u_incidence, u_progression,
+        gx_difference,
+        mr_bias = (u_progression * gu_cases + ge_cases) / gx_population,
+        case_fraction = mean(selected)
+      )
+    }
+  }
+}
+grid_results <- do.call(rbind, grid_results)
+
+summarise_grid <- function(results) {
+  means <- aggregate(
+    cbind(gx_difference, mr_bias, case_fraction) ~
+      bmi_incidence + u_incidence + u_progression,
+    data = results, FUN = mean
+  )
+  means$heterogeneity <- abs(means$gx_difference)
+  means$bias_magnitude <- abs(means$mr_bias)
+  means
+}
+
+grid_means <- summarise_grid(grid_results)
+```
+
+For each scenario, we first average the **signed** MR estimates across replicates to estimate bias, then take its absolute value. We likewise average the signed SNP-BMI differences before taking their absolute values. Taking absolute values before averaging would mix systematic bias or heterogeneity with sampling error.
+
+### A simple prediction check
+
+Fit a linear predictor of bias magnitude using only heterogeneity magnitude. Train on scenario averages from the first 15 replicates and evaluate on averages from the other 15. The validation populations have independent random draws, but cover the same parameter grid: this checks prediction in new populations under these settings, not generalisation to different causal models.
+
+We compare its validation squared error against a constant prediction equal to the training mean bias magnitude. The resulting prediction score is $1-\mathrm{SSE}_{\mathrm{model}}/\mathrm{SSE}_{\mathrm{constant}}$; zero means no improvement over that constant predictor.
+
+```{r}
+#| label: predictive-performance
+
+training <- summarise_grid(grid_results[grid_results$replicate_id <= 15, ])
+validation <- summarise_grid(grid_results[grid_results$replicate_id > 15, ])
+predictor <- lm(bias_magnitude ~ heterogeneity, data = training)
+validation$predicted_bias <- predict(predictor, newdata = validation)
+
+prediction_r2 <- 1 - sum((validation$bias_magnitude - validation$predicted_bias)^2) /
+  sum((validation$bias_magnitude - mean(training$bias_magnitude))^2)
+pearson_r <- cor(grid_means$heterogeneity, grid_means$bias_magnitude)
+spearman_r <- cor(grid_means$heterogeneity, grid_means$bias_magnitude, method = "spearman")
+
+knitr::kable(
+  data.frame(
+    metric = c("Pearson correlation", "Spearman correlation", "Validation prediction score"),
+    value = c(pearson_r, spearman_r, prediction_r2)
+  ),
+  digits = 3,
+  col.names = c("Metric", "Value")
+)
+```
+
+```{r}
+#| label: fig-heterogeneity-predicts-bias
+#| fig-width: 10
+#| fig-height: 4.5
+#| fig-cap: "Left: absolute case-control SNP-BMI heterogeneity versus absolute MR bias, averaged over 30 replicates per scenario. Colours identify U's effect on progression. Right: predictions from the first 15 replicates versus bias in the other 15; the dashed diagonal represents perfect prediction. Scenarios sharing a selection model have identical heterogeneity but different progression effects."
+
+progression_values <- c(0, 0.5, 1, 2)
+progression_colours <- c("#999999", "#4477AA", "#228833", "#CC6677")
+par(mfrow = c(1, 2), mar = c(4, 5, 3, 1))
+plot(
+  grid_means$heterogeneity, grid_means$bias_magnitude,
+  pch = 19, col = progression_colours[match(grid_means$u_progression, progression_values)],
+  xlab = "Absolute SNP-BMI case-control difference",
+  ylab = "Absolute mean MR bias", main = "Does heterogeneity track bias?"
+)
+abline(predictor, lty = 2, col = "grey30")
+legend(
+  "topright", legend = progression_values, col = progression_colours,
+  pch = 19, title = "U -> progression", bty = "n"
+)
+
+validation_limits <- range(0, validation$predicted_bias, validation$bias_magnitude)
+plot(
+  validation$predicted_bias, validation$bias_magnitude,
+  xlim = validation_limits, ylim = validation_limits,
+  pch = 19, col = progression_colours[match(validation$u_progression, progression_values)],
+  xlab = "Predicted bias magnitude", ylab = "Validation mean bias magnitude",
+  main = "Independent simulation validation"
+)
+abline(a = 0, b = 1, lty = 2, col = "grey50")
+```
+
+Across this grid, the magnitude correlation is `r round(pearson_r, 3)` and the validation prediction score is `r round(prediction_r2, 3)`. The simple linear predictor therefore accounts for only about `r round(100 * prediction_r2)`% of validation squared error relative to the constant predictor. This is a weak linear relationship in these settings, not evidence that every possible nonlinear predictor must perform poorly.
+
+### Inspect scenarios where the diagnostic and bias disagree
+
+```{r}
+#| label: predictive-counterexamples
+
+large_heterogeneity <- subset(
+  grid_means, bmi_incidence == 2 & u_incidence == 0 & u_progression == 1
+)
+small_heterogeneity <- subset(
+  grid_means, bmi_incidence == 0.5 & u_incidence == 2 & u_progression == 2
+)
+same_heterogeneity <- subset(
+  grid_means, bmi_incidence == 1 & u_incidence == 1 & u_progression %in% c(1, 2)
+)
+examples <- rbind(large_heterogeneity, small_heterogeneity, same_heterogeneity)
+
+knitr::kable(
+  examples[c("bmi_incidence", "u_incidence", "u_progression", "gx_difference", "mr_bias")],
+  digits = 4, row.names = FALSE,
+  col.names = c("BMI -> incidence", "U -> incidence", "U -> progression",
+                "GX difference", "Mean MR bias")
+)
+```
+
+The first setting has substantial SNP-BMI heterogeneity (`r round(large_heterogeneity$gx_difference, 4)`) but negligible mean MR bias (`r round(large_heterogeneity$mr_bias, 3)`). The second has almost no case-control heterogeneity (`r round(small_heterogeneity$gx_difference, 4)`) but substantial bias (`r round(small_heterogeneity$mr_bias, 3)`). The last two settings have exactly the same diagnostic because their case selection is identical, but doubling $U$'s progression effect approximately doubles the MR bias.
+
+These examples show that the diagnostic does not provide a universal calibration of MR bias, and a small case-control difference cannot reliably exclude bias. A predictive relationship could still be useful under a more restricted and justified causal model; its usefulness needs to be evaluated across the assumptions relevant to that application.
+
+## Interpretation
+
+This example establishes that selection on case status can induce a SNP-confounder association and produce a non-null MR estimate when the true progression effect is zero. In this model, that selection also produces heterogeneity in SNP-BMI associations.
+
+Such heterogeneity is a useful warning signal. It does not specifically diagnose index event bias in real data, where disease-related effect modification, measurement differences and other selection processes may also explain it. Equally, failing to detect SNP-BMI heterogeneity does not establish instrument independence among cases or rule out bias in SNP-progression associations. The proposed check measures a different association from the one that directly carries the outcome bias.
+
+The initial demonstration uses one large sample; the prediction comparison averages over independent replicates. All scenarios still use one SNP, one shared cause, logistic incidence and a linear progression score with no true BMI effect. The prediction results apply to this deliberately simple grid, not to realistic disease settings in general. The direction and size of bias depend on the incidence model and the effects of the shared causes. The SNP-BMI comparison is a diagnostic, not a correction method.
+
+## References
+
+- [Dudbridge et al. (2019). Adjustment for index event bias in genome-wide association studies of subsequent events.](https://doi.org/10.1038/s41467-019-09381-w)
+- [Yaghootkar et al. (2017). Quantifying the extent to which index event biases influence large genetic association studies.](https://doi.org/10.1093/hmg/ddw433)
+
+---
+
+```{r}
+sessionInfo()
+```
